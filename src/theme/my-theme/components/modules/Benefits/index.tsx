@@ -1,0 +1,160 @@
+import {
+  ModuleFields,
+  TextField,
+  UrlField,
+  ImageField,
+  RepeatedFieldGroup,
+} from '@hubspot/cms-components/fields';
+
+export function Component({ fieldValues }) {
+  // Handle UrlField structure - it can be a string or an object with url/href property
+  const getUrl = (urlField) => {
+    if (!urlField) return '#';
+    if (typeof urlField === 'string') return urlField;
+    if (typeof urlField === 'object') {
+      return urlField.url || urlField.href || urlField.link || '#';
+    }
+    return '#';
+  };
+
+  const heading = fieldValues.heading || 'Why Attend GAI?';
+  const ctaUrl = getUrl(fieldValues.ctaUrl) || '#';
+  const benefits = fieldValues.benefits || [];
+  const sectionId = fieldValues.sectionId;
+
+  return (
+    <div className="benefits-section" id={sectionId || undefined}>
+      <div className="container">
+        <div className="benefits-inner">
+          <div className="row">
+            <div className="col-md-4 custom-45 p-0">
+              <div className="benefits-left">
+                <h2>{heading}</h2>
+                {fieldValues.ctaText && (
+                  <div className="benefits-btn">
+                    <a href={ctaUrl} className="transparent-btn benefits-cta-btn">
+                      {fieldValues.ctaText}
+                    </a>
+                  </div>
+                )}
+                {fieldValues.image?.src && (
+                  <div className="benefits-img">
+                    <img
+                      src={fieldValues.image.src}
+                      alt={fieldValues.image.alt || 'Benefits image'}
+                      className="img-fluid"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="col-md-8 custom-md-full p-0">
+              <div className="benefits-right">
+                {benefits.map((benefit: any, index: number) => {
+                  // Get items from the RepeatedFieldGroup
+                  const items = benefit.items && Array.isArray(benefit.items)
+                    ? benefit.items.map((item: any) => {
+                        // Handle both string and object formats
+                        return typeof item === 'string' ? item : (item.item || item.text || '');
+                      }).filter((item: string) => item.trim())
+                    : [];
+                  
+                  return (
+                    <div key={index} className="benefits-div">
+                      <h3>{benefit.title || ''}</h3>
+                      <ul>
+                        {items.length > 0 ? (
+                          items.map((item: string, itemIndex: number) => (
+                            <li key={itemIndex}>{item}</li>
+                          ))
+                        ) : (
+                          <li>No items added</li>
+                        )}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+          (function() {
+            // Handle smooth scrolling for Benefits CTA button
+            function handleAnchorClick(e, href) {
+              if (href && href.startsWith('#') && href.length > 1) {
+                e.preventDefault();
+                const targetId = href.substring(1);
+                const target = document.getElementById(targetId);
+                if (target) {
+                  target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                  });
+                }
+              }
+            }
+
+            const benefitsCtaBtn = document.querySelector('.benefits-section .benefits-cta-btn');
+            if (benefitsCtaBtn) {
+              benefitsCtaBtn.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                  handleAnchorClick(e, href);
+                }
+              });
+            }
+          })();
+        `,
+        }}
+      />
+    </div>
+  );
+}
+
+export const fields = (
+  <ModuleFields>
+    <TextField name="heading" label="Heading" default="Why Attend GAI?" />
+    <TextField name="ctaText" label="CTA text" default="Convince Your Boss to Send You" />
+    <UrlField name="ctaUrl" label="CTA URL" />
+    <ImageField
+      name="image"
+      label="Side image"
+      helpText="Upload the vertical image for the left side"
+    />
+    <RepeatedFieldGroup
+      name="benefits"
+      label="Benefits"
+      required={true}
+      children={[
+        <TextField name="title" label="Benefit title" required={true} default="Grow" />,
+        <RepeatedFieldGroup
+          name="items"
+          label="Benefit items"
+          required={true}
+          children={[
+            <TextField
+              name="item"
+              label="List item"
+              required={true}
+              default="Enterprise AI Leaders"
+            />,
+          ]}
+        />,
+      ]}
+    />
+    <TextField
+      name="sectionId"
+      label="Section ID (optional)"
+      helpText="ID for anchor links (e.g., #benefits). Leave empty for no ID."
+    />
+  </ModuleFields>
+);
+
+export const meta = {
+  label: 'Why Attend GAI?',
+};
+

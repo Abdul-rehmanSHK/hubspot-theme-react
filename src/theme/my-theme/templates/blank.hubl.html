@@ -1,0 +1,22 @@
+<!--
+  templateType: page
+  isAvailableForNewContent: true
+  label: Blank (Header & Footer only)
+-->
+{% extends "./layouts/base.hubl.html" %}
+
+{% block body %}
+  {# Drag-and-drop enabled area for adding modules on the page #}
+  {% dnd_area "main_content" label="Main content" %}
+    {% dnd_section %}
+      {% dnd_column %}
+        {% dnd_row %}
+          {% dnd_module path="@hubspot/rich_text" label="Rich text placeholder" %}
+            <div>This area is editable. Add or replace modules here.</div>
+          {% end_dnd_module %}
+        {% end_dnd_row %}
+      {% end_dnd_column %}
+    {% end_dnd_section %}
+  {% end_dnd_area %}
+{% endblock body %}
+

@@ -1,0 +1,14 @@
+<!--
+  templateType: page
+  isAvailableForNewContent: true
+  label: Getting started with CMS React
+-->
+{% extends "./layouts/base.hubl.html" %}
+
+{% block body %}
+
+  {# Default page composition: Hero + About. Adjust as needed on pages #}
+  {% module "hero" path="../components/modules/Hero" %}
+  {% module "about" path="../components/modules/About" %}
+
+{% endblock body %}
