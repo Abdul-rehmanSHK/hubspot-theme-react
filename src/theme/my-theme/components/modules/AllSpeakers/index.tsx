@@ -209,14 +209,17 @@ export function Component({ fieldValues }) {
                   return;
                 }
                 
-                // Group speakers by topic
+                // Group speakers by topic and preserve API order
                 const topicMap = {};
+                const topicOrder = []; // Track order of topics as they appear in API response
                 
                 allSpeakers.forEach(function(speaker) {
                   if (speaker.topics && speaker.topics.length > 0) {
                     speaker.topics.forEach(function(topicName) {
                       if (!topicMap[topicName]) {
                         topicMap[topicName] = [];
+                        // Add to order array only when first encountered (preserves API order)
+                        topicOrder.push(topicName);
                       }
                       topicMap[topicName].push(speaker);
                     });
@@ -224,15 +227,14 @@ export function Component({ fieldValues }) {
                     // Speakers without topics go to "Other" category
                     if (!topicMap['Other']) {
                       topicMap['Other'] = [];
+                      topicOrder.push('Other');
                     }
                     topicMap['Other'].push(speaker);
                   }
                 });
                 
-                // Sort topics alphabetically
-                const sortedTopics = Object.keys(topicMap).sort(function(a, b) {
-                  return a.localeCompare(b);
-                });
+                // Use topics in the order they appeared in API response (no sorting)
+                const sortedTopics = topicOrder;
                 
                 // Populate side panel with topics
                 const panelList = root.querySelector('#topic-filter-list-${moduleId}');

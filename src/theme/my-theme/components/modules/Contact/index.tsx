@@ -73,7 +73,7 @@ export function Component({ fieldValues }) {
                   <>
                     <div id={formContainerId}></div>
                     <script
-                      dangerouslySetInnerHTML={{
+                  dangerouslySetInnerHTML={{
                         __html: `
                         (function() {
                           const containerId = '${formContainerId}';
