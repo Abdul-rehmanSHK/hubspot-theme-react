@@ -325,6 +325,72 @@ a.transparent-btn:hover {
   }
 }
 
+/* Hero Sponsor Slider Styles */
+.hero-sponsor-slider {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  margin: 30px 0;
+  padding: 20px 0;
+}
+
+.hero-sponsor-slider-row {
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  height: auto;
+}
+
+.hero-sponsor-slide-track {
+  display: flex;
+  gap: 5.5rem;
+  top: 0;
+  left: 0;
+  flex-wrap: nowrap;
+  will-change: transform;
+}
+
+.hero-sponsor-slide-card {
+  width: auto;
+  height: auto;
+  flex-shrink: 0;
+  position: relative;
+  border-radius: 0;
+  overflow: visible;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+}
+
+.hero-sponsor-slide-card img {
+  width: auto;
+  height: 80px;
+  max-width: 200px;
+  object-fit: contain;
+  filter: none;
+  background: transparent;
+  mix-blend-mode: normal;
+  opacity: 1;
+}
+
+/* Responsive adjustments for hero sponsor slider */
+@media (max-width: 768px) {
+  .hero-sponsor-slide-card {
+    padding: 8px 15px;
+  }
+  
+  .hero-sponsor-slide-card img {
+    height: 60px;
+    max-width: 150px;
+  }
+  
+  .hero-sponsor-slide-track {
+    gap: 3rem;
+  }
+}
+
 .hero::before {
     content: "";
     position: absolute;

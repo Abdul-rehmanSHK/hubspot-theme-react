@@ -1,4 +1,4 @@
-import { ModuleFields, ImageField, TextField, UrlField, FileField, RepeatedFieldGroup } from '@hubspot/cms-components/fields';
+import { ModuleFields, ImageField, TextField, UrlField, FileField, RepeatedFieldGroup, BooleanField } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
   // Handle UrlField structure - it can be a string or an object with url/href property
@@ -112,6 +112,9 @@ export function Component({ fieldValues }) {
   const allSubheadings = subheadings.length > 0 
     ? subheadings.map((item: any) => item.text || item.subheading || '').filter((text: string) => text && text.trim())
     : (legacySubheading ? [legacySubheading] : []);
+  
+  // Sponsor slider checkbox
+  const showSponsorSlider = fieldValues.showSponsorSlider || false;
   
   // Handle video: Check for URL first, then fall back to file upload
   // Use the same logic as VideoTestimonials component
@@ -227,6 +230,15 @@ export function Component({ fieldValues }) {
               )}
             </div>
           </div>
+          {showSponsorSlider && (
+            <div className="hero-sponsor-slider" id={`hero-sponsor-slider-${sectionId}`}>
+              <div className="hero-sponsor-slider-row">
+                <div className="hero-sponsor-slide-track" id={`hero-sponsor-track-${sectionId}`}>
+                  {/* Sponsor logos will be inserted here by JavaScript */}
+                </div>
+              </div>
+            </div>
+          )}
           {allSubheadings.length > 0 && (
             <div className="hero-subheading-container">
               <h2 className="hero-subheading" id={`hero-subheading-${sectionId}`}>
@@ -288,6 +300,161 @@ export function Component({ fieldValues }) {
                 // If it's a regular URL (not anchor), let it navigate normally
                 // If it's opening in new window, let it navigate normally
               });
+            }
+            
+            // Fetch and display featured sponsors for hero slider
+            const showSponsorSlider = ${JSON.stringify(showSponsorSlider)};
+            if (showSponsorSlider) {
+              const sponsorSliderContainer = document.getElementById('hero-sponsor-slider-${sectionId}');
+              const sponsorTrack = document.getElementById('hero-sponsor-track-${sectionId}');
+              
+              if (sponsorSliderContainer && sponsorTrack) {
+                const portalId = '39650877';
+                const tableId = '146535020'; // sponsors table ID
+                
+                async function fetchFeaturedSponsors() {
+                  try {
+                    const apiUrl = 'https://api.hubapi.com/cms/v3/hubdb/tables/' + tableId + '/rows?portalId=' + portalId;
+                    const response = await fetch(apiUrl);
+                    
+                    if (!response.ok) {
+                      throw new Error('Failed to fetch sponsors: ' + response.status);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Filter only featured sponsors (featured === 1)
+                    const featuredSponsors = (data.results || []).filter(function(row) {
+                      return row.values?.featured === 1;
+                    }).map(function(row) {
+                      return {
+                        image: row.values?.image ? {
+                          src: row.values.image.url || '',
+                          alt: row.values.image.altText || 'Sponsor'
+                        } : null
+                      };
+                    }).filter(function(sponsor) {
+                      return sponsor.image && sponsor.image.src;
+                    });
+                    
+                    if (featuredSponsors.length === 0) {
+                      sponsorSliderContainer.style.display = 'none';
+                      return;
+                    }
+                    
+                    // Duplicate array for seamless infinite scroll
+                    const sponsorImages = [...featuredSponsors, ...featuredSponsors];
+                    
+                    // Clear existing content
+                    sponsorTrack.innerHTML = '';
+                    
+                    // Create sponsor logo cards
+                    sponsorImages.forEach(function(sponsor, idx) {
+                      const card = document.createElement('div');
+                      card.className = 'hero-sponsor-slide-card';
+                      card.innerHTML = '<img src="' + sponsor.image.src + '" alt="' + (sponsor.image.alt || 'Sponsor ' + (idx + 1)) + '" />';
+                      sponsorTrack.appendChild(card);
+                    });
+                    
+                    // Start continuous scrolling animation
+                    function startSponsorScroll() {
+                      const track = sponsorTrack;
+                      if (!track) return;
+                      
+                      // Wait for all images to load to get accurate width calculation
+                      const images = track.querySelectorAll('img');
+                      let imagesLoaded = 0;
+                      const totalImages = images.length;
+                      
+                      if (totalImages === 0) {
+                        return;
+                      }
+                      
+                      function checkImagesLoaded() {
+                        images.forEach(function(img) {
+                          if (img.complete && img.naturalWidth > 0) {
+                            imagesLoaded++;
+                          } else {
+                            img.addEventListener('load', function() {
+                              imagesLoaded++;
+                              if (imagesLoaded === totalImages) {
+                                initAnimation();
+                              }
+                            }, { once: true });
+                            img.addEventListener('error', function() {
+                              imagesLoaded++;
+                              if (imagesLoaded === totalImages) {
+                                initAnimation();
+                              }
+                            }, { once: true });
+                          }
+                        });
+                        
+                        if (imagesLoaded === totalImages) {
+                          // Small delay to ensure layout is complete
+                          setTimeout(initAnimation, 50);
+                        }
+                      }
+                      
+                      function initAnimation() {
+                        // Force a reflow to ensure accurate width calculation
+                        track.offsetWidth;
+                        
+                        // Recalculate width after images are loaded to ensure accuracy
+                        const trackWidth = track.scrollWidth;
+                        const halfWidth = trackWidth / 2;
+                        
+                        // Ensure we have a valid width
+                        if (halfWidth <= 0) {
+                          setTimeout(initAnimation, 100);
+                          return;
+                        }
+                        
+                        let position = 0;
+                        const speed = 0.35; // pixels per frame
+                        
+                        function animate() {
+                          position -= speed;
+                          
+                          // Reset position seamlessly when we've scrolled exactly half the track width
+                          // Since we duplicated the content, resetting to 0 at -halfWidth creates seamless loop
+                          // Use <= instead of == to handle any floating point precision issues
+                          if (position <= -halfWidth) {
+                            // Reset to 0 when we've scrolled exactly half width
+                            // The duplicate content is now in the same position as the original was at start
+                            position = 0;
+                          }
+                          
+                          track.style.transform = 'translateX(' + position + 'px)';
+                          requestAnimationFrame(animate);
+                        }
+                        
+                        // Start animation
+                        animate();
+                      }
+                      
+                      // Check if images are already loaded or wait for them
+                      checkImagesLoaded();
+                    }
+                    
+                    // Start animation after logos are rendered
+                    startSponsorScroll();
+                    
+                  } catch (err) {
+                    console.warn('Error loading featured sponsors:', err);
+                    sponsorSliderContainer.style.display = 'none';
+                  }
+                }
+                
+                // Start fetching sponsors
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(fetchFeaturedSponsors, 100);
+                  });
+                } else {
+                  setTimeout(fetchFeaturedSponsors, 100);
+                }
+              }
             }
             
             // Typewriter animation for multiple subheadings
@@ -397,6 +564,12 @@ export const fields = (
       name="downArrowUrl"
       label="Down arrow button URL"
       helpText="Link URL for the down arrow button. Use #sectionid for smooth scrolling to a section, or any URL/page link. Leave empty to hide the button."
+    />
+    <BooleanField
+      name="showSponsorSlider"
+      label="Show Sponsor Slider"
+      default={false}
+      helpText="Check this to display featured sponsor logos sliding above the subheading. Logos will be fetched from the Sponsors HubDB table (featured: 1 only)."
     />
     <RepeatedFieldGroup
       name="subheadings"
