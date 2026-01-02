@@ -158,6 +158,7 @@ header.header {
     left: 0;
     right: 0;
     top: 0;
+    padding: 0 3%;
 }
 .header.scrolled {
   background-color: #050d51;
@@ -184,7 +185,10 @@ max-width: 1297px;
   transition: background-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
   transition: all 0.4s ease-in-out;
 }
-
+.header.scrolled .header-btn a.transparent-btn {
+    padding: 12px 15px;
+    font-size: 16px;
+}
 /* Header with background when scrolled */
 
 /* Responsive padding for header container to match other sections */
@@ -198,23 +202,10 @@ max-width: 1297px;
   .navbar-toggler:focus {
     box-shadow: none !important;
 }
-  .header.scrolled {
-    left: 15px;
-    right: 15px;
-    padding-left: 15px;
-    padding-right: 15px;
-  }
 }
 
 @media (max-width: 767.98px) {
   .header {
-    left: 12px;
-    right: 12px;
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-  
-  .header.scrolled {
     left: 12px;
     right: 12px;
     padding-left: 12px;
@@ -279,7 +270,7 @@ a.transparent-btn:hover {
     text-align: center;
     color: #cdcdcd;
     font-size: 17px;
-    padding: 9rem 1rem 3rem;
+    padding: 9rem 0 3rem 0;
     justify-content: center;
     overflow: hidden;
     z-index: 1;
@@ -3125,10 +3116,7 @@ footer.footer::after {
          responsive
 ---------------------------*/
 @media (max-width: 1199px) {
-.header.scrolled {
-    max-width: 93%;
-    padding: 20px 20px;
-}
+
 a.transparent-btn{
       font-size: 16px;
       padding: 12px;
