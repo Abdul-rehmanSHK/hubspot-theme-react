@@ -1,4 +1,4 @@
-import { ModuleFields, ImageField, TextField, UrlField, FileField } from '@hubspot/cms-components/fields';
+import { ModuleFields, ImageField, TextField, UrlField, FileField, RepeatedFieldGroup } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
   // Handle UrlField structure - it can be a string or an object with url/href property
@@ -103,7 +103,15 @@ export function Component({ fieldValues }) {
   const ctaUrl = getUrlWithHash(fieldValues.ctaUrl) || '#';
   const rawDownArrowUrl = getUrlWithHash(fieldValues.downArrowUrl);
   const downArrowUrl = (rawDownArrowUrl && rawDownArrowUrl !== '#') ? rawDownArrowUrl : '';
-  const subheading = fieldValues.subheading || '';
+  
+  // Handle multiple subheadings - support both old single subheading and new repeated field group
+  const subheadings = fieldValues.subheadings || [];
+  const legacySubheading = fieldValues.subheading || '';
+  
+  // Convert legacy single subheading to array format for backward compatibility
+  const allSubheadings = subheadings.length > 0 
+    ? subheadings.map((item: any) => item.text || item.subheading || '').filter((text: string) => text && text.trim())
+    : (legacySubheading ? [legacySubheading] : []);
   
   // Handle video: Check for URL first, then fall back to file upload
   // Use the same logic as VideoTestimonials component
@@ -219,7 +227,16 @@ export function Component({ fieldValues }) {
               )}
             </div>
           </div>
-          {subheading && <h2>{subheading}</h2>}
+          {allSubheadings.length > 0 && (
+            <div className="hero-subheading-container">
+              <h2 className="hero-subheading" id={`hero-subheading-${sectionId}`}>
+                {allSubheadings.length === 1 ? allSubheadings[0] : ''}
+              </h2>
+              {allSubheadings.length > 1 && (
+                <span className="typewriter-cursor">|</span>
+              )}
+            </div>
+          )}
         </div>
         {downArrowUrl && (
           <a href={downArrowUrl} className="aero-btn">
@@ -272,6 +289,70 @@ export function Component({ fieldValues }) {
                 // If it's opening in new window, let it navigate normally
               });
             }
+            
+            // Typewriter animation for multiple subheadings
+            const subheadingElement = document.getElementById('hero-subheading-${sectionId}');
+            const cursorElement = document.querySelector('.hero-subheading-container .typewriter-cursor');
+            const subheadings = ${JSON.stringify(allSubheadings)};
+            
+            if (subheadingElement && subheadings.length > 1) {
+              let currentIndex = 0;
+              let currentText = '';
+              let isTyping = true;
+              let isDeleting = false;
+              let typingSpeed = 50; // milliseconds per character (typing speed)
+              let deletingSpeed = 10; // milliseconds per character (deleting speed - faster)
+              let waitTime = 2000; // milliseconds to wait after typing completes
+              let timeoutId = null;
+              
+              function typeWriter() {
+                const fullText = subheadings[currentIndex];
+                
+                if (isTyping && !isDeleting) {
+                  // Typing phase
+                  if (currentText.length < fullText.length) {
+                    currentText = fullText.substring(0, currentText.length + 1);
+                    subheadingElement.textContent = currentText;
+                    timeoutId = setTimeout(typeWriter, typingSpeed);
+                  } else {
+                    // Finished typing, wait before deleting
+                    isTyping = false;
+                    timeoutId = setTimeout(function() {
+                      isDeleting = true;
+                      typeWriter();
+                    }, waitTime);
+                  }
+                } else if (isDeleting) {
+                  // Deleting phase (backspace effect)
+                  if (currentText.length > 0) {
+                    currentText = currentText.substring(0, currentText.length - 1);
+                    subheadingElement.textContent = currentText;
+                    timeoutId = setTimeout(typeWriter, deletingSpeed);
+                  } else {
+                    // Finished deleting, move to next subheading
+                    isDeleting = false;
+                    isTyping = true;
+                    currentIndex = (currentIndex + 1) % subheadings.length;
+                    timeoutId = setTimeout(typeWriter, 100); // Small delay before starting next
+                  }
+                }
+              }
+              
+              // Start the typewriter animation
+              if (subheadings.length > 0) {
+                typeWriter();
+              }
+              
+              // Clean up on unmount
+              const heroSection = document.querySelector('.hero[id="${sectionId}"]');
+              if (heroSection) {
+                heroSection.addEventListener('cms:unmount', function() {
+                  if (timeoutId) {
+                    clearTimeout(timeoutId);
+                  }
+                });
+              }
+            }
           })();
         `,
         }}
@@ -317,11 +398,19 @@ export const fields = (
       label="Down arrow button URL"
       helpText="Link URL for the down arrow button. Use #sectionid for smooth scrolling to a section, or any URL/page link. Leave empty to hide the button."
     />
-    <TextField
-      name="subheading"
-      label="Subheading (h2)"
-      helpText="Subheading text displayed below the main content. Leave empty to hide."
-      multiline={true}
+    <RepeatedFieldGroup
+      name="subheadings"
+      label="Subheadings (h2)"
+      helpText="Add multiple subheadings that will be displayed with typewriter animation. Each subheading will type out, wait, then delete before showing the next one."
+      required={false}
+      children={[
+        <TextField
+          name="text"
+          label="Subheading text"
+          required={true}
+          helpText="Text for this subheading"
+        />,
+      ]}
     />
     <UrlField
       name="videoUrl"

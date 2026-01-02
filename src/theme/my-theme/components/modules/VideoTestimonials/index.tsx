@@ -201,7 +201,7 @@ export function Component({ fieldValues }) {
         </div>
       </div>
 
-      {/* Swiper.js initialization - matching Speakers section exactly */}
+      {/* Swiper.js initialization with video play/pause autoplay control */}
       <script
         dangerouslySetInnerHTML={{
           __html: `
@@ -210,6 +210,261 @@ export function Component({ fieldValues }) {
             if (!root) return;
             const slider = root.querySelector('.videos-carousel');
             if (!slider) return;
+            
+            let swiperInstance = null;
+            let youtubePlayers = {}; // Store YouTube player instances by video ID
+            let vimeoPlayers = {}; // Store Vimeo player instances by video ID
+            let videoElementToPlayer = {}; // Map video elements to their player instances
+            let currentlyPlayingVideo = null; // Track which video element is currently playing
+            let currentlyPlayingVideoType = null; // Track type: 'html5', 'youtube', 'vimeo'
+            
+            // Extract YouTube video ID from URL
+            function extractYouTubeId(url) {
+              if (!url) return null;
+              const match = url.match(/(?:youtube\\.com\\/embed\\/|youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([a-zA-Z0-9_-]{11})/);
+              return match ? match[1] : null;
+            }
+            
+            // Extract Vimeo video ID from URL
+            function extractVimeoId(url) {
+              if (!url) return null;
+              const match = url.match(/(?:vimeo\\.com\\/|player\\.vimeo\\.com\\/video\\/)(\\d+)/);
+              return match ? match[1] : null;
+            }
+            
+            // Pause the currently playing video
+            function pauseCurrentVideo() {
+              if (!currentlyPlayingVideo) return;
+              
+              try {
+                if (currentlyPlayingVideoType === 'html5') {
+                  // HTML5 video element - use native pause method
+                  if (currentlyPlayingVideo.pause && !currentlyPlayingVideo.paused) {
+                    currentlyPlayingVideo.pause();
+                  }
+                } else if (currentlyPlayingVideoType === 'youtube') {
+                  // YouTube player - get videoId from iframe src
+                  const iframeSrc = currentlyPlayingVideo.src || currentlyPlayingVideo.getAttribute('src') || '';
+                  const videoId = extractYouTubeId(iframeSrc);
+                  if (videoId && youtubePlayers[videoId]) {
+                    try {
+                      const playerState = youtubePlayers[videoId].getPlayerState();
+                      // YT.PlayerState.PLAYING = 1
+                      if (playerState === 1) {
+                        youtubePlayers[videoId].pauseVideo();
+                      }
+                    } catch (e) {
+                      // If we can't check state, just try to pause
+                      youtubePlayers[videoId].pauseVideo();
+                    }
+                  }
+                } else if (currentlyPlayingVideoType === 'vimeo') {
+                  // Vimeo player - get videoId from iframe src
+                  const iframeSrc = currentlyPlayingVideo.src || currentlyPlayingVideo.getAttribute('src') || '';
+                  const videoId = extractVimeoId(iframeSrc);
+                  if (videoId && vimeoPlayers[videoId]) {
+                    vimeoPlayers[videoId].getPaused().then(function(paused) {
+                      if (!paused) {
+                        vimeoPlayers[videoId].pause();
+                      }
+                    }).catch(function(e) {
+                      // If we can't check paused state, just try to pause
+                      vimeoPlayers[videoId].pause();
+                    });
+                  }
+                }
+              } catch (e) {
+                console.warn('Error pausing current video:', e);
+              }
+            }
+            
+            // Pause slider autoplay when video plays and stop any other playing video
+            function pauseAutoplay(videoElement, videoType) {
+              // If another video is playing, pause it first
+              if (currentlyPlayingVideo && currentlyPlayingVideo !== videoElement) {
+                pauseCurrentVideo();
+              }
+              
+              // Pause slider autoplay
+              if (swiperInstance && swiperInstance.autoplay) {
+                swiperInstance.autoplay.stop();
+              }
+              
+              // Update currently playing video
+              currentlyPlayingVideo = videoElement;
+              currentlyPlayingVideoType = videoType;
+            }
+            
+            // Resume slider autoplay when video stops
+            function resumeAutoplay(videoElement) {
+              if (swiperInstance && swiperInstance.autoplay && currentlyPlayingVideo === videoElement) {
+                swiperInstance.autoplay.start();
+                currentlyPlayingVideo = null;
+                currentlyPlayingVideoType = null;
+              }
+            }
+            
+            // Setup event listeners for HTML5 video elements
+            function setupVideoListeners() {
+              const videoElements = root.querySelectorAll('video');
+              videoElements.forEach(function(video) {
+                // Check if listeners are already attached (using data attribute)
+                if (video.dataset.listenersAttached === 'true') {
+                  return;
+                }
+                
+                // Mark as having listeners attached
+                video.dataset.listenersAttached = 'true';
+                
+                // Add play event listener
+                video.addEventListener('play', function() {
+                  pauseAutoplay(video, 'html5');
+                });
+                
+                // Add pause event listener
+                video.addEventListener('pause', function() {
+                  resumeAutoplay(video);
+                });
+                
+                // Add ended event listener
+                video.addEventListener('ended', function() {
+                  resumeAutoplay(video);
+                });
+              });
+            }
+            
+            // Load YouTube IFrame API and initialize players
+            function loadYouTubeAPI() {
+              if (window.YT && window.YT.Player) {
+                initializeYouTubePlayers();
+                return;
+              }
+              
+              // Check if script is already loading
+              if (document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+                // Wait for API to load
+                const checkInterval = setInterval(function() {
+                  if (window.YT && window.YT.Player) {
+                    clearInterval(checkInterval);
+                    initializeYouTubePlayers();
+                  }
+                }, 100);
+                return;
+              }
+              
+              // Load YouTube IFrame API
+              const tag = document.createElement('script');
+              tag.src = 'https://www.youtube.com/iframe_api';
+              tag.async = true;
+              const firstScriptTag = document.getElementsByTagName('script')[0];
+              firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+              
+              // Wait for API to be ready
+              window.onYouTubeIframeAPIReady = function() {
+                initializeYouTubePlayers();
+              };
+            }
+            
+            // Initialize YouTube players
+            function initializeYouTubePlayers() {
+              const iframes = root.querySelectorAll('iframe[src*="youtube.com"]');
+              iframes.forEach(function(iframe, index) {
+                const videoId = extractYouTubeId(iframe.src);
+                if (videoId && !youtubePlayers[videoId]) {
+                  try {
+                    // YouTube API requires an ID on the iframe
+                    const iframeId = 'youtube-player-' + videoId + '-' + index;
+                    if (!iframe.id) {
+                      iframe.id = iframeId;
+                    }
+                    
+                    const player = new window.YT.Player(iframe.id || iframeId, {
+                      events: {
+                        onStateChange: function(event) {
+                          // YT.PlayerState.PLAYING = 1
+                          // YT.PlayerState.PAUSED = 2
+                          // YT.PlayerState.ENDED = 0
+                          if (event.data === 1) { // Playing
+                            pauseAutoplay(iframe, 'youtube');
+                          } else if (event.data === 2 || event.data === 0) { // Paused or Ended
+                            resumeAutoplay(iframe);
+                          }
+                        }
+                      }
+                    });
+                    youtubePlayers[videoId] = player;
+                    videoElementToPlayer[iframe] = { type: 'youtube', player: player, videoId: videoId };
+                  } catch (e) {
+                    console.warn('Failed to initialize YouTube player:', e);
+                  }
+                }
+              });
+            }
+            
+            // Load Vimeo Player API and initialize players
+            function loadVimeoAPI() {
+              if (window.Vimeo && window.Vimeo.Player) {
+                initializeVimeoPlayers();
+                return;
+              }
+              
+              // Check if script is already loading
+              if (document.querySelector('script[src*="player.vimeo.com/api"]')) {
+                // Wait for API to load
+                const checkInterval = setInterval(function() {
+                  if (window.Vimeo && window.Vimeo.Player) {
+                    clearInterval(checkInterval);
+                    initializeVimeoPlayers();
+                  }
+                }, 100);
+                return;
+              }
+              
+              // Load Vimeo Player API
+              const tag = document.createElement('script');
+              tag.src = 'https://player.vimeo.com/api/player.js';
+              tag.async = true;
+              const firstScriptTag = document.getElementsByTagName('script')[0];
+              firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+              
+              // Wait for API to be ready
+              tag.onload = function() {
+                setTimeout(initializeVimeoPlayers, 100);
+              };
+            }
+            
+            // Initialize Vimeo players
+            function initializeVimeoPlayers() {
+              const iframes = root.querySelectorAll('iframe[src*="vimeo.com"]');
+              iframes.forEach(function(iframe) {
+                const videoId = extractVimeoId(iframe.src);
+                if (videoId && !vimeoPlayers[videoId]) {
+                  try {
+                    const player = new window.Vimeo.Player(iframe);
+                    vimeoPlayers[videoId] = player;
+                    
+                    // Listen for play event
+                    player.on('play', function() {
+                      pauseAutoplay(iframe, 'vimeo');
+                    });
+                    
+                    // Listen for pause event
+                    player.on('pause', function() {
+                      resumeAutoplay(iframe);
+                    });
+                    
+                    // Listen for ended event
+                    player.on('ended', function() {
+                      resumeAutoplay(iframe);
+                    });
+                    
+                    videoElementToPlayer[iframe] = { type: 'vimeo', player: player, videoId: videoId };
+                  } catch (e) {
+                    console.warn('Failed to initialize Vimeo player:', e);
+                  }
+                }
+              });
+            }
             
             // Wait for Swiper to be available and DOM ready
             const initSwiper = () => {
@@ -229,7 +484,7 @@ export function Component({ fieldValues }) {
               const prevBtn = root.querySelector('.swiper-button-prev');
               
               // Initialize Swiper exactly like Speakers section
-              const swiper = new Swiper(slider, {
+              swiperInstance = new Swiper(slider, {
                 slidesPerView: 3,
                 spaceBetween: 20,
                 centeredSlides: false,
@@ -263,10 +518,35 @@ export function Component({ fieldValues }) {
                 },
               });
               
+              // Setup video event listeners after Swiper is initialized
+              setTimeout(function() {
+                setupVideoListeners();
+                loadYouTubeAPI();
+                loadVimeoAPI();
+              }, 300);
+              
               // Clean up on unmount
               root.addEventListener('cms:unmount', () => {
-                if (swiper && swiper.destroy) {
-                  swiper.destroy(true, true);
+                // Destroy YouTube players
+                Object.keys(youtubePlayers).forEach(function(videoId) {
+                  try {
+                    if (youtubePlayers[videoId] && youtubePlayers[videoId].destroy) {
+                      youtubePlayers[videoId].destroy();
+                    }
+                  } catch (e) {}
+                });
+                
+                // Destroy Vimeo players
+                Object.keys(vimeoPlayers).forEach(function(videoId) {
+                  try {
+                    if (vimeoPlayers[videoId] && vimeoPlayers[videoId].destroy) {
+                      vimeoPlayers[videoId].destroy();
+                    }
+                  } catch (e) {}
+                });
+                
+                if (swiperInstance && swiperInstance.destroy) {
+                  swiperInstance.destroy(true, true);
                 }
               });
             };

@@ -287,6 +287,42 @@ a.transparent-btn:hover {
     margin-bottom: 0 !important;
 }
 
+/* Typewriter animation container for multiple subheadings */
+.hero-subheading-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  margin-top: 30px;
+  min-height: 60px; /* Prevent layout shift during animation */
+}
+
+.hero-subheading-container h2 {
+  display: inline-block;
+  margin: 0;
+  padding-right: 10px;
+}
+
+/* Typewriter cursor animation */
+.typewriter-cursor {
+  display: inline-block;
+  color: #06C7EE;
+  font-weight: 300;
+  animation: blink-cursor 1s infinite;
+  margin-left: 2px;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+@keyframes blink-cursor {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
 .hero::before {
     content: "";
     position: absolute;
