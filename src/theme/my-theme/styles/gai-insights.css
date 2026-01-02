@@ -997,6 +997,7 @@ button#toggleAutoplay {
   color: #fff;
   overflow: hidden;
   padding: 100px 0;
+  background: #f8f5ee;
 }
 .benefits-section::before {
   content: "";
@@ -1015,8 +1016,8 @@ button#toggleAutoplay {
 .benefits-section::after {
   content: "";
   position: absolute;
-  width: 700px;
-  height: 700px;
+  width: 500px;
+  height: 500px;
   background: radial-gradient(circle at top left, #050d51 0%, #06C7EE 100%);
   bottom: 0;
   left: 0;
@@ -1402,8 +1403,8 @@ border-color: #050d51;
 .speakers-area::before {
   content: "";
   position: absolute;
-  width: 700px;
-  height: 700px;
+  width: 500px;
+  height: 500px;
   background: radial-gradient(circle at top left, #050d51 0%, #06C7EE 100%);
   top: 0;
   right: 0;
@@ -1417,12 +1418,12 @@ border-color: #050d51;
 .speakers-area::after {
   content: "";
   position: absolute;
-  width: 700px;
-  height: 700px;
+  width: 500px;
+  height: 500px;
   background: radial-gradient(circle at top left, #050d51 0%, #06C7EE 100%);
   bottom: 0;
-  left: 0;
-  transform: translate(-20%, 50%);
+  right: 0;
+  transform: translate(0%, 50%);
   border-radius: 50%;
   z-index: 0;
   pointer-events: none;
