@@ -2,8 +2,8 @@
   "name": "getting-started-with-cms-react",
   "description": "Getting started with CMS React",
   "devDependencies": {
+    "@hubspot/cms-dev-server": "^0.16.18",
     "@hubspot/prettier-plugin-hubl": "latest",
-    "@hubspot/cms-dev-server": "latest",
     "eslint": "^8.24.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-react": "^7.31.10",
