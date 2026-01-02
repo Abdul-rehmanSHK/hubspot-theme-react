@@ -26,7 +26,8 @@ export function Component({ fieldValues }) {
 
   return (
     <header className="header">
-      <div className="logo-div">
+      <div className="header-wrapper">
+        <div className="logo-div">
         <a href={logoLink}>
           <img src={fieldValues.logo?.src} alt={fieldValues.logo?.alt || 'Logo'} />
         </a>
@@ -170,6 +171,7 @@ export function Component({ fieldValues }) {
         `,
         }}
       />
+      </div>
     </header>
   );
 }
