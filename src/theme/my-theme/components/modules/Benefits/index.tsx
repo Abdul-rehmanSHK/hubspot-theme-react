@@ -60,18 +60,30 @@ export function Component({ fieldValues }) {
                       }).filter((item: string) => item.trim())
                     : [];
                   
+                  // Get paragraph text
+                  const paragraph = benefit.paragraph || '';
+                  const hasItems = items.length > 0;
+                  const hasParagraph = paragraph && paragraph.trim() !== '';
+                  
                   return (
                     <div key={index} className="benefits-div">
                       <h3>{benefit.title || ''}</h3>
-                      <ul>
-                        {items.length > 0 ? (
-                          items.map((item: string, itemIndex: number) => (
+                      {hasItems ? (
+                        // If items exist, show list (list takes priority)
+                        <ul>
+                          {items.map((item: string, itemIndex: number) => (
                             <li key={itemIndex}>{item}</li>
-                          ))
-                        ) : (
+                          ))}
+                        </ul>
+                      ) : hasParagraph ? (
+                        // If no items but paragraph exists, show paragraph
+                        <p>{paragraph}</p>
+                      ) : (
+                        // Fallback if neither exists
+                        <ul>
                           <li>No items added</li>
-                        )}
-                      </ul>
+                        </ul>
+                      )}
                     </div>
                   );
                 })}
@@ -132,10 +144,17 @@ export const fields = (
       required={true}
       children={[
         <TextField name="title" label="Benefit title" required={true} default="Grow" />,
+        <TextField
+          name="paragraph"
+          label="Paragraph (optional)"
+          multiline={true}
+          helpText="Optional paragraph text. If both paragraph and list items are provided, list items will be displayed."
+        />,
         <RepeatedFieldGroup
           name="items"
           label="Benefit items"
-          required={true}
+          required={false}
+          helpText="List items. If provided, will take priority over paragraph."
           children={[
             <TextField
               name="item"
