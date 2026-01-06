@@ -2957,7 +2957,7 @@ ease;
 
 .help-area input.hs-button {
     display: inline-block;
-    color: #001D57;
+    color: #001D57 !important;
     background: #06C7EE;
     padding: 15px 18px;
     border-radius: 5px;
@@ -4381,7 +4381,7 @@ footer.footer {
 /* FAQ Section Styles */
 .faq-section {
   position: relative;
-  background: #f8f5ee;
+  background: #06C7EE;
   overflow: hidden;
   padding: 100px 0;
 }
@@ -4418,12 +4418,11 @@ footer.footer {
 
 .faq-inner {
   position: relative;
-  background: #fff;
+  background: #06C7EE;
   border-radius: 10px;
   padding: 60px 40px;
   overflow: hidden;
   z-index: 1;
-  color: #050d51;
 }
 
 .faq-inner::before {
@@ -4487,21 +4486,18 @@ footer.footer {
 
 .faq-item {
   margin-bottom: 20px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
   overflow: hidden;
+  border-bottom: 1px solid #ced4da;
   transition: all 0.3s ease;
-  background: #fff;
 }
 
 .faq-item:hover {
-  border-color: #06C7EE;
   box-shadow: 0 4px 12px rgba(6, 199, 238, 0.1);
 }
 
 .faq-question {
   width: 100%;
-  padding: 20px 25px;
+  padding: 20px 0px;
   background: transparent;
   border: none;
   text-align: left;
@@ -4518,12 +4514,12 @@ footer.footer {
 }
 
 .faq-question:hover {
-  background: #f0f9ff;
+  background: transparent;
 }
 
 .faq-question.active {
   background: #06C7EE;
-  color: #050d51;
+  color: #001D57;
 }
 
 .faq-question-text {
@@ -4543,7 +4539,7 @@ footer.footer {
 
 .faq-icon i {
   font-size: 16px;
-  color: #06C7EE;
+  color: #050d51;
   transition: transform 0.3s ease, color 0.3s ease;
 }
 
