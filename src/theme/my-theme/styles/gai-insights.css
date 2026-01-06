@@ -2855,7 +2855,59 @@ ease;
   pointer-events: none;
   z-index: 0;
 }
-
+.help-area.inner .help-inner {
+    background: transparent !important;
+    padding: 0;
+}
+.help-area.inner {
+    background: #f8f5ee;
+}
+.help-area.inner .help-content {
+    color: #050d51;
+    padding: 80px 0px 80px 40px;
+    background: #f8f5ee;
+    min-height: 860px;
+    border-radius: 10px;
+}
+.help-area.inner h2 {
+    color: #050d51;
+}
+.help-area.inner .contact-form label {
+    color: #050d51;
+}
+.help-area.inner .contact-form textarea, .help-area.inner .contact-form input {
+    color: #ced4da;
+    border-bottom-color: #ced4da;
+}
+.help-area.inner .contact-form {
+    background: #fff;
+    padding: 30px;
+    position: relative;
+    border-radius: 10px;
+}
+.help-area.inner::before {
+    right: 0;
+    transform: translate(0%, -53%);
+    left: auto;
+}
+.help-area.inner .help-inner::before {
+    right: auto;
+    transform: translate(-35%, -50%);
+    left: 0;
+}
+.help-area.inner .help-inner::after {
+    display: none;
+}
+.help-area.inner::after {
+    right: auto;
+    left: 0;
+    transform: translate(-25%, 50%);
+    height: 800px;
+    width: 800px;
+}
+.help-area.inner .row {
+    align-items: start !important;
+}
 .help-inner::after {
   content: "";
   position: absolute;
@@ -2889,7 +2941,7 @@ ease;
     outline: 0;
     border-radius: 0;
     box-shadow: none;
-        padding: 10px 0 0 0;
+        padding: 8px 0 6px 0;
         margin-bottom: 10px;
 }
 .help-area .contact-form input[type="checkbox"] {
@@ -2913,7 +2965,7 @@ ease;
     font-weight: 400;
     transition: 0.3s ease;
     text-transform: uppercase;
-    margin-top: 0;
+    margin-top: 20px;
     border: 0;
     width: auto !important;
 }
