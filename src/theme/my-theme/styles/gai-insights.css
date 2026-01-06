@@ -330,7 +330,6 @@ a.transparent-btn:hover {
   position: relative;
   overflow: hidden;
   width: 100%;
-  margin: 30px 0;
   padding: 20px 0;
 }
 
@@ -343,7 +342,7 @@ a.transparent-btn:hover {
 
 .hero-sponsor-slide-track {
   display: flex;
-  gap: 5.5rem;
+  gap: 10px;
   top: 0;
   left: 0;
   flex-wrap: nowrap;
@@ -351,17 +350,18 @@ a.transparent-btn:hover {
 }
 
 .hero-sponsor-slide-card {
-  width: auto;
-  height: auto;
+  width: 225px;
+  height: 130px;
   flex-shrink: 0;
   position: relative;
-  border-radius: 0;
+  border-radius: 10px;
   overflow: visible;
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 10px 20px;
+  background: #fff;
 }
 
 .hero-sponsor-slide-card img {
@@ -411,11 +411,6 @@ a.transparent-btn:hover {
   z-index: 99;
   overflow: hidden;
   text-align: left;
-}
-
-.left-area {
-    max-width: 600px;
-    margin-top: -70px;
 }
 
 .heading {
@@ -543,10 +538,6 @@ main .container-fluid {
 .dnd-module {
   padding: 0 !important;
   margin: 0 !important;
-}
-.left-area {
-    
-    max-width: 600px;
 }
 .heading {
   margin-top: 20px;
@@ -1414,7 +1405,7 @@ border-color: #050d51;
   pointer-events: none;
   opacity: 0.9;
 }
-
+/* 
 .speakers-area::after {
   content: "";
   position: absolute;
@@ -1428,7 +1419,7 @@ border-color: #050d51;
   z-index: 0;
   pointer-events: none;
   opacity: 0.9;
-}
+} */
 
 .speakers-inner {
     background: #fff !important;
