@@ -141,7 +141,7 @@ export function Component({ fieldValues }) {
                   
                   // Get the actual height of the content
                   const contentHeight = answerContent.scrollHeight;
-                  answerDiv.style.maxHeight = contentHeight + 'px';
+                  answerDiv.style.maxHeight = contentHeight + '%';
                   answerDiv.style.paddingTop = '20px';
                   answerDiv.style.paddingBottom = '20px';
                   
