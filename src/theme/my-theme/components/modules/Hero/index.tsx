@@ -115,6 +115,7 @@ export function Component({ fieldValues }) {
   
   // Sponsor slider checkbox
   const showSponsorSlider = fieldValues.showSponsorSlider || false;
+  const sponsorSliderPreTitle = fieldValues.sponsorSliderPreTitle || '';
   
   // Handle video: Check for URL first, then fall back to file upload
   // Use the same logic as VideoTestimonials component
@@ -231,10 +232,15 @@ export function Component({ fieldValues }) {
             </div>
           </div>
           {showSponsorSlider && (
-            <div className="hero-sponsor-slider" id={`hero-sponsor-slider-${sectionId}`}>
-              <div className="hero-sponsor-slider-row">
-                <div className="hero-sponsor-slide-track" id={`hero-sponsor-track-${sectionId}`}>
-                  {/* Sponsor logos will be inserted here by JavaScript */}
+            <div className="hero-sponsor-slider-wrapper">
+              {sponsorSliderPreTitle && (
+                <div className="hero-sponsor-slider-pre-title">{sponsorSliderPreTitle}</div>
+              )}
+              <div className="hero-sponsor-slider" id={`hero-sponsor-slider-${sectionId}`}>
+                <div className="hero-sponsor-slider-row">
+                  <div className="hero-sponsor-slide-track" id={`hero-sponsor-track-${sectionId}`}>
+                    {/* Sponsor logos will be inserted here by JavaScript */}
+                  </div>
                 </div>
               </div>
             </div>
@@ -570,6 +576,11 @@ export const fields = (
       label="Show Sponsor Slider"
       default={false}
       helpText="Check this to display featured sponsor logos sliding above the subheading. Logos will be fetched from the Sponsors HubDB table (featured: 1 only)."
+    />
+    <TextField
+      name="sponsorSliderPreTitle"
+      label="Text above sponsor slider"
+      helpText="Text displayed above the sponsor slider logos (e.g., 'Our Sponsors'). Leave empty to hide. Only shown when sponsor slider is enabled."
     />
     <RepeatedFieldGroup
       name="subheadings"

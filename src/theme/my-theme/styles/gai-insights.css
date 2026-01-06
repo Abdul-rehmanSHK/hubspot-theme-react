@@ -326,6 +326,20 @@ a.transparent-btn:hover {
 }
 
 /* Hero Sponsor Slider Styles */
+.hero-sponsor-slider-wrapper {
+  width: 100%;
+  text-align: center;
+  margin: 30px 0;
+}
+
+.hero-sponsor-slider-pre-title {
+  font-size: 26px;
+  line-height: 1.2em;
+  color: #06C7EE;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
 .hero-sponsor-slider {
   position: relative;
   overflow: hidden;
