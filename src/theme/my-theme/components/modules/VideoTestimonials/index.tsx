@@ -92,11 +92,12 @@ export function Component({ fieldValues }) {
   const heading = fieldValues.heading || 'AI Leaders rave about GAI World';
   const videos = fieldValues.videos || [];
   const sectionId = fieldValues.sectionId;
+  const sectionClass = fieldValues.sectionClass || 'videos-area';
 
   const moduleId = `videos-${fieldValues.moduleInstanceId || Math.random().toString(36).slice(2)}`;
 
   return (
-    <div className="videos-area" id={sectionId || undefined} data-videos-id={moduleId}>
+    <div className={sectionClass} id={sectionId || undefined} data-videos-id={moduleId}>
       <div className="container">
         <div className="videos-slider">
           <h2>{heading}</h2>
@@ -618,6 +619,12 @@ export const fields = (
       name="sectionId"
       label="Section ID (optional)"
       helpText="ID for anchor links (e.g., #video-testimonials). Leave empty for no ID."
+    />
+    <TextField
+      name="sectionClass"
+      label="Section CSS Class"
+      default="videos-area"
+      helpText="Custom CSS class for this section. Default: videos-area"
     />
   </ModuleFields>
 );

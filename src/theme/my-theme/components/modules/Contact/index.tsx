@@ -6,6 +6,7 @@ import {
 
 export function Component({ fieldValues }) {
   const sectionId = fieldValues.sectionId || 'contact-us';
+  const sectionClass = fieldValues.sectionClass || 'help-area';
   
   // Get selected form from FormField
   // FormField returns an object with form information
@@ -54,7 +55,7 @@ export function Component({ fieldValues }) {
   const formContainerId = `hs-form-container-${sectionId}-${formId ? formId.replace(/[^a-zA-Z0-9]/g, '') : 'empty'}`;
 
   return (
-    <div className="help-area" id={sectionId}>
+    <div className={sectionClass} id={sectionId}>
       <div className="container">
         <div className="help-inner">
           <div className="row align-items-center">
@@ -175,6 +176,12 @@ export const fields = (
       label="Section ID"
       default="contact-us"
       helpText="ID for anchor links (e.g., #contact-us). Leave empty for no ID."
+    />
+    <TextField
+      name="sectionClass"
+      label="Section CSS Class"
+      default="help-area"
+      helpText="Custom CSS class for this section. Default: help-area"
     />
   </ModuleFields>
 );

@@ -67,9 +67,10 @@ export function Component({ fieldValues }) {
 
   const moduleId = `speakers-${fieldValues.moduleInstanceId || Math.random().toString(36).slice(2)}`;
   const sectionId = fieldValues.sectionId || 'previous-speakers-attendees';
+  const sectionClass = fieldValues.sectionClass || 'speakers-area';
 
   return (
-    <div className="speakers-area" id={sectionId} data-speakers-id={moduleId}>
+    <div className={sectionClass} id={sectionId} data-speakers-id={moduleId}>
       <div className="container">
         <div className="speakers-inner">
           <div className="row justify-content-center align-items-baseline">
@@ -356,6 +357,12 @@ export const fields = (
       label="Section ID"
       default="previous-speakers-attendees"
       helpText="ID for anchor links (e.g., #previous-speakers-attendees). Leave empty for no ID."
+    />
+    <TextField
+      name="sectionClass"
+      label="Section CSS Class"
+      default="speakers-area"
+      helpText="Custom CSS class for this section. Default: speakers-area"
     />
   </ModuleFields>
 );

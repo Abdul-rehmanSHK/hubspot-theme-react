@@ -21,9 +21,10 @@ export function Component({ fieldValues }) {
   const ctaUrl = getUrl(fieldValues.ctaUrl) || '#';
   const benefits = fieldValues.benefits || [];
   const sectionId = fieldValues.sectionId;
+  const sectionClass = fieldValues.sectionClass || 'benefits-section';
 
   return (
-    <div className="benefits-section" id={sectionId || undefined}>
+    <div className={sectionClass} id={sectionId || undefined}>
       <div className="container">
         <div className="benefits-inner">
           <div className="row">
@@ -150,6 +151,12 @@ export const fields = (
       name="sectionId"
       label="Section ID (optional)"
       helpText="ID for anchor links (e.g., #benefits). Leave empty for no ID."
+    />
+    <TextField
+      name="sectionClass"
+      label="Section CSS Class"
+      default="benefits-section"
+      helpText="Custom CSS class for this section. Default: benefits-section"
     />
   </ModuleFields>
 );

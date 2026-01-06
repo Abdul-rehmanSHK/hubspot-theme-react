@@ -16,9 +16,10 @@ export function Component({ fieldValues }) {
 
   const moduleId = `snaps-${fieldValues.moduleInstanceId || Math.random().toString(36).slice(2)}`;
   const sectionId = fieldValues.sectionId;
+  const sectionClass = fieldValues.sectionClass || 'snaps-area';
 
   return (
-    <div className="snaps-area" id={sectionId || undefined} data-snaps-id={moduleId}>
+    <div className={sectionClass} id={sectionId || undefined} data-snaps-id={moduleId}>
       <div className="container">
         <div className="snaps-text">
           <h2>{heading}</h2>
@@ -152,6 +153,12 @@ export const fields = (
       name="sectionId"
       label="Section ID (optional)"
       helpText="ID for anchor links (e.g., #snaps). Leave empty for no ID."
+    />
+    <TextField
+      name="sectionClass"
+      label="Section CSS Class"
+      default="snaps-area"
+      helpText="Custom CSS class for this section. Default: snaps-area"
     />
   </ModuleFields>
 );

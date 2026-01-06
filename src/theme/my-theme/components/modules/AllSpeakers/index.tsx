@@ -68,9 +68,10 @@ export function Component({ fieldValues }) {
 
   const moduleId = `all-speakers-${fieldValues.moduleInstanceId || Math.random().toString(36).slice(2)}`;
   const sectionId = fieldValues.sectionId || 'all-speakers';
+  const sectionClass = fieldValues.sectionClass || 'speakers-area';
 
   return (
-    <div className="speakers-area" id={sectionId} data-speakers-id={moduleId}>
+    <div className={sectionClass} id={sectionId} data-speakers-id={moduleId}>
       <div className="container">
         <div className="speakers-inner">
           <div className="speakers-header-with-filter">
@@ -541,6 +542,12 @@ export const fields = (
       label="Filter button text"
       default="Filter by Topic"
       helpText="Text displayed on the filter button"
+    />
+    <TextField
+      name="sectionClass"
+      label="Section CSS Class"
+      default="speakers-area"
+      helpText="Custom CSS class for this section. Default: speakers-area"
     />
   </ModuleFields>
 );

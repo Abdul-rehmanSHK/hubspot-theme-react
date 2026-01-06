@@ -20,9 +20,10 @@ export function Component({ fieldValues }) {
   const moduleId = `about-${fieldValues.moduleInstanceId || Math.random().toString(36).slice(2)}`;
   const sectionId = fieldValues.sectionId || 'about-area';
   const ctaUrl = getUrl(fieldValues.ctaUrl) || '#';
+  const sectionClass = fieldValues.sectionClass || 'about-section';
 
   return (
-    <div className="about-section" id={sectionId} data-about-id={moduleId}>
+    <div className={sectionClass} id={sectionId} data-about-id={moduleId}>
       <div className="container">
         <div className="about-inner">
           <div className="row align-items-flex-start">
@@ -199,6 +200,12 @@ export const fields = (
       label="Section ID"
       default="about-area"
       helpText="ID for anchor links (e.g., #about-area). Leave empty for no ID."
+    />
+    <TextField
+      name="sectionClass"
+      label="Section CSS Class"
+      default="about-section"
+      helpText="Custom CSS class for this section. Default: about-section"
     />
   </ModuleFields>
 );

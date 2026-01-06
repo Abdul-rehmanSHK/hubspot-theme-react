@@ -25,9 +25,10 @@ export function Component({ fieldValues }) {
   const topImages = [...top, ...top];
   const bottomImages = [...bottom, ...bottom];
   const sectionId = fieldValues.sectionId || 'become-a-sponsor-or-exhibitor';
+  const sectionClass = fieldValues.sectionClass || 'announcements-area';
 
   return (
-    <div className="announcements-area" id={sectionId}>
+    <div className={sectionClass} id={sectionId}>
       <div className="container">
         <div className="logo-slider">
           <h2>{heading}</h2>
@@ -155,6 +156,12 @@ export const fields = (
       label="Section ID"
       default="become-a-sponsor-or-exhibitor"
       helpText="ID for anchor links (e.g., #become-a-sponsor-or-exhibitor). Leave empty for no ID."
+    />
+    <TextField
+      name="sectionClass"
+      label="Section CSS Class"
+      default="announcements-area"
+      helpText="Custom CSS class for this section. Default: announcements-area"
     />
   </ModuleFields>
 );
