@@ -100,7 +100,9 @@ export function Component({ fieldValues }) {
               // Set initial state - closed
               answerDiv.style.maxHeight = '0';
               answerDiv.style.overflow = 'hidden';
-              answerDiv.style.transition = 'max-height 0.3s ease-out, padding 0.3s ease-out';
+              answerDiv.style.paddingTop = '0';
+              answerDiv.style.paddingBottom = '0';
+              answerDiv.style.transition = 'max-height 0.3s ease-out, padding-top 0.3s ease-out, padding-bottom 0.3s ease-out';
               
               questionBtn.addEventListener('click', function() {
                 const isExpanded = this.getAttribute('aria-expanded') === 'true';
@@ -116,9 +118,12 @@ export function Component({ fieldValues }) {
                     if (otherBtn && otherAnswer && otherIcon) {
                       otherBtn.setAttribute('aria-expanded', 'false');
                       otherBtn.classList.remove('active');
-                      otherAnswer.style.maxHeight = '0';
-                      otherAnswer.style.paddingTop = '0';
-                      otherAnswer.style.paddingBottom = '0';
+                      // Use requestAnimationFrame to ensure smooth closing
+                      requestAnimationFrame(function() {
+                        otherAnswer.style.maxHeight = '0';
+                        otherAnswer.style.paddingTop = '0';
+                        otherAnswer.style.paddingBottom = '0';
+                      });
                       otherIcon.style.transform = 'rotate(0deg)';
                     }
                   }
@@ -128,9 +133,14 @@ export function Component({ fieldValues }) {
                   // Close this FAQ
                   this.setAttribute('aria-expanded', 'false');
                   this.classList.remove('active');
-                  answerDiv.style.maxHeight = '0';
-                  answerDiv.style.paddingTop = '0';
-                  answerDiv.style.paddingBottom = '0';
+                  
+                  // Use requestAnimationFrame to ensure smooth closing animation
+                  requestAnimationFrame(function() {
+                    answerDiv.style.maxHeight = '0';
+                    answerDiv.style.paddingTop = '0';
+                    answerDiv.style.paddingBottom = '0';
+                  });
+                  
                   if (icon) {
                     icon.style.transform = 'rotate(0deg)';
                   }
@@ -141,9 +151,13 @@ export function Component({ fieldValues }) {
                   
                   // Get the actual height of the content
                   const contentHeight = answerContent.scrollHeight;
-                  answerDiv.style.maxHeight = contentHeight + '%';
-                  answerDiv.style.paddingTop = '20px';
-                  answerDiv.style.paddingBottom = '20px';
+                  
+                  // Use requestAnimationFrame to ensure smooth opening animation
+                  requestAnimationFrame(function() {
+                    answerDiv.style.maxHeight = contentHeight + 'px';
+                    answerDiv.style.paddingTop = '20px';
+                    answerDiv.style.paddingBottom = '20px';
+                  });
                   
                   if (icon) {
                     icon.style.transform = 'rotate(180deg)';

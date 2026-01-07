@@ -4572,8 +4572,10 @@ a.transparent-btn.faq-cta-btn {
 .faq-answer {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease-out, padding 0.3s ease-out;
-  padding: 0 25px 0 0; 
+  transition: max-height 0.3s ease-out, padding-top 0.3s ease-out, padding-bottom 0.3s ease-out;
+  padding: 0 25px 0 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .faq-answer-content {
