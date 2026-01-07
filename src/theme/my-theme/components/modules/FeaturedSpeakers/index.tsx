@@ -73,7 +73,7 @@ export function Component({ fieldValues }) {
     <div className={sectionClass} id={sectionId} data-speakers-id={moduleId}>
       <div className="container">
         <div className="speakers-inner">
-          <div className="row justify-content-center align-items-baseline">
+          <div className="row">
             <div className="col-md-8">
               <div className="speakers-text">
                 <h2>{heading}</h2>

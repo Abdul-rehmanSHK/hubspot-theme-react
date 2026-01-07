@@ -154,8 +154,8 @@ export function Component({ fieldValues }) {
                   
                   // Use requestAnimationFrame to ensure smooth opening animation
                   requestAnimationFrame(function() {
-                    answerDiv.style.maxHeight = contentHeight + 'px';
-                    answerDiv.style.paddingTop = '20px';
+                    answerDiv.style.maxHeight = contentHeight + '100%';
+                    answerDiv.style.paddingTop = '0px';
                     answerDiv.style.paddingBottom = '20px';
                   });
                   
