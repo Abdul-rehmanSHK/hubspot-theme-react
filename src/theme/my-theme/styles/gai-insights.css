@@ -3346,6 +3346,263 @@ footer.footer::after {
   color: #666;
   font-size: 18px;
 }
+/* All Sessions Section Styles */
+.sessions-area {
+  position: relative;
+  background: #f8f5ee;
+  width: 100%;
+  overflow: hidden;
+  padding: 100px 0;
+}
+
+.sessions-area::before {
+  content: "";
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle at top left, #06C7EE 0%, #050d51 100%);
+  top: 0;
+  right: 0;
+  transform: translate(10%, -50%);
+  border-radius: 50%;
+  z-index: 0;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.sessions-area::after {
+  content: "";
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle at top left, #06C7EE 0%, #050d51 100%);
+  bottom: 0;
+  left: 0;
+  transform: translate(-20%, 50%);
+  border-radius: 50%;
+  z-index: 0;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.sessions-inner {
+  background: #fff !important;
+  color: #050d51 !important;
+  border-radius: 10px !important;
+  position: relative;
+  z-index: 99 !important;
+  padding: 60px 0px;
+  overflow: hidden;
+}
+
+.sessions-schedule-container {
+  margin-top: 40px;
+  position: relative;
+}
+
+.sessions-loading,
+.sessions-error {
+  text-align: center;
+  padding: 40px 20px;
+  color: #050d51;
+  font-size: 18px;
+}
+
+.sessions-table-wrapper {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 800px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.sessions-schedule-table {
+  width: 100%;
+  border-spacing: 0;
+  min-width: 800px;
+  position: relative;
+}
+
+.sessions-time-header {
+  width: 120px;
+  min-width: 120px;
+  background: #f8f5ee;
+  color: #050d51;
+  padding: 15px 10px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 16px;
+  position: sticky;
+  left: 0;
+  top: 0;
+  z-index: 15;
+  border-right: 2px solid #9f9f9f;
+  border-bottom: 2px solid #9f9f9f;
+}
+.sessions-area .speakers-text {
+    padding-left: 30px;
+}
+.sessions-room-header {
+  background: #f8f5ee;
+  color: #050d51;
+  padding: 10px 10px;
+  text-align: center;
+  min-width: 200px;
+  border-right: 1px solid #e0e0e0;
+  border-bottom: 2px solid #9f9f9f;
+  position: sticky;
+  top: 0;
+  z-index: 14;
+}
+
+/* Alternate room headers: 2nd, 4th, 6th columns (even positions after time column) get white background */
+.sessions-room-header:nth-child(2n+2) {
+  background: #fff;
+}
+
+.sessions-room-header:last-child {
+  border-right: none;
+}
+
+.sessions-time-row {
+  height: 120px;
+}
+
+.sessions-time-cell {
+  width: 120px;
+  min-width: 120px;
+  background: #f8f5ee;
+  padding: 0 10px;
+  text-align: center;
+  vertical-align: top;
+  border-right: 2px solid #9f9f9f;
+  position: sticky;
+  left: 0;
+  z-index: 13;
+  border-left: none;
+  border-top: none;
+  border-bottom: none;
+}
+
+/* Whole hour rows ONLY - show top border in time column (at whole hour position) */
+.sessions-time-cell-whole-hour {
+  border-top: 1px solid #e0e0e0 !important;
+  border-bottom: none !important;
+}
+
+/* Interval rows (15, 30, 45) - explicitly no border in time column */
+.sessions-time-cell-interval {
+  border-bottom: none !important;
+  border-top: none !important;
+}
+
+.sessions-time-label {
+  font-weight: 700;
+  font-size: 18px !important;
+  color: #050d51;
+  padding: 5px 0;
+  margin: 0;
+  font-size: 20px;
+}
+.sessions-time-label h3 {
+  font-weight: 700;
+  font-size: 14px;
+  color: #050d51;
+  margin: 0;
+  padding: 5px 0;
+}
+
+.sessions-room-name {
+  font-weight: 700;
+  font-size: 16px;
+  color: #050d51;
+  margin: 0;
+  padding: 0;
+}
+
+.sessions-room-header h3 {
+  font-weight: 700;
+  font-size: 18px !important;
+  color: #050d51;
+  margin: 0;
+  padding: 0;
+}
+
+
+.sessions-room-cell {
+  min-width: 200px;
+  padding: 0;
+  border-right: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  border-left: 1px solid #e0e0e0;
+  vertical-align: top;
+  position: relative;
+  background: #f8f5ee;
+  height: 120px;
+}
+
+/* Alternate room cells: 2nd, 4th, 6th columns (even positions after time column) get white background */
+.sessions-room-cell:nth-child(2n+2) {
+  background: #fff;
+}
+
+/* Ensure all room cells have bottom border for ALL time slots (whole hours AND intervals) */
+/* This ensures horizontal lines appear in room columns for all time slots, not just whole hours */
+.sessions-time-row .sessions-room-cell {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.sessions-room-cell:last-child {
+  border-right: none;
+}
+
+.sessions-session-box {
+  position: absolute;
+  background: #06C7EE;
+  color: #050d51;
+  border-radius: 4px;
+  padding: 0 12px;
+  margin: 0 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 5;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  box-sizing: border-box;
+}
+
+.sessions-session-box:hover {
+  background: #050d51;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transform: translateY(-2px);
+}
+
+.sessions-session-title {
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.3;
+    margin: 0;
+    padding: 10px 0 2px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+.sessions-session-time {
+  font-size: 14px;
+  font-weight: 400;
+  opacity: 0.8;
+  margin: 0;
+  padding: 0 0 4px 0;
+}
+
 /*---------------------------
          responsive
 ---------------------------*/
@@ -3452,6 +3709,40 @@ footer.footer{
 }
 
 @media (max-width:991px) {
+  .sessions-area {
+    padding: 70px 0;
+  }
+  
+  .sessions-inner {
+    padding: 50px 25px;
+  }
+  
+  .sessions-table-wrapper {
+    max-height: 600px;
+  }
+  
+  .sessions-time-header,
+  .sessions-time-cell {
+    width: 100px;
+    min-width: 100px;
+  }
+  
+  .sessions-room-header,
+  .sessions-room-cell {
+    min-width: 180px;
+  }
+  
+  .sessions-session-title {
+    font-size: 13px;
+  }
+  
+  .sessions-session-speakers {
+    font-size: 11px;
+  }
+  
+  .sessions-session-time {
+    font-size: 10px;
+  }
     .header {
     left: 15px;
     right: 15px;
@@ -4434,11 +4725,18 @@ h3 {
   .heading-div p {
     margin: 0 0 40px;
   }
-
+.help-area.inner .help-content
+ {
+    padding: 30px 15px 0px 15px;
+    min-height: auto;
+}
+.help-area.inner .contact-form {
+    padding: 30px 15px;
+}
   .about-content,
   .benefits-inner,
   .speakers-inner {
-    padding: 30px 10px;
+    padding: 30px 15px;
   }
         .snaps-area {
         padding: 40px 0px 0px;
@@ -4601,309 +4899,7 @@ footer.footer {
 .footer-bottom a {
     display: block;
 }
-
-}
-
-/* All Sessions Section Styles */
-.sessions-area {
-  position: relative;
-  background: #f8f5ee;
-  width: 100%;
-  overflow: hidden;
-  padding: 100px 0;
-}
-
-.sessions-area::before {
-  content: "";
-  position: absolute;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle at top left, #050d51 0%, #06C7EE 100%);
-  top: 0;
-  right: 0;
-  transform: translate(10%, -50%);
-  border-radius: 50%;
-  z-index: 0;
-  opacity: 0.9;
-  pointer-events: none;
-}
-
-.sessions-area::after {
-  content: "";
-  position: absolute;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle at top left, #050d51 0%, #06C7EE 100%);
-  bottom: 0;
-  left: 0;
-  transform: translate(-20%, 50%);
-  border-radius: 50%;
-  z-index: 0;
-  opacity: 0.9;
-  pointer-events: none;
-}
-
-.sessions-inner {
-  background: #fff !important;
-  color: #050d51 !important;
-  border-radius: 10px !important;
-  position: relative;
-  z-index: 99 !important;
-  padding: 60px 40px;
-  overflow: hidden;
-}
-
-.sessions-schedule-container {
-  margin-top: 40px;
-  position: relative;
-}
-
-.sessions-loading,
-.sessions-error {
-  text-align: center;
-  padding: 40px 20px;
-  color: #050d51;
-  font-size: 18px;
-}
-
-.sessions-table-wrapper {
-  overflow-x: auto;
-  overflow-y: auto;
-  max-height: 800px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  background: #fff;
-}
-
-.sessions-schedule-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  min-width: 800px;
-  position: relative;
-}
-
-.sessions-time-header {
-  width: 120px;
-  min-width: 120px;
-  background: #f8f5ee;
-  color: #050d51;
-  padding: 15px 10px;
-  text-align: center;
-  font-weight: 700;
-  font-size: 16px;
-  position: sticky;
-  left: 0;
-  top: 0;
-  z-index: 15;
-  border-right: 2px solid #06C7EE;
-  border-bottom: 2px solid #06C7EE;
-}
-
-.sessions-room-header {
-  background: #f8f5ee;
-  color: #050d51;
-  padding: 15px 20px;
-  text-align: center;
-  font-weight: 700;
-  font-size: 16px;
-  min-width: 200px;
-  border-right: 1px solid #e0e0e0;
-  border-bottom: 2px solid #06C7EE;
-  position: sticky;
-  top: 0;
-  z-index: 14;
-}
-
-/* Alternate room headers: 2nd, 4th, 6th columns (even positions after time column) get white background */
-.sessions-room-header:nth-child(2n+2) {
-  background: #fff;
-}
-
-.sessions-room-header:last-child {
-  border-right: none;
-}
-
-.sessions-time-row {
-  height: 120px;
-}
-
-.sessions-time-cell {
-  width: 120px;
-  min-width: 120px;
-  background: #f8f5ee;
-  padding: 0 10px;
-  text-align: center;
-  vertical-align: top;
-  border-right: 2px solid #06C7EE;
-  position: sticky;
-  left: 0;
-  z-index: 13;
-  border-left: none;
-  border-top: none;
-  border-bottom: none;
-}
-
-/* Whole hour rows ONLY - show top border in time column (at whole hour position) */
-.sessions-time-cell-whole-hour {
-  border-top: 1px solid #e0e0e0 !important;
-  border-bottom: none !important;
-}
-
-/* Interval rows (15, 30, 45) - explicitly no border in time column */
-.sessions-time-cell-interval {
-  border-bottom: none !important;
-  border-top: none !important;
-}
-
-.sessions-time-label {
-  font-weight: 700;
-  font-size: 14px;
-  color: #050d51;
-  padding: 5px 0;
-  margin: 0;
-}
-
-.sessions-time-label h3 {
-  font-weight: 700;
-  font-size: 14px;
-  color: #050d51;
-  margin: 0;
-  padding: 5px 0;
-}
-
-.sessions-room-name {
-  font-weight: 700;
-  font-size: 16px;
-  color: #050d51;
-  margin: 0;
-  padding: 0;
-}
-
-.sessions-room-header h3 {
-  font-weight: 700;
-  font-size: 16px;
-  color: #050d51;
-  margin: 0;
-  padding: 0;
-}
-
-
-.sessions-room-cell {
-  min-width: 200px;
-  padding: 0;
-  border-right: 1px solid #e0e0e0;
-  border-bottom: 1px solid #e0e0e0;
-  border-left: 1px solid #e0e0e0;
-  vertical-align: top;
-  position: relative;
-  background: #f8f5ee;
-  height: 120px;
-}
-
-/* Alternate room cells: 2nd, 4th, 6th columns (even positions after time column) get white background */
-.sessions-room-cell:nth-child(2n+2) {
-  background: #fff;
-}
-
-/* Ensure all room cells have bottom border for ALL time slots (whole hours AND intervals) */
-/* This ensures horizontal lines appear in room columns for all time slots, not just whole hours */
-.sessions-time-row .sessions-room-cell {
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.sessions-room-cell:last-child {
-  border-right: none;
-}
-
-.sessions-session-box {
-  position: absolute;
-  background: #06C7EE;
-  color: #050d51;
-  border-radius: 4px;
-  padding: 0 12px;
-  margin: 0 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 5;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  box-sizing: border-box;
-}
-
-.sessions-session-box:hover {
-  background: #050d51;
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  transform: translateY(-2px);
-}
-
-.sessions-session-title {
-  font-weight: 700;
-  font-size: 14px;
-  line-height: 1.3;
-  margin: 0;
-  padding: 4px 0 2px 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-
-.sessions-session-time {
-  font-size: 11px;
-  font-weight: 400;
-  opacity: 0.8;
-  margin: 0;
-  padding: 0 0 4px 0;
-}
-
-/* Responsive Sessions Section */
-@media (max-width: 991px) {
-  .sessions-area {
-    padding: 70px 0;
-  }
-  
-  .sessions-inner {
-    padding: 50px 25px;
-  }
-  
-  .sessions-table-wrapper {
-    max-height: 600px;
-  }
-  
-  .sessions-time-header,
-  .sessions-time-cell {
-    width: 100px;
-    min-width: 100px;
-  }
-  
-  .sessions-room-header,
-  .sessions-room-cell {
-    min-width: 180px;
-  }
-  
-  .sessions-session-title {
-    font-size: 13px;
-  }
-  
-  .sessions-session-speakers {
-    font-size: 11px;
-  }
-  
-  .sessions-session-time {
-    font-size: 10px;
-  }
-}
-
-@media (max-width: 767px) {
-  .sessions-area {
+ .sessions-area {
     padding: 50px 0;
   }
   
@@ -4954,7 +4950,5 @@ footer.footer {
   .sessions-session-time {
     font-size: 9px;
   }
+
 }
-
-
-
