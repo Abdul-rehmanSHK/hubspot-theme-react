@@ -70,7 +70,7 @@ export function Component({ fieldValues }) {
                       <h3>{benefit.title || ''}</h3>
                       {hasItems ? (
                         // If items exist, show list (list takes priority)
-                        <ul>
+                      <ul>
                           {items.map((item: string, itemIndex: number) => (
                             <li key={itemIndex}>{item}</li>
                           ))}
@@ -83,7 +83,7 @@ export function Component({ fieldValues }) {
                         <ul>
                           <li>No items added</li>
                         </ul>
-                      )}
+                        )}
                     </div>
                   );
                 })}

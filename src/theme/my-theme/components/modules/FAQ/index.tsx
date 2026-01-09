@@ -102,7 +102,8 @@ export function Component({ fieldValues }) {
               answerDiv.style.overflow = 'hidden';
               answerDiv.style.paddingTop = '0';
               answerDiv.style.paddingBottom = '0';
-              answerDiv.style.transition = 'max-height 0.3s ease-out, padding-top 0.3s ease-out, padding-bottom 0.3s ease-out';
+              // Use cubic-bezier for smoother animation, matching ease-out but smoother
+              answerDiv.style.transition = 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding-top 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
               
               questionBtn.addEventListener('click', function() {
                 const isExpanded = this.getAttribute('aria-expanded') === 'true';
@@ -116,15 +117,25 @@ export function Component({ fieldValues }) {
                     const otherIcon = otherItem.querySelector('.faq-icon i');
                     
                     if (otherBtn && otherAnswer && otherIcon) {
-                      otherBtn.setAttribute('aria-expanded', 'false');
-                      otherBtn.classList.remove('active');
-                      // Use requestAnimationFrame to ensure smooth closing
-                      requestAnimationFrame(function() {
-                        otherAnswer.style.maxHeight = '0';
-                        otherAnswer.style.paddingTop = '0';
-                        otherAnswer.style.paddingBottom = '0';
-                      });
-                      otherIcon.style.transform = 'rotate(0deg)';
+                      const isOtherExpanded = otherBtn.getAttribute('aria-expanded') === 'true';
+                      if (isOtherExpanded) {
+                        otherBtn.setAttribute('aria-expanded', 'false');
+                        otherBtn.classList.remove('active');
+                        
+                        // Get current height before closing for smooth transition
+                        const otherContentHeight = otherAnswer.scrollHeight;
+                        otherAnswer.style.maxHeight = otherContentHeight + 'px';
+                        // Force reflow to ensure the height is set
+                        otherAnswer.offsetHeight;
+                        
+                        // Now animate to closed state
+                        requestAnimationFrame(function() {
+                          otherAnswer.style.maxHeight = '0';
+                          otherAnswer.style.paddingTop = '0';
+                          otherAnswer.style.paddingBottom = '0';
+                        });
+                        otherIcon.style.transform = 'rotate(0deg)';
+                      }
                     }
                   }
                 });
@@ -133,6 +144,12 @@ export function Component({ fieldValues }) {
                   // Close this FAQ
                   this.setAttribute('aria-expanded', 'false');
                   this.classList.remove('active');
+                  
+                  // Get current height before closing for smooth transition
+                  const currentHeight = answerDiv.scrollHeight;
+                  answerDiv.style.maxHeight = currentHeight + 'px';
+                  // Force reflow to ensure the height is set
+                  answerDiv.offsetHeight;
                   
                   // Use requestAnimationFrame to ensure smooth closing animation
                   requestAnimationFrame(function() {
@@ -149,14 +166,34 @@ export function Component({ fieldValues }) {
                   this.setAttribute('aria-expanded', 'true');
                   this.classList.add('active');
                   
-                  // Get the actual height of the content
-                  const contentHeight = answerContent.scrollHeight;
+                  // Temporarily remove max-height restriction and set padding to measure actual total height
+                  answerDiv.style.maxHeight = 'none';
+                  answerDiv.style.overflow = 'visible';
+                  answerDiv.style.paddingTop = '15px';
+                  answerDiv.style.paddingBottom = '15px';
+                  
+                  // Force reflow to ensure browser calculates with padding
+                  void answerDiv.offsetHeight;
+                  
+                  // Get the actual scroll height including all padding (this accounts for content + padding)
+                  const totalHeight = answerDiv.scrollHeight;
+                  
+                  // Add 50px buffer to ensure padding is covered and answer is fully visible
+                  const finalHeight = totalHeight + 50;
+                  
+                  // Now reset for smooth animation start
+                  answerDiv.style.maxHeight = '0';
+                  answerDiv.style.overflow = 'hidden';
+                  answerDiv.style.paddingTop = '0';
+                  answerDiv.style.paddingBottom = '0';
+                  // Force reflow again to ensure browser registers the reset
+                  void answerDiv.offsetHeight;
                   
                   // Use requestAnimationFrame to ensure smooth opening animation
                   requestAnimationFrame(function() {
-                    answerDiv.style.maxHeight = contentHeight + '100%';
-                    answerDiv.style.paddingTop = '0px';
-                    answerDiv.style.paddingBottom = '20px';
+                    answerDiv.style.maxHeight = finalHeight + 'px';
+                    answerDiv.style.paddingTop = '15px';
+                    answerDiv.style.paddingBottom = '15px';
                   });
                   
                   if (icon) {
