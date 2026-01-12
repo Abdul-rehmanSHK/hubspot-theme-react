@@ -3583,14 +3583,21 @@ footer.footer::after {
 
 .sessions-table-wrapper {
   overflow-x: auto;
-  overflow-y: visible;
-  max-height: none;
+  overflow-y: hidden;
+  height: auto;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   background: #fff;
   /* Hide horizontal scrollbar */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
+  display: block;
+}
+
+.sessions-table-wrapper .sessions-schedule-table {
+  display: table;
+  width: 100%;
+  table-layout: auto;
 }
 
 /* Hide horizontal scrollbar for WebKit browsers (Chrome, Safari, Opera) */
@@ -3734,7 +3741,7 @@ footer.footer::after {
   border-bottom: 2px solid #9f9f9f;
 }
 
-.calendar-duplicate-table .sessions-room-header:nth-child(2n+2) {
+.calendar-duplicate-table .sessions-room-header:nth-child(2n+3) {
   background: #fff;
 }
 
@@ -3920,7 +3927,9 @@ footer.footer::after {
 }
 
 /* Alternate room headers: 2nd, 4th, 6th columns (even positions after time column) get white background */
-.sessions-room-header:nth-child(2n+2) {
+/* Time header is 1st child, so room headers start at 2nd child */
+/* We want 2nd room (3rd child), 4th room (5th child), 6th room (7th child) to be white */
+.sessions-room-header:nth-child(2n+3) {
   background: #fff;
 }
 
@@ -3946,6 +3955,7 @@ footer.footer::after {
   border-left: none;
   border-top: none;
   border-bottom: none;
+  height: 120px;
 }
 
 /* Whole hour rows ONLY - show top border in time column (at whole hour position) */
@@ -4006,7 +4016,9 @@ footer.footer::after {
 }
 
 /* Alternate room cells: 2nd, 4th, 6th columns (even positions after time column) get white background */
-.sessions-room-cell:nth-child(2n+2) {
+/* Time cell is 1st child, so room cells start at 2nd child */
+/* We want 2nd room (3rd child), 4th room (5th child), 6th room (7th child) to be white */
+.sessions-room-cell:nth-child(2n+3) {
   background: #fff;
 }
 
@@ -4266,6 +4278,52 @@ footer.footer::after {
   margin-bottom: 10px;
 }
 
+.session-detail-speaker-description {
+  font-size: 14px;
+  color: #ffffff;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.session-detail-speaker-description a {
+  color: #06C7EE;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.session-detail-speaker-description a:hover {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.session-detail-speaker-social {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  margin-top: 10px;
+}
+
+.session-detail-speaker-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid #06C7EE;
+  background: transparent;
+  color: #06C7EE;
+  border-radius: 50%;
+  font-size: 18px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.session-detail-speaker-social-link:hover {
+  background: #06C7EE;
+  color: #050d51;
+  transform: scale(1.1);
+}
+
 .session-detail-speaker-topics {
   display: flex;
   flex-wrap: wrap;
@@ -4397,7 +4455,8 @@ footer.footer{
   }
   
   .sessions-table-wrapper {
-    max-height: none;
+    overflow-y: hidden;
+    height: auto;
     /* Hide horizontal scrollbar */
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
@@ -5590,7 +5649,8 @@ footer.footer {
   }
   
   .sessions-table-wrapper {
-    max-height: none;
+    overflow-y: hidden;
+    height: auto;
     /* Hide horizontal scrollbar */
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */

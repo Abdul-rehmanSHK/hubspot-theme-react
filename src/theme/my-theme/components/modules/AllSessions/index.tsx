@@ -187,7 +187,10 @@ export function Component({ fieldValues }) {
                       src: row.values.image.url || '',
                       alt: row.values.image.altText || row.values?.name || 'Speaker'
                     } : null,
-                    topics: topics
+                    topics: topics,
+                    description: row.values?.description || '',
+                    linkedin_profile: row.values?.linkedin_profile || '',
+                    portfolio_site: row.values?.portfolio_site || ''
                   };
                 });
                 
@@ -1033,11 +1036,10 @@ export function Component({ fieldValues }) {
                   table.appendChild(tbody);
                   if (tableWrapper) {
                     tableWrapper.appendChild(table);
-                    
-                    // Initialize navigation arrows after table is rendered
-                    setTimeout(function() {
-                      initNavigationArrows();
-                    }, 100);
+                    // Ensure table displays correctly
+                    table.style.display = 'table';
+                    table.style.width = '100%';
+                    table.style.borderSpacing = '0';
                   }
                   
                   // Now place session boxes
@@ -1046,6 +1048,9 @@ export function Component({ fieldValues }) {
                   allRoomCells.forEach(function(cell) {
                     cell.style.position = 'relative';
                   });
+                  
+                  // Track maximum bottom position of all sessions
+                  let maxBottomPosition = 0;
                   
                   filteredSessions.forEach(function(session) {
                     const roomIndex = uniqueRooms.indexOf(session.room);
@@ -1058,6 +1063,12 @@ export function Component({ fieldValues }) {
                     const startCell = tbody.querySelector('td[data-room="' + session.room + '"][data-slot-index="' + startSlotIndex + '"]');
                     
                     if (!startCell) return;
+                    
+                    // Calculate bottom position of this session (top + height)
+                    const sessionBottom = position.top + position.height;
+                    if (sessionBottom > maxBottomPosition) {
+                      maxBottomPosition = sessionBottom;
+                    }
                     
                     // Create session box
                     const sessionBox = document.createElement('div');
@@ -1093,6 +1104,52 @@ export function Component({ fieldValues }) {
                     // Append to the starting cell
                     startCell.appendChild(sessionBox);
                   });
+                  
+                  // After all sessions are placed, calculate and set wrapper height
+                  if (tableWrapper) {
+                    setTimeout(function() {
+                      // Get actual header height
+                      const theadElement = table.querySelector('thead');
+                      const tbodyElement = table.querySelector('tbody');
+                      const theadHeight = theadElement ? theadElement.offsetHeight : 60;
+                      
+                      // Calculate required height: header + maximum session bottom position + padding
+                      // If no sessions, use time slots height as fallback
+                      let requiredHeight;
+                      if (maxBottomPosition > 0) {
+                        // Use the maximum bottom position of sessions, add header and padding
+                        requiredHeight = theadHeight + maxBottomPosition + 20; // 20px padding at bottom
+                      } else {
+                        // Fallback: use time slots height if no sessions
+                        requiredHeight = theadHeight + (timeSlots.length * slotHeight);
+                      }
+                      
+                      // Set explicit height to show all sessions without vertical scrolling
+                      tableWrapper.style.height = requiredHeight + 'px';
+                      tableWrapper.style.overflowY = 'hidden';
+                      tableWrapper.style.maxHeight = 'none';
+                      
+                      // Ensure table grows naturally to show all rows
+                      if (table) {
+                        table.style.height = 'auto';
+                        table.style.minHeight = requiredHeight + 'px';
+                        table.style.display = 'table';
+                      }
+                      if (tbodyElement) {
+                        tbodyElement.style.display = 'table-row-group';
+                        tbodyElement.style.height = 'auto';
+                      }
+                      
+                      // Force a reflow to ensure all rows are rendered and visible
+                      void tableWrapper.offsetHeight;
+                      void table.offsetHeight;
+                    }, 100);
+                    
+                    // Initialize navigation arrows after table is rendered
+                    setTimeout(function() {
+                      initNavigationArrows();
+                    }, 150);
+                  }
                 }
                 
                 // Render based on current view
@@ -1939,6 +1996,40 @@ export function Component({ fieldValues }) {
               initNavigationArrows();
             }, 1100);
             
+            // Helper function to strip HTML tags from text (for plain text)
+            function stripHtmlTags(html) {
+              if (!html) return '';
+              // Create a temporary div element
+              const tmp = document.createElement('div');
+              // Set the HTML content
+              tmp.innerHTML = html;
+              // Return the text content (automatically strips all HTML tags)
+              return tmp.textContent || tmp.innerText || '';
+            }
+            
+            // Helper function to remove only <span> tags while preserving other HTML (like links)
+            function removeSpanTags(html) {
+              if (!html) return '';
+              // Create a temporary div element
+              const tmp = document.createElement('div');
+              // Set the HTML content
+              tmp.innerHTML = html;
+              
+              // Find all span elements and replace them with their text content
+              const spans = tmp.querySelectorAll('span');
+              spans.forEach(function(span) {
+                const parent = span.parentNode;
+                // Replace span with its text content
+                while (span.firstChild) {
+                  parent.insertBefore(span.firstChild, span);
+                }
+                parent.removeChild(span);
+              });
+              
+              // Return the cleaned HTML
+              return tmp.innerHTML;
+            }
+            
             // Function to open session detail modal
             function openSessionDetailModal(session) {
               const modal = document.querySelector('#session-detail-modal-' + moduleId);
@@ -1946,8 +2037,14 @@ export function Component({ fieldValues }) {
               const content = document.querySelector('#session-detail-content-' + moduleId);
               const body = document.querySelector('#session-detail-body-' + moduleId);
               const closeBtn = document.querySelector('#session-detail-close-' + moduleId);
+              const headerTitle = document.querySelector('#session-detail-modal-' + moduleId + ' .session-detail-header h3');
               
               if (!modal || !body) return;
+              
+              // Update header title to show session title instead of "Session Details"
+              if (headerTitle && session.title) {
+                headerTitle.textContent = session.title;
+              }
               
               // Clear previous content
               body.innerHTML = '';
@@ -1958,17 +2055,12 @@ export function Component({ fieldValues }) {
               dateTimeDiv.textContent = formatDateTimeRange(session.start_time, session.end_time);
               body.appendChild(dateTimeDiv);
               
-              // Session title
-              const titleDiv = document.createElement('div');
-              titleDiv.className = 'session-detail-title';
-              titleDiv.textContent = session.title;
-              body.appendChild(titleDiv);
-              
-              // Session description
+              // Session description (strip HTML tags like <span>)
               if (session.description && session.description.trim()) {
                 const descDiv = document.createElement('div');
                 descDiv.className = 'session-detail-description';
-                descDiv.textContent = session.description;
+                // Strip HTML tags from description before displaying
+                descDiv.textContent = stripHtmlTags(session.description);
                 body.appendChild(descDiv);
               }
               
@@ -2043,11 +2135,54 @@ export function Component({ fieldValues }) {
                       speakerInfo.appendChild(nameDiv);
                     }
                     
+                    // Show description if available (richtext field from HubDB)
+                    if (speaker.description && speaker.description.trim()) {
+                      const descDiv = document.createElement('div');
+                      descDiv.className = 'session-detail-speaker-description';
+                      // Remove only <span> tags while preserving other HTML (like links)
+                      descDiv.innerHTML = removeSpanTags(speaker.description);
+                      speakerInfo.appendChild(descDiv);
+                    }
+                    
+                    // Legacy bio field (keep for backward compatibility)
                     if (speaker.bio) {
                       const bioDiv = document.createElement('div');
                       bioDiv.className = 'session-detail-speaker-bio';
                       bioDiv.textContent = speaker.bio;
                       speakerInfo.appendChild(bioDiv);
+                    }
+                    
+                    // Social media links (below description, above topics)
+                    if ((speaker.linkedin_profile && speaker.linkedin_profile.trim()) || 
+                        (speaker.portfolio_site && speaker.portfolio_site.trim())) {
+                      const socialDiv = document.createElement('div');
+                      socialDiv.className = 'session-detail-speaker-social';
+                      
+                      // LinkedIn link
+                      if (speaker.linkedin_profile && speaker.linkedin_profile.trim()) {
+                        const linkedinLink = document.createElement('a');
+                        linkedinLink.href = speaker.linkedin_profile;
+                        linkedinLink.target = '_blank';
+                        linkedinLink.rel = 'noopener noreferrer';
+                        linkedinLink.className = 'session-detail-speaker-social-link';
+                        linkedinLink.setAttribute('aria-label', 'LinkedIn Profile');
+                        linkedinLink.innerHTML = '<i class="fa-brands fa-linkedin"></i>';
+                        socialDiv.appendChild(linkedinLink);
+                      }
+                      
+                      // Portfolio site link
+                      if (speaker.portfolio_site && speaker.portfolio_site.trim()) {
+                        const portfolioLink = document.createElement('a');
+                        portfolioLink.href = speaker.portfolio_site;
+                        portfolioLink.target = '_blank';
+                        portfolioLink.rel = 'noopener noreferrer';
+                        portfolioLink.className = 'session-detail-speaker-social-link';
+                        portfolioLink.setAttribute('aria-label', 'Portfolio Site');
+                        portfolioLink.innerHTML = '<i class="fa-solid fa-globe"></i>';
+                        socialDiv.appendChild(portfolioLink);
+                      }
+                      
+                      speakerInfo.appendChild(socialDiv);
                     }
                     
                     if (speaker.topics && speaker.topics.length > 0) {
