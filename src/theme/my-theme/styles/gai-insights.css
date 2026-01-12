@@ -1775,7 +1775,7 @@ border-color: #050d51;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 9999;
+  z-index: 99999 !important;
   visibility: hidden;
   opacity: 0;
   transition: visibility 0.3s ease, opacity 0.3s ease;
@@ -1796,6 +1796,7 @@ border-color: #050d51;
   backdrop-filter: blur(4px);
   opacity: 0;
   transition: opacity 0.3s ease;
+  z-index: 1;
 }
 
 .topic-filter-side-panel.active .topic-filter-panel-overlay {
@@ -1817,6 +1818,7 @@ border-color: #050d51;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  z-index: 2;
 }
 
 .topic-filter-side-panel.active .topic-filter-panel-content {
@@ -1960,7 +1962,7 @@ border-color: #050d51;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 10000;
+  z-index: 99999 !important;
   visibility: hidden;
   opacity: 0;
   transition: visibility 0.3s ease, opacity 0.3s ease;
@@ -1981,6 +1983,7 @@ border-color: #050d51;
   backdrop-filter: blur(6px);
   opacity: 0;
   transition: opacity 0.3s ease;
+  z-index: 1;
 }
 
 .speaker-search-modal.active .speaker-search-overlay {
@@ -2001,6 +2004,7 @@ border-color: #050d51;
   flex-direction: column;
   overflow: hidden;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
 }
 
 .speaker-search-modal.active .speaker-search-content {
@@ -3395,6 +3399,177 @@ footer.footer::after {
   overflow: hidden;
 }
 
+.sessions-filters-row {
+  margin: 30px 0 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+  padding: 0 30px;
+  flex-wrap: wrap;
+}
+
+.sessions-filters-row .sessions-actions-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.sessions-filters-row .speaker-search-btn,
+.sessions-filters-row .topic-filter-btn {
+  height: 44px;
+  min-height: 44px;
+  padding: 10px 20px;
+  box-sizing: border-box;
+}
+
+.sessions-date-filter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.sessions-date-select {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: 2px solid #06C7EE;
+  border-radius: 5px;
+  background: transparent;
+  color: #06C7EE;
+  cursor: pointer;
+  min-width: 200px;
+  font-weight: 600;
+  height: 44px;
+  box-sizing: border-box;
+  text-transform: uppercase;
+  transition: all 0.3s ease-in-out;
+  font-family: inherit;
+}
+
+.sessions-date-select:hover {
+  background: #06C7EE;
+  color: #050d51;
+  border-color: #06C7EE;
+}
+
+.sessions-date-select:focus {
+  outline: none;
+  background: #06C7EE;
+  color: #050d51;
+  border-color: #06C7EE;
+}
+
+/* Time Range Slider Filter */
+.sessions-time-filter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1;
+  min-width: 300px;
+}
+
+.sessions-time-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  max-width: 600px;
+  background-color: transparent;
+  border: 2px solid #06C7EE;
+  border-radius: 5px;
+  padding: 10px 20px;
+  height: 44px;
+  box-sizing: border-box;
+  transition: all 0.3s ease-in-out;
+}
+
+.sessions-time-slider-container:hover {
+  background: #06C7EE;
+}
+
+.sessions-time-slider-container:hover .sessions-time-slider-label {
+  color: #050d51;
+}
+
+.sessions-time-slider-container:hover .sessions-time-slider-range {
+  background-color: #050d51;
+}
+
+.sessions-time-slider-container:hover .sessions-time-slider-handle {
+  border-color: #050d51;
+}
+
+.sessions-time-slider-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #050d51;
+  min-width: 70px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sessions-time-slider-wrapper {
+  flex: 1;
+  position: relative;
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.sessions-time-slider-track {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  background-color: #e0e0e0;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.sessions-time-slider-range {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  background-color: #06C7EE;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sessions-time-slider-handle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background-color: #fff;
+  border: 2px solid #06C7EE;
+  border-radius: 50%;
+  cursor: grab;
+  z-index: 2;
+  transition: transform 0.1s ease, border-color 0.1s ease;
+}
+
+.sessions-time-slider-handle:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  border-color: #050d51;
+}
+
+.sessions-time-slider-handle:active {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.15);
+  border-color: #050d51;
+}
+
+.sessions-time-slider-handle-min {
+  left: 0;
+}
+
+.sessions-time-slider-handle-max {
+  left: 100%;
+}
+
 .sessions-schedule-container {
   margin-top: 40px;
   position: relative;
@@ -3410,11 +3585,19 @@ footer.footer::after {
 
 .sessions-table-wrapper {
   overflow-x: auto;
-  overflow-y: auto;
-  max-height: 800px;
+  overflow-y: visible;
+  max-height: none;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   background: #fff;
+  /* Hide horizontal scrollbar */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide horizontal scrollbar for WebKit browsers (Chrome, Safari, Opera) */
+.sessions-table-wrapper::-webkit-scrollbar {
+  display: none;
 }
 
 .sessions-schedule-table {
@@ -3439,9 +3622,294 @@ footer.footer::after {
   z-index: 15;
   border-right: 2px solid #9f9f9f;
   border-bottom: 2px solid #9f9f9f;
+  box-sizing: border-box;
+}
+
+/* Navigation box with left/right arrows in time header */
+.sessions-nav-box {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #06C7EE;
+  border-radius: 8px;
+  background: #f8f5ee;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Ensure nav box in duplicate header matches exactly */
+.calendar-duplicate-table .sessions-nav-box {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.sessions-nav-arrow {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #06C7EE;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  position: relative;
+}
+
+.sessions-nav-arrow:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #06C7EE;
+}
+
+.sessions-nav-arrow:hover {
+  background: #06C7EE;
+  color: #050d51;
+}
+
+.sessions-nav-arrow:active {
+  background: #05a8c7;
+  color: #050d51;
+}
+
+.sessions-nav-arrow svg {
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+
+/* Duplicate calendar header that replaces page header */
+.calendar-duplicate-header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0;
+  right: 0;
+  z-index: 1000 !important;
+  background: #f8f5ee;
+  overflow: hidden !important;
+  display: block !important;
+  visibility: visible !important;
+  border-left: 2px solid #e0e0e0;
+  border-right: 2px solid #e0e0e0;
+}
+
+.calendar-duplicate-table {
+  width: 100%;
+  border-spacing: 0;
+  min-width: 800px;
+}
+
+/* Ensure nav box in duplicate header matches exactly */
+.calendar-duplicate-table .sessions-nav-box {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.calendar-duplicate-table .sessions-time-header {
+  width: 120px;
+  min-width: 120px;
+  background: #f8f5ee;
+  color: #050d51;
+  padding: 15px 10px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 16px;
+  border-right: 2px solid #9f9f9f;
+  border-bottom: 2px solid #9f9f9f;
+  box-sizing: border-box;
+}
+
+.calendar-duplicate-table .sessions-room-header {
+  background: #f8f5ee;
+  color: #050d51;
+  padding: 10px 10px;
+  text-align: center;
+  min-width: 200px;
+  border-right: 1px solid #e0e0e0;
+  border-bottom: 2px solid #9f9f9f;
+}
+
+.calendar-duplicate-table .sessions-room-header:nth-child(2n+2) {
+  background: #fff;
+}
+
+.calendar-duplicate-table .sessions-room-header h3 {
+  font-weight: 700;
+  font-size: 18px !important;
+  color: #050d51;
+  margin: 0;
+  padding: 0;
+}
+
+/* Responsive styles for duplicate header - Match real header exactly */
+@media (max-width: 991px) {
+  .calendar-duplicate-table {
+    min-width: 800px;
+  }
+  
+  .calendar-duplicate-table .sessions-time-header {
+    width: 100px;
+    min-width: 100px;
+  }
+  
+  .calendar-duplicate-table .sessions-room-header {
+    min-width: 180px;
+    padding: 10px 10px;
+    font-size: 14px;
+  }
+  
+  .calendar-duplicate-table .sessions-room-header h3 {
+    font-size: 14px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .calendar-duplicate-table {
+    min-width: 800px;
+  }
+  
+  .calendar-duplicate-table .sessions-time-header {
+    width: 80px;
+    min-width: 80px;
+    font-size: 12px;
+    padding: 12px 10px;
+    box-sizing: border-box;
+  }
+  
+  .calendar-duplicate-table .sessions-room-header {
+    min-width: 150px;
+    padding: 12px 10px;
+    font-size: 14px;
+  }
+  
+  .calendar-duplicate-table .sessions-room-header h3 {
+    font-size: 14px !important;
+  }
+  
+  /* Ensure nav box width matches exactly on mobile */
+  .calendar-duplicate-table .sessions-time-header .sessions-nav-box {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
 }
 .sessions-area .speakers-text {
-    padding-left: 30px;
+  padding: 0 30px;
+}
+
+.sessions-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.sessions-view-toggle {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.sessions-view-chip {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #050d51;
+  background: transparent;
+  border: 2px solid #06C7EE;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.sessions-view-chip:hover {
+  background: rgba(6, 199, 238, 0.1);
+  border-color: #050d51;
+}
+
+.sessions-view-chip.active {
+  background: #06C7EE;
+  color: #fff;
+  border-color: #06C7EE;
+}
+
+.sessions-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 30px;
+  padding: 20px 0;
+}
+
+.sessions-grid-card {
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 25px;
+  transition: all 0.3s ease;
+}
+
+.sessions-grid-card:hover {
+  border-color: #06C7EE;
+  box-shadow: 0 4px 12px rgba(6, 199, 238, 0.15);
+}
+
+.sessions-card-datetime {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+.sessions-card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #050d51;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+.sessions-card-speakers {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sessions-card-speaker-images {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.sessions-card-speaker-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e0e0e0;
+}
+
+.sessions-card-speaker-names {
+  font-size: 16px;
+  font-weight: 600;
+  color: #050d51;
+  margin-top: 5px;
+}
+
+.sessions-card-speaker-topics {
+  font-size: 14px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.sessions-grid-wrapper {
+  margin-top: 20px;
 }
 .sessions-room-header {
   background: #f8f5ee;
@@ -3718,7 +4186,10 @@ footer.footer{
   }
   
   .sessions-table-wrapper {
-    max-height: 600px;
+    max-height: none;
+    /* Hide horizontal scrollbar */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
   }
   
   .sessions-time-header,
@@ -4908,7 +5379,10 @@ footer.footer {
   }
   
   .sessions-table-wrapper {
-    max-height: 500px;
+    max-height: none;
+    /* Hide horizontal scrollbar */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
   }
   
   .sessions-time-header,
@@ -4951,4 +5425,256 @@ footer.footer {
     font-size: 9px;
   }
 
+}
+
+/* Session Detail Modal - Covers whole screen like search modal */
+.session-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 99999 !important;
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0.3s ease, opacity 0.3s ease;
+}
+
+.session-detail-modal.active {
+  visibility: visible;
+  opacity: 1;
+}
+
+.session-detail-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(5, 13, 81, 1);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.session-detail-modal.active .session-detail-overlay {
+  opacity: 1;
+}
+
+.session-detail-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  width: 95%;
+  max-width: 100%;
+  max-height: 85vh;
+  background: transparent;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+.session-detail-modal.active .session-detail-content {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.session-detail-header {
+  padding: 25px 0px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.session-detail-header h3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: capitalize;
+}
+
+.session-detail-close-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #06C7EE;
+  background: transparent;
+  color: #06C7EE;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.session-detail-close-btn:hover {
+  background: #06C7EE;
+  color: #050d51;
+}
+
+.session-detail-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 0;
+  background: transparent;
+}
+
+.session-detail-datetime {
+  font-size: 16px;
+  color: #06C7EE;
+  font-weight: 600;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.session-detail-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+.session-detail-description {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.session-detail-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+.session-detail-topics {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.session-detail-topics-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.session-detail-topic-tag {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #06C7EE;
+  color: #050d51;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.session-detail-speakers {
+  margin-bottom: 20px;
+}
+
+.session-detail-speakers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.session-detail-speaker-card {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.session-detail-speaker-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.session-detail-speaker-info {
+  flex: 1;
+}
+
+.session-detail-speaker-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.session-detail-speaker-bio {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.session-detail-speaker-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.session-detail-speaker-topic-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #06C7EE;
+  border: 1px solid #06C7EE;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Responsive styles for session detail modal */
+@media (max-width: 768px) {
+  .session-detail-content {
+    max-width: 100%;
+  }
+  
+  .session-detail-header {
+    padding: 15px 20px;
+  }
+  
+  .session-detail-header h3 {
+    font-size: 20px;
+  }
+  
+  .session-detail-body {
+    padding: 20px;
+  }
+  
+  .session-detail-title {
+    font-size: 24px;
+  }
+  
+  .session-detail-speaker-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .session-detail-speaker-image {
+    width: 100px;
+    height: 100px;
+  }
 }
