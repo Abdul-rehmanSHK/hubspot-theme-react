@@ -3353,7 +3353,7 @@ footer.footer::after {
 /* All Sessions Section Styles */
 .sessions-area {
   position: relative;
-  background: #f8f5ee;
+  background: #fff;
   width: 100%;
   overflow: hidden;
   padding: 100px 0;
@@ -3390,12 +3390,11 @@ footer.footer::after {
 }
 
 .sessions-inner {
-  background: #fff !important;
+  background: transparent !important;
   color: #050d51 !important;
-  border-radius: 10px !important;
+  border-radius: 0px !important;
   position: relative;
   z-index: 99 !important;
-  padding: 60px 0px;
   overflow: hidden;
 }
 
@@ -3405,7 +3404,6 @@ footer.footer::after {
   align-items: center;
   justify-content: flex-start;
   gap: 20px;
-  padding: 0 30px;
   flex-wrap: wrap;
 }
 
@@ -3799,10 +3797,6 @@ footer.footer::after {
     box-sizing: border-box;
   }
 }
-.sessions-area .speakers-text {
-  padding: 0 30px;
-}
-
 .sessions-header-row {
   display: flex;
   justify-content: space-between;
@@ -3817,23 +3811,24 @@ footer.footer::after {
 }
 
 .sessions-view-chip {
-  padding: 10px 20px;
+  padding: 12px 15px;
   font-size: 16px;
   font-weight: 600;
-  color: #050d51;
+  color: #06C7EE;
   background: transparent;
   border: 2px solid #06C7EE;
-  border-radius: 25px;
+  border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
+  text-transform: uppercase;
 }
-
-.sessions-view-chip:hover {
-  background: rgba(6, 199, 238, 0.1);
-  border-color: #050d51;
+.sessions-view-chip:hover
+ {
+    background: rgb(6 199 238);
+    border-color: #06c7ee;
+    color: #050d51;
 }
-
 .sessions-view-chip.active {
   background: #06C7EE;
   color: #fff;
@@ -4070,7 +4065,223 @@ footer.footer::after {
   margin: 0;
   padding: 0 0 4px 0;
 }
+/* Session Detail Modal - Covers whole screen like search modal */
+.session-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 99999 !important;
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0.3s ease, opacity 0.3s ease;
+}
 
+.session-detail-modal.active {
+  visibility: visible;
+  opacity: 1;
+}
+
+.session-detail-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(5, 13, 81, 1);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.session-detail-modal.active .session-detail-overlay {
+  opacity: 1;
+}
+
+.session-detail-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  width: 95%;
+  max-width: 100%;
+  max-height: 85vh;
+  background: transparent;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+.session-detail-modal.active .session-detail-content {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.session-detail-header {
+  padding: 25px 0px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.session-detail-header h3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: capitalize;
+}
+
+.session-detail-close-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #06C7EE;
+  background: transparent;
+  color: #06C7EE;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.session-detail-close-btn:hover {
+  background: #06C7EE;
+  color: #050d51;
+}
+
+.session-detail-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 0;
+  background: transparent;
+}
+
+.session-detail-datetime {
+  font-size: 16px;
+  color: #06C7EE;
+  font-weight: 600;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.session-detail-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+.session-detail-description {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.session-detail-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+.session-detail-topics {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.session-detail-topics-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.session-detail-topic-tag {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #06C7EE;
+  color: #050d51;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.session-detail-speakers {
+  margin-bottom: 20px;
+}
+
+.session-detail-speakers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.session-detail-speaker-card {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.session-detail-speaker-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.session-detail-speaker-info {
+  flex: 1;
+}
+
+.session-detail-speaker-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.session-detail-speaker-bio {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.session-detail-speaker-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.session-detail-speaker-topic-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #06C7EE;
+  border: 1px solid #06C7EE;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+}
 /*---------------------------
          responsive
 ---------------------------*/
@@ -5424,230 +5635,7 @@ footer.footer {
   .sessions-session-time {
     font-size: 9px;
   }
-
-}
-
-/* Session Detail Modal - Covers whole screen like search modal */
-.session-detail-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 99999 !important;
-  visibility: hidden;
-  opacity: 0;
-  transition: visibility 0.3s ease, opacity 0.3s ease;
-}
-
-.session-detail-modal.active {
-  visibility: visible;
-  opacity: 1;
-}
-
-.session-detail-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(5, 13, 81, 1);
-  backdrop-filter: blur(6px);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 1;
-}
-
-.session-detail-modal.active .session-detail-overlay {
-  opacity: 1;
-}
-
-.session-detail-content {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.9);
-  width: 95%;
-  max-width: 100%;
-  max-height: 85vh;
-  background: transparent;
-  box-shadow: none;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 2;
-}
-
-.session-detail-modal.active .session-detail-content {
-  transform: translate(-50%, -50%) scale(1);
-}
-
-.session-detail-header {
-  padding: 25px 0px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: transparent;
-  flex-shrink: 0;
-}
-
-.session-detail-header h3 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 700;
-  color: #fff;
-  text-transform: capitalize;
-}
-
-.session-detail-close-btn {
-  width: 40px;
-  height: 40px;
-  border: 2px solid #06C7EE;
-  background: transparent;
-  color: #06C7EE;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 18px;
-  transition: all 0.2s ease;
-}
-
-.session-detail-close-btn:hover {
-  background: #06C7EE;
-  color: #050d51;
-}
-
-.session-detail-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px 0;
-  background: transparent;
-}
-
-.session-detail-datetime {
-  font-size: 16px;
-  color: #06C7EE;
-  font-weight: 600;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.session-detail-title {
-  font-size: 32px;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 20px;
-  line-height: 1.3;
-}
-
-.session-detail-description {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.9);
-  line-height: 1.6;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.session-detail-label {
-  font-size: 18px;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 15px;
-}
-
-.session-detail-topics {
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.session-detail-topics-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.session-detail-topic-tag {
-  display: inline-block;
-  padding: 8px 16px;
-  background: #06C7EE;
-  color: #050d51;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.session-detail-speakers {
-  margin-bottom: 20px;
-}
-
-.session-detail-speakers-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.session-detail-speaker-card {
-  display: flex;
-  gap: 20px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.session-detail-speaker-image {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.session-detail-speaker-info {
-  flex: 1;
-}
-
-.session-detail-speaker-name {
-  font-size: 20px;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 10px;
-}
-
-.session-detail-speaker-bio {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.6;
-  margin-bottom: 10px;
-}
-
-.session-detail-speaker-topics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.session-detail-speaker-topic-tag {
-  display: inline-block;
-  padding: 4px 12px;
-  background: rgba(255, 255, 255, 0.2);
-  color: #06C7EE;
-  border: 1px solid #06C7EE;
-  border-radius: 15px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-/* Responsive styles for session detail modal */
-@media (max-width: 768px) {
-  .session-detail-content {
+    .session-detail-content {
     max-width: 100%;
   }
   
@@ -5677,4 +5665,5 @@ footer.footer {
     width: 100px;
     height: 100px;
   }
+
 }
