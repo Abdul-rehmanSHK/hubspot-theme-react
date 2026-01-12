@@ -101,6 +101,7 @@ export function Component({ fieldValues }) {
   const locationLine = fieldValues.locationLine || '';
   const ctaText = fieldValues.ctaText || '';
   const ctaUrl = getUrlWithHash(fieldValues.ctaUrl) || '#';
+  const ctaOpenInNewWindow = fieldValues.ctaOpenInNewWindow || false;
   const rawDownArrowUrl = getUrlWithHash(fieldValues.downArrowUrl);
   const downArrowUrl = (rawDownArrowUrl && rawDownArrowUrl !== '#') ? rawDownArrowUrl : '';
   
@@ -143,6 +144,21 @@ export function Component({ fieldValues }) {
   const hasVideo = hasVideoUrl || hasVideoFile;
   
   const videoTitle = fieldValues.videoTitle || '';
+  
+  // Handle image upload
+  const imageFile = fieldValues.imageFile;
+  let imageFileSrc = '';
+  
+  if (imageFile) {
+    if (typeof imageFile === 'string') {
+      imageFileSrc = imageFile;
+    } else if (typeof imageFile === 'object') {
+      // Try common property names
+      imageFileSrc = imageFile.src || imageFile.url || imageFile.href || imageFile.path || '';
+    }
+  }
+  
+  const hasImage = !!imageFileSrc;
 
   // Get background image from field or use default
   const bgImage = fieldValues.backgroundImage?.src || '/_hcms/themes/gai-world-2026-theme/assets/images/bg.jpg';
@@ -176,56 +192,71 @@ export function Component({ fieldValues }) {
                   </div>
                 )}
                 {ctaText && (
-                  <a href={ctaUrl} className="fill-btn">
+                  <a 
+                    href={ctaUrl} 
+                    className="fill-btn"
+                    {...(ctaOpenInNewWindow ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  >
                     {ctaText}
                   </a>
                 )}
               </div>
             </div>
             <div className="col-md-6">
-              {hasVideo && (
+              {(hasVideo || hasImage) && (
                 <div className="right-area">
                   <div className="banner-video">
-                    {hasVideoUrl ? (
-                      // Use URL (YouTube, Vimeo, or direct video file)
-                      isDirectVideo ? (
-                        // Direct video file from URL - use <video> tag
+                    {hasImage ? (
+                      // Image file upload - display image with same dimensions as video (priority over video)
+                      <img
+                        src={imageFileSrc}
+                        alt={fieldValues.imageAlt || 'Hero image'}
+                        width="625"
+                        height="380"
+                        style={{ width: '100%', height: 'auto', maxWidth: '625px', display: 'block' }}
+                      />
+                    ) : hasVideo ? (
+                      hasVideoUrl ? (
+                        // Use URL (YouTube, Vimeo, or direct video file)
+                        isDirectVideo ? (
+                          // Direct video file from URL - use <video> tag
+                          <video
+                            width="625"
+                            height="380"
+                            controls
+                            style={{ width: '100%', height: 'auto', maxWidth: '625px' }}
+                          >
+                            <source src={processedVideoUrl} type="video/mp4" />
+                            <source src={processedVideoUrl} type="video/ogg" />
+                            <source src={processedVideoUrl} type="video/webm" />
+                            Your browser does not support the video tag.
+                          </video>
+                        ) : (
+                          // Embed URL (YouTube, Vimeo, etc.) - use <iframe>
+                          <iframe
+                            width="625"
+                            height="380"
+                            src={processedVideoUrl}
+                            title={videoTitle || 'Video'}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                          />
+                        )
+                      ) : hasVideoFile ? (
+                        // File upload - use <video> tag
                         <video
                           width="625"
                           height="380"
                           controls
                           style={{ width: '100%', height: 'auto', maxWidth: '625px' }}
                         >
-                          <source src={processedVideoUrl} type="video/mp4" />
-                          <source src={processedVideoUrl} type="video/ogg" />
-                          <source src={processedVideoUrl} type="video/webm" />
+                          <source src={videoFileSrc} type="video/mp4" />
+                          <source src={videoFileSrc} type="video/ogg" />
+                          <source src={videoFileSrc} type="video/webm" />
                           Your browser does not support the video tag.
                         </video>
-                      ) : (
-                        // Embed URL (YouTube, Vimeo, etc.) - use <iframe>
-                        <iframe
-                          width="625"
-                          height="380"
-                          src={processedVideoUrl}
-                          title={videoTitle || 'Video'}
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          allowFullScreen
-                        />
-                      )
-                    ) : hasVideoFile ? (
-                      // File upload - use <video> tag
-                      <video
-                        width="625"
-                        height="380"
-                        controls
-                        style={{ width: '100%', height: 'auto', maxWidth: '625px' }}
-                      >
-                        <source src={videoFileSrc} type="video/mp4" />
-                        <source src={videoFileSrc} type="video/ogg" />
-                        <source src={videoFileSrc} type="video/webm" />
-                        Your browser does not support the video tag.
-                      </video>
+                      ) : null
                     ) : null}
                   </div>
                 </div>
@@ -736,6 +767,12 @@ export const fields = (
       label="CTA button URL"
       helpText="Link URL for the call-to-action button"
     />
+    <BooleanField
+      name="ctaOpenInNewWindow"
+      label="Open CTA in new window"
+      default={false}
+      helpText="Check this to open the CTA button link in a new window/tab"
+    />
     <UrlField
       name="downArrowUrl"
       label="Down arrow button URL"
@@ -783,6 +820,18 @@ export const fields = (
       required={false}
       helpText="Upload a video file (MP4, OGG, WEBM, etc.). Leave empty if using a URL. URL takes priority over file upload."
       acceptedFormats="video/*"
+    />
+    <FileField
+      name="imageFile"
+      label="Image File (optional)"
+      required={false}
+      helpText="Upload an image file (JPG, PNG, WEBP, etc.). Will be displayed in the same area as video with same dimensions (625x380). Image takes priority over video if both are provided."
+      acceptedFormats="image/*"
+    />
+    <TextField
+      name="imageAlt"
+      label="Image alt text"
+      helpText="Alternative text for the image (for accessibility). Leave empty for default."
     />
     <TextField
       name="videoTitle"
