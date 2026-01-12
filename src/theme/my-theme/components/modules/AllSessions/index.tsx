@@ -124,19 +124,20 @@ export function Component({ fieldValues }) {
             let searchQuery = ''; // Store search query
             
             // Helper function to format date and time for grid view: "Wed • Sep 3 • 9:30am - 10:30am"
-            function formatDateTimeRange(startTime, endTime) {
-              const startDate = new Date(startTime);
-              const endDate = new Date(endTime);
-              
-              // Format date part: "Wed • Sep 3"
-              const dateStr = startDate.toLocaleDateString("en-US", {
+            // dateTimestamp: timestamp from date.name (UTC, normalized to midnight)
+            // startTime: timestamp from start_time (UTC, used only for time)
+            // endTime: timestamp from end_time (UTC, used only for time)
+            function formatDateTimeRange(dateTimestamp, startTime, endTime) {
+              // Format date part from date.name timestamp (UTC)
+              const dateObj = new Date(dateTimestamp);
+              const dateStr = dateObj.toLocaleDateString("en-US", {
                 timeZone: "UTC",
                 weekday: "short",
                 month: "short",
                 day: "numeric"
               }).replace(",", "");
               
-              // Format time part: "9:30am - 10:30am" (PST)
+              // Format time part from start_time and end_time (UTC, used only for time)
               const startPST = getPSTTime(startTime);
               const endPST = getPSTTime(endTime);
               
@@ -237,7 +238,8 @@ export function Component({ fieldValues }) {
             
             // Helper function to get date timestamp from session (for comparison)
             function getDateTimestamp(session) {
-              // Get the date from the session's date field
+              // Get the date ONLY from the session's date field (date.name)
+              // NEVER use start_time for date - start_time is ONLY for time
               if (session.date) {
                 // If date is an array, get the first element
                 if (Array.isArray(session.date) && session.date.length > 0) {
@@ -257,8 +259,9 @@ export function Component({ fieldValues }) {
                   }
                 }
               }
-              // Fallback: use start_time to determine date (in UTC)
-              return normalizeToMidnightUTC(session.start_time);
+              // Return 0 if date is not available - DO NOT use start_time as fallback
+              // Date must come from date.name, time comes from start_time/end_time
+              return 0;
             }
             
             // Helper function to get PST hours and minutes from timestamp
@@ -294,6 +297,33 @@ export function Component({ fieldValues }) {
             function getMinutesFromStartOfDay(timestamp) {
               const pstTime = getPSTTime(timestamp);
               return pstTime.hours * 60 + pstTime.minutes;
+            }
+            
+            // Helper function to get time of day in minutes from start_time (UTC)
+            // This extracts ONLY the time portion (hours * 60 + minutes), completely ignoring the date
+            // Used for sorting sessions by time of day (9:15AM = 555 minutes, 5:15PM = 1035 minutes)
+            // This ensures 9:15AM comes before 5:15PM regardless of what date the timestamp contains
+            function getTimeOfDayInMinutes(timestamp) {
+              // getPSTTime now returns UTC time (hours and minutes only)
+              const utcTime = getPSTTime(timestamp);
+              // Convert to minutes from start of day (0-1439)
+              // Example: 9:15AM = 9*60 + 15 = 555 minutes
+              // Example: 5:15PM = 17*60 + 15 = 1035 minutes
+              return utcTime.hours * 60 + utcTime.minutes;
+            }
+            
+            // Helper function to sort sessions by time of day ONLY (not full timestamp)
+            // This ensures proper chronological ordering: 9:15AM comes before 5:15PM regardless of date
+            // Uses UTC time extraction to get only hours and minutes, ignoring date completely
+            function sortSessionsByTimeOfDay(sessions) {
+              if (!sessions || sessions.length === 0) return sessions;
+              return sessions.slice().sort(function(a, b) {
+                // Extract time of day in minutes (ignoring date) from start_time
+                const timeA = getTimeOfDayInMinutes(a.start_time);
+                const timeB = getTimeOfDayInMinutes(b.start_time);
+                // Sort ascending: earlier times first (9:15AM before 5:15PM)
+                return timeA - timeB;
+              });
             }
             
             // Helper function to get minutes from start of day (PST) for a timestamp (alias for consistency)
@@ -528,29 +558,49 @@ export function Component({ fieldValues }) {
               return estimate;
             }
             
-            // Generate time slots (whole hours + 15-minute intervals) in PST
+            // Generate time slots (whole hours + 15-minute intervals) in UTC
             function generateTimeSlots(minTime, maxTime) {
               const slots = [];
               
-              // Get PST times for min and max
-              const minPST = getPSTTime(minTime);
-              const maxPST = getPSTTime(maxTime);
+              // Get UTC times for min and max
+              const minDate = new Date(minTime);
+              const maxDate = new Date(maxTime);
+              const minUTC = {
+                hours: minDate.getUTCHours(),
+                minutes: minDate.getUTCMinutes()
+              };
+              const maxUTC = {
+                hours: maxDate.getUTCHours(),
+                minutes: maxDate.getUTCMinutes()
+              };
               
-              // Round down to nearest hour for start (in PST)
-              const startHour = minPST.hours;
+              // Round down to nearest hour for start (in UTC)
+              const startHour = minUTC.hours;
               
-              // Round up to nearest hour for end (in PST)
-              const endHour = maxPST.minutes > 0 ? maxPST.hours + 1 : maxPST.hours;
+              // Round up to nearest hour for end (in UTC)
+              const endHour = maxUTC.minutes > 0 ? maxUTC.hours + 1 : maxUTC.hours;
               
-              // Find the UTC timestamp for the start hour in PST
-              let currentSlot = findUTCTimestampForPST(minTime, startHour, 0);
+              // Create start slot at the beginning of the start hour in UTC
+              const startSlot = new Date(Date.UTC(
+                minDate.getUTCFullYear(),
+                minDate.getUTCMonth(),
+                minDate.getUTCDate(),
+                startHour,
+                0,
+                0,
+                0
+              ));
               
-              // Generate slots: iterate and check PST time
+              // Generate slots: iterate and check UTC time
+              let currentSlot = new Date(startSlot);
               while (true) {
-                const slotPST = getPSTTime(currentSlot.getTime());
+                const slotUTC = {
+                  hours: currentSlot.getUTCHours(),
+                  minutes: currentSlot.getUTCMinutes()
+                };
                 
                 // Stop if we've passed the end hour
-                if (slotPST.hours > endHour || (slotPST.hours === endHour && slotPST.minutes > 0)) {
+                if (slotUTC.hours > endHour || (slotUTC.hours === endHour && slotUTC.minutes > 0)) {
                   break;
                 }
                 
@@ -607,10 +657,9 @@ export function Component({ fieldValues }) {
               // Clear grid wrapper
               gridWrapper.innerHTML = '';
               
-              // Sort sessions by start time (minimum time first)
-              const sortedSessions = sessions.slice().sort(function(a, b) {
-                return a.start_time - b.start_time;
-              });
+              // Sort sessions by time of day only (not full timestamp)
+              // This ensures 9:15AM comes before 5:15PM regardless of date
+              const sortedSessions = sortSessionsByTimeOfDay(sessions);
               
               // Create grid container
               const gridContainer = document.createElement('div');
@@ -623,7 +672,9 @@ export function Component({ fieldValues }) {
                 // Date and time
                 const dateTimeDiv = document.createElement('div');
                 dateTimeDiv.className = 'sessions-card-datetime';
-                dateTimeDiv.textContent = formatDateTimeRange(session.start_time, session.end_time);
+                // Get date timestamp from date.name (not from start_time)
+                const sessionDateTs = getDateTimestamp(session);
+                dateTimeDiv.textContent = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
                 card.appendChild(dateTimeDiv);
                 
                 // Session title
@@ -1001,10 +1052,20 @@ export function Component({ fieldValues }) {
                     
                     // Time cell
                     const timeCell = document.createElement('td');
-                    const minutes = slot.getMinutes();
+                    // Use EXACTLY the same method as session boxes use to check slot times
+                    // Session boxes use: getPSTTime(timeSlots[i].getTime()) to find their slot
+                    // So we use the same method to check if this slot is at a whole hour
+                    const slotTime = getPSTTime(slot.getTime());
+                    const slotMinutes = slotTime.minutes;
+                    
+                    // Also check slot index modulo 4 as a fallback
+                    // Slots are generated at 15-minute intervals, so every 4th slot (0, 4, 8, 12...) is at a whole hour
+                    const isWholeHourByIndex = (slotIndex % 4 === 0);
+                    const isWholeHourByMinutes = (slotMinutes === 0);
                     
                     // Show time label only for whole hours (no labels for 15, 30, 45)
-                    if (minutes === 0) {
+                    // Use both checks to ensure we catch all whole hours
+                    if (isWholeHourByMinutes || isWholeHourByIndex) {
                       timeCell.className = 'sessions-time-cell sessions-time-cell-whole-hour';
                       // Don't add top border to first row
                       if (slotIndex === 0) {
@@ -1012,6 +1073,7 @@ export function Component({ fieldValues }) {
                       }
                       const timeLabel = document.createElement('h3');
                       timeLabel.className = 'sessions-time-label';
+                      // Use formatTime which uses getPSTTime to format the time (same as session boxes)
                       timeLabel.textContent = formatTime(slot.getTime());
                       timeCell.appendChild(timeLabel);
                     } else {
@@ -1049,10 +1111,18 @@ export function Component({ fieldValues }) {
                     cell.style.position = 'relative';
                   });
                   
+                  // CRITICAL: Sort sessions by time of day ONLY (not full timestamp) before rendering in calendar view
+                  // This ensures proper chronological ordering: 9:15AM comes before 5:15PM regardless of date
+                  // Uses UTC time extraction (hours * 60 + minutes) to compare only time portion, ignoring date completely
+                  // This matches the same sorting logic used in grid view for consistency
+                  // DO NOT use raw start_time timestamp - it includes date which causes incorrect ordering
+                  const sortedFilteredSessions = sortSessionsByTimeOfDay(filteredSessions);
+                  
                   // Track maximum bottom position of all sessions
                   let maxBottomPosition = 0;
                   
-                  filteredSessions.forEach(function(session) {
+                  // Process sessions in sorted order (earliest time first)
+                  sortedFilteredSessions.forEach(function(session) {
                     const roomIndex = uniqueRooms.indexOf(session.room);
                     if (roomIndex === -1) return;
                     
@@ -1113,18 +1183,24 @@ export function Component({ fieldValues }) {
                       const tbodyElement = table.querySelector('tbody');
                       const theadHeight = theadElement ? theadElement.offsetHeight : 60;
                       
-                      // Calculate required height: header + maximum session bottom position + padding
-                      // If no sessions, use time slots height as fallback
-                      let requiredHeight;
-                      if (maxBottomPosition > 0) {
-                        // Use the maximum bottom position of sessions, add header and padding
-                        requiredHeight = theadHeight + maxBottomPosition + 20; // 20px padding at bottom
-                      } else {
-                        // Fallback: use time slots height if no sessions
-                        requiredHeight = theadHeight + (timeSlots.length * slotHeight);
-                      }
+                      // Calculate required height based on ALL time slots (not just sessions)
+                      // This ensures the table is tall enough to show all time slots (up to 24 hours)
+                      // Each time slot is 120px high (slotHeight), representing 15 minutes
+                      // For 24 hours: 24 * 4 slots/hour * 120px = 11,520px
+                      const totalTimeSlotsHeight = timeSlots.length * slotHeight;
                       
-                      // Set explicit height to show all sessions without vertical scrolling
+                      // Also check if any session extends beyond the time slots
+                      // Add extra padding if sessions extend beyond calculated height
+                      const sessionBottomWithPadding = maxBottomPosition > 0 ? maxBottomPosition + 20 : 0;
+                      
+                      // Use the larger of: (1) all time slots height, or (2) session bottom position
+                      // This ensures we show all time slots AND any sessions that might extend
+                      const contentHeight = Math.max(totalTimeSlotsHeight, sessionBottomWithPadding);
+                      
+                      // Total required height: header + content + bottom padding
+                      const requiredHeight = theadHeight + contentHeight + 20; // 20px padding at bottom
+                      
+                      // Set explicit height to show all content without vertical scrolling
                       tableWrapper.style.height = requiredHeight + 'px';
                       tableWrapper.style.overflowY = 'hidden';
                       tableWrapper.style.maxHeight = 'none';
@@ -1191,10 +1267,9 @@ export function Component({ fieldValues }) {
               // Clear grid wrapper
               gridWrapper.innerHTML = '';
               
-              // Sort sessions by start time (minimum time first)
-              const sortedSessions = sessions.slice().sort(function(a, b) {
-                return a.start_time - b.start_time;
-              });
+              // Sort sessions by time of day only (not full timestamp)
+              // This ensures 9:15AM comes before 5:15PM regardless of date
+              const sortedSessions = sortSessionsByTimeOfDay(sessions);
               
               // Create grid container
               const gridContainer = document.createElement('div');
@@ -1207,7 +1282,9 @@ export function Component({ fieldValues }) {
                 // Date and time
                 const dateTimeDiv = document.createElement('div');
                 dateTimeDiv.className = 'sessions-card-datetime';
-                dateTimeDiv.textContent = formatDateTimeRange(session.start_time, session.end_time);
+                // Get date timestamp from date.name (not from start_time)
+                const sessionDateTs = getDateTimestamp(session);
+                dateTimeDiv.textContent = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
                 card.appendChild(dateTimeDiv);
                 
                 // Session title
@@ -1618,7 +1695,9 @@ export function Component({ fieldValues }) {
                       resultsHTML += '<div class="speaker-search-results-grid">';
                       
                       matchingSessions.forEach(function(session) {
-                        const dateTime = formatDateTimeRange(session.start_time, session.end_time);
+                        // Get date timestamp from date.name (not from start_time)
+                        const sessionDateTs = getDateTimestamp(session);
+                        const dateTime = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
                         resultsHTML += '<div class="speaker-search-result-card" data-session-id="' + session.id + '">' +
                           '<div class="team-info">' +
                           '<h4>' + (session.title || 'Untitled Session') + '</h4>' +
@@ -2050,9 +2129,11 @@ export function Component({ fieldValues }) {
               body.innerHTML = '';
               
               // Date and time (formatted like grid view)
+              // Get date timestamp from date.name (not from start_time)
+              const sessionDateTs = getDateTimestamp(session);
               const dateTimeDiv = document.createElement('div');
               dateTimeDiv.className = 'session-detail-datetime';
-              dateTimeDiv.textContent = formatDateTimeRange(session.start_time, session.end_time);
+              dateTimeDiv.textContent = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
               body.appendChild(dateTimeDiv);
               
               // Session description (strip HTML tags like <span>)

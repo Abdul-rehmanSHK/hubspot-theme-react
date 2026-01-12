@@ -3956,6 +3956,7 @@ footer.footer::after {
   border-top: none;
   border-bottom: none;
   height: 120px;
+  overflow: visible;
 }
 
 /* Whole hour rows ONLY - show top border in time column (at whole hour position) */
@@ -3972,11 +3973,13 @@ footer.footer::after {
 
 .sessions-time-label {
   font-weight: 700;
-  font-size: 18px !important;
-  color: #050d51;
+  font-size: 20px !important;
+  color: #050d51 !important;
   padding: 5px 0;
   margin: 0;
-  font-size: 20px;
+  display: block;
+  visibility: visible;
+  opacity: 1;
 }
 .sessions-time-label h3 {
   font-weight: 700;
@@ -4007,12 +4010,16 @@ footer.footer::after {
   min-width: 200px;
   padding: 0;
   border-right: 1px solid #e0e0e0;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0 !important;
   border-left: 1px solid #e0e0e0;
+  border-top: none !important;
   vertical-align: top;
   position: relative;
   background: #f8f5ee;
   height: 120px;
+  box-sizing: border-box;
+  /* Ensure borders are always visible */
+  border-collapse: separate;
 }
 
 /* Alternate room cells: 2nd, 4th, 6th columns (even positions after time column) get white background */
@@ -4024,8 +4031,9 @@ footer.footer::after {
 
 /* Ensure all room cells have bottom border for ALL time slots (whole hours AND intervals) */
 /* This ensures horizontal lines appear in room columns for all time slots, not just whole hours */
+/* Each row is 120px high, so borders create 15-minute interval lines (every 120px) */
 .sessions-time-row .sessions-room-cell {
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0 !important;
 }
 
 .sessions-room-cell:last-child {
