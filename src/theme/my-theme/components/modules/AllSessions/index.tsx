@@ -559,33 +559,34 @@ export function Component({ fieldValues }) {
             }
             
             // Generate time slots (whole hours + 15-minute intervals) in UTC
-            function generateTimeSlots(minTime, maxTime) {
+            // baseDateTimestamp: The date to use for slots (from date.name, normalized to midnight UTC)
+            // minTimeOfDay: Minimum time of day in minutes (0-1439) from start_time
+            // maxTimeOfDay: Maximum time of day in minutes (0-1439) from end_time
+            function generateTimeSlots(baseDateTimestamp, minTimeOfDay, maxTimeOfDay) {
               const slots = [];
               
-              // Get UTC times for min and max
-              const minDate = new Date(minTime);
-              const maxDate = new Date(maxTime);
-              const minUTC = {
-                hours: minDate.getUTCHours(),
-                minutes: minDate.getUTCMinutes()
-              };
-              const maxUTC = {
-                hours: maxDate.getUTCHours(),
-                minutes: maxDate.getUTCMinutes()
-              };
+              // Extract hours and minutes from time-of-day minutes
+              const startHour = Math.floor(minTimeOfDay / 60);
+              const startMinute = minTimeOfDay % 60;
+              const endHour = Math.floor(maxTimeOfDay / 60);
+              const endMinute = maxTimeOfDay % 60;
               
-              // Round down to nearest hour for start (in UTC)
-              const startHour = minUTC.hours;
+              // Round down to nearest hour for start
+              const slotStartHour = startHour;
               
-              // Round up to nearest hour for end (in UTC)
-              const endHour = maxUTC.minutes > 0 ? maxUTC.hours + 1 : maxUTC.hours;
+              // Round up to nearest hour for end
+              const slotEndHour = endMinute > 0 ? endHour + 1 : endHour;
               
-              // Create start slot at the beginning of the start hour in UTC
+              // Use the base date (from date.name) to create slots
+              // This ensures slots are on the correct date, not the date from start_time
+              const baseDate = new Date(baseDateTimestamp);
+              
+              // Create start slot at the beginning of the start hour on the base date
               const startSlot = new Date(Date.UTC(
-                minDate.getUTCFullYear(),
-                minDate.getUTCMonth(),
-                minDate.getUTCDate(),
-                startHour,
+                baseDate.getUTCFullYear(),
+                baseDate.getUTCMonth(),
+                baseDate.getUTCDate(),
+                slotStartHour,
                 0,
                 0,
                 0
@@ -600,7 +601,7 @@ export function Component({ fieldValues }) {
                 };
                 
                 // Stop if we've passed the end hour
-                if (slotUTC.hours > endHour || (slotUTC.hours === endHour && slotUTC.minutes > 0)) {
+                if (slotUTC.hours > slotEndHour || (slotUTC.hours === slotEndHour && slotUTC.minutes > 0)) {
                   break;
                 }
                 
@@ -661,11 +662,20 @@ export function Component({ fieldValues }) {
               // This ensures 9:15AM comes before 5:15PM regardless of date
               const sortedSessions = sortSessionsByTimeOfDay(sessions);
               
+              // Separate sessions with rooms from sessions without rooms
+              const sessionsWithRooms = sortedSessions.filter(function(session) {
+                return session.room && session.room !== 'Unknown Room';
+              });
+              const sessionsWithoutRooms = sortedSessions.filter(function(session) {
+                return !session.room || session.room === 'Unknown Room';
+              });
+              
               // Create grid container
               const gridContainer = document.createElement('div');
               gridContainer.className = 'sessions-grid-container';
               
-              sortedSessions.forEach(function(session) {
+              // Process sessions WITH rooms (normal grid cards)
+              sessionsWithRooms.forEach(function(session) {
                 const card = document.createElement('div');
                 card.className = 'sessions-grid-card';
                 
@@ -745,6 +755,36 @@ export function Component({ fieldValues }) {
                 card.addEventListener('click', function() {
                   openSessionDetailModal(session);
                 });
+                
+                gridContainer.appendChild(card);
+              });
+              
+              // Process sessions WITHOUT rooms (breaks - full width cards)
+              sessionsWithoutRooms.forEach(function(session) {
+                const card = document.createElement('div');
+                card.className = 'sessions-grid-card sessions-break-card';
+                // Make it full width
+                card.style.width = '100%';
+                card.style.gridColumn = '1 / -1';
+                // Make it un-clickable
+                card.style.cursor = 'default';
+                card.style.pointerEvents = 'none';
+                
+                // Date and time
+                const dateTimeDiv = document.createElement('div');
+                dateTimeDiv.className = 'sessions-card-datetime';
+                // Get date timestamp from date.name (not from start_time)
+                const sessionDateTs = getDateTimestamp(session);
+                dateTimeDiv.textContent = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
+                card.appendChild(dateTimeDiv);
+                
+                // Session title
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'sessions-card-title';
+                titleDiv.textContent = session.title;
+                card.appendChild(titleDiv);
+                
+                // No speakers for break sessions
                 
                 gridContainer.appendChild(card);
               });
@@ -961,24 +1001,46 @@ export function Component({ fieldValues }) {
                   return;
                 }
                 
-                // Find min and max times from filtered sessions
-                const allStartTimes = filteredSessions.map(function(s) { return s.start_time; });
-                const allEndTimes = filteredSessions.map(function(s) { return s.end_time; });
-                const minTime = Math.min.apply(null, allStartTimes);
-                const maxTime = Math.max.apply(null, allEndTimes);
+                // Get the base date for time slot generation (from date filter, not from start_time)
+                // This ensures time slots are generated for the correct date
+                const baseDateTimestamp = normalizedSelectedDate !== ALL_DAYS_VALUE 
+                  ? normalizedSelectedDate 
+                  : (filteredSessions.length > 0 ? getDateTimestamp(filteredSessions[0]) : Date.now());
                 
-                // Get unique rooms from filtered sessions
+                // Find min and max TIME OF DAY (not full timestamps) from filtered sessions
+                // Extract only hours and minutes from start_time/end_time, ignoring date
+                const allStartTimeOfDay = filteredSessions.map(function(s) { 
+                  return getTimeOfDayInMinutes(s.start_time); 
+                });
+                const allEndTimeOfDay = filteredSessions.map(function(s) { 
+                  return getTimeOfDayInMinutes(s.end_time); 
+                });
+                // Use different variable names to avoid conflict with global minTimeOfDay/maxTimeOfDay
+                const sessionMinTimeOfDay = Math.min.apply(null, allStartTimeOfDay);
+                const sessionMaxTimeOfDay = Math.max.apply(null, allEndTimeOfDay);
+                
+                // Get unique rooms from filtered sessions (exclude 'Unknown Room' and null/empty rooms)
                 const uniqueRooms = [];
                 const roomSet = new Set();
                 filteredSessions.forEach(function(session) {
-                  if (!roomSet.has(session.room)) {
+                  // Only add rooms that are not 'Unknown Room' and not null/empty
+                  if (session.room && session.room !== 'Unknown Room' && !roomSet.has(session.room)) {
                     roomSet.add(session.room);
                     uniqueRooms.push(session.room);
                   }
                 });
                 
-                // Generate time slots (needed for both views)
-                const timeSlots = generateTimeSlots(minTime, maxTime);
+                // Separate sessions with rooms from sessions without rooms
+                const sessionsWithRooms = filteredSessions.filter(function(session) {
+                  return session.room && session.room !== 'Unknown Room';
+                });
+                const sessionsWithoutRooms = filteredSessions.filter(function(session) {
+                  return !session.room || session.room === 'Unknown Room';
+                });
+                
+                // Generate time slots using base date (from date.name) and time-of-day ranges (from start_time/end_time)
+                // This ensures slots are on the correct date with correct time ranges
+                const timeSlots = generateTimeSlots(baseDateTimestamp, sessionMinTimeOfDay, sessionMaxTimeOfDay);
                 
                 // Only build table if calendar view is selected
                 if (currentView === 'calendar') {
@@ -1118,11 +1180,19 @@ export function Component({ fieldValues }) {
                   // DO NOT use raw start_time timestamp - it includes date which causes incorrect ordering
                   const sortedFilteredSessions = sortSessionsByTimeOfDay(filteredSessions);
                   
+                  // Separate sessions with rooms from sessions without rooms
+                  const sessionsWithRooms = sortedFilteredSessions.filter(function(session) {
+                    return session.room && session.room !== 'Unknown Room';
+                  });
+                  const sessionsWithoutRooms = sortedFilteredSessions.filter(function(session) {
+                    return !session.room || session.room === 'Unknown Room';
+                  });
+                  
                   // Track maximum bottom position of all sessions
                   let maxBottomPosition = 0;
                   
-                  // Process sessions in sorted order (earliest time first)
-                  sortedFilteredSessions.forEach(function(session) {
+                  // Process sessions WITH rooms (normal room-based sessions)
+                  sessionsWithRooms.forEach(function(session) {
                     const roomIndex = uniqueRooms.indexOf(session.room);
                     if (roomIndex === -1) return;
                     
@@ -1173,6 +1243,86 @@ export function Component({ fieldValues }) {
                     
                     // Append to the starting cell
                     startCell.appendChild(sessionBox);
+                  });
+                  
+                  // Process sessions WITHOUT rooms (breaks - full width across all room columns)
+                  sessionsWithoutRooms.forEach(function(session) {
+                    const position = calculateSessionPosition(session, timeSlots, slotHeight);
+                    const startSlotIndex = position.startSlotIndex;
+                    
+                    // Find the first room cell in the start slot row to attach the full-width box
+                    const firstRoomCell = tbody.querySelector('tr[data-slot-index="' + startSlotIndex + '"] td.sessions-room-cell:first-child');
+                    if (!firstRoomCell) return;
+                    
+                    // Calculate bottom position of this session (top + height)
+                    const sessionBottom = position.top + position.height;
+                    if (sessionBottom > maxBottomPosition) {
+                      maxBottomPosition = sessionBottom;
+                    }
+                    
+                    // Get the row to calculate proper positioning
+                    const row = firstRoomCell.parentElement;
+                    if (!row) return;
+                    
+                    // Calculate width: all room columns (sum of all room cell widths)
+                    let totalRoomWidth = 0;
+                    const roomCells = row.querySelectorAll('td.sessions-room-cell');
+                    roomCells.forEach(function(cell) {
+                      totalRoomWidth += cell.offsetWidth || 200; // Fallback to 200px if offsetWidth not available
+                    });
+                    
+                    // If we can't calculate from cells, use table width minus time column
+                    if (totalRoomWidth === 0) {
+                      const tableWidth = table.offsetWidth || 0;
+                      const timeColumnWidth = 120; // Time column is approximately 120px
+                      totalRoomWidth = tableWidth - timeColumnWidth;
+                    }
+                    
+                    // Get the first room cell's left position relative to the table wrapper
+                    const firstRoomCellRect = firstRoomCell.getBoundingClientRect();
+                    const tableWrapperRect = tableWrapper.getBoundingClientRect();
+                    const leftOffset = firstRoomCellRect.left - tableWrapperRect.left;
+                    
+                    // Create full-width session box (spans all room columns)
+                    const sessionBox = document.createElement('div');
+                    sessionBox.className = 'sessions-session-box sessions-break-box';
+                    sessionBox.style.position = 'absolute';
+                    sessionBox.style.top = position.top + 'px';
+                    sessionBox.style.left = leftOffset + 'px';
+                    sessionBox.style.width = totalRoomWidth + 'px';
+                    sessionBox.style.height = position.height + 'px';
+                    sessionBox.style.zIndex = '5';
+                    sessionBox.style.margin = '0';
+                    sessionBox.style.paddingTop = '0';
+                    sessionBox.style.paddingBottom = '0';
+                    // Make it un-clickable
+                    sessionBox.style.cursor = 'default';
+                    sessionBox.style.pointerEvents = 'none';
+                    
+                    // Add session title only (no time in the box, time will be shown in time column)
+                    const sessionTitle = document.createElement('div');
+                    sessionTitle.className = 'sessions-session-title';
+                    sessionTitle.textContent = session.title;
+                    sessionBox.appendChild(sessionTitle);
+                    
+                    // Append to table wrapper so it can span across all columns
+                    tableWrapper.appendChild(sessionBox);
+                    
+                    // Also add time to the time column for this slot
+                    const timeCell = tbody.querySelector('tr[data-slot-index="' + startSlotIndex + '"] td.sessions-time-cell');
+                    if (timeCell) {
+                      // Check if there's already a time label
+                      const existingTimeLabel = timeCell.querySelector('.sessions-time-label');
+                      const existingBreakTime = timeCell.querySelector('.sessions-break-time');
+                      
+                      // Only add if there's no existing break time for this session
+                      if (!existingBreakTime) {
+                        const breakTime = document.createElement('div');
+                        breakTime.className = 'sessions-break-time';
+                        breakTime.textContent = formatTime(session.start_time) + ' - ' + formatTime(session.end_time);
+                        timeCell.appendChild(breakTime);
+                      }
+                    }
                   });
                   
                   // After all sessions are placed, calculate and set wrapper height
@@ -1271,11 +1421,20 @@ export function Component({ fieldValues }) {
               // This ensures 9:15AM comes before 5:15PM regardless of date
               const sortedSessions = sortSessionsByTimeOfDay(sessions);
               
+              // Separate sessions with rooms from sessions without rooms
+              const sessionsWithRooms = sortedSessions.filter(function(session) {
+                return session.room && session.room !== 'Unknown Room';
+              });
+              const sessionsWithoutRooms = sortedSessions.filter(function(session) {
+                return !session.room || session.room === 'Unknown Room';
+              });
+              
               // Create grid container
               const gridContainer = document.createElement('div');
               gridContainer.className = 'sessions-grid-container';
               
-              sortedSessions.forEach(function(session) {
+              // Process sessions WITH rooms (normal grid cards)
+              sessionsWithRooms.forEach(function(session) {
                 const card = document.createElement('div');
                 card.className = 'sessions-grid-card';
                 
@@ -1355,6 +1514,36 @@ export function Component({ fieldValues }) {
                 card.addEventListener('click', function() {
                   openSessionDetailModal(session);
                 });
+                
+                gridContainer.appendChild(card);
+              });
+              
+              // Process sessions WITHOUT rooms (breaks - full width cards)
+              sessionsWithoutRooms.forEach(function(session) {
+                const card = document.createElement('div');
+                card.className = 'sessions-grid-card sessions-break-card';
+                // Make it full width
+                card.style.width = '100%';
+                card.style.gridColumn = '1 / -1';
+                // Make it un-clickable
+                card.style.cursor = 'default';
+                card.style.pointerEvents = 'none';
+                
+                // Date and time
+                const dateTimeDiv = document.createElement('div');
+                dateTimeDiv.className = 'sessions-card-datetime';
+                // Get date timestamp from date.name (not from start_time)
+                const sessionDateTs = getDateTimestamp(session);
+                dateTimeDiv.textContent = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
+                card.appendChild(dateTimeDiv);
+                
+                // Session title
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'sessions-card-title';
+                titleDiv.textContent = session.title;
+                card.appendChild(titleDiv);
+                
+                // No speakers for break sessions
                 
                 gridContainer.appendChild(card);
               });
