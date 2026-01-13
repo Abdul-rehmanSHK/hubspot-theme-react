@@ -49,9 +49,10 @@ export function Component({ fieldValues }) {
             {navItems.map((item, index) => {
               const linkUrl = getUrl(item.link);
               const openInNewWindow = item.openInNewWindow === true || item.openInNewWindow === 'true';
+              const isActive = item.active === true || item.active === 'true';
               
               return (
-                <li className={`nav-item ${index === 0 ? 'active' : ''}`} key={index}>
+                <li className={`nav-item ${isActive ? 'active' : ''}`} key={index}>
                   <a
                     className="nav-link"
                     href={linkUrl}
@@ -210,6 +211,12 @@ export const fields = (
           label="Open in new window"
           default={false}
           helpText="Check to open this link in a new tab/window"
+        />,
+        <BooleanField
+          name="active"
+          label="Active"
+          default={false}
+          helpText="Check to mark this navigation link as active"
         />,
       ]}
     />

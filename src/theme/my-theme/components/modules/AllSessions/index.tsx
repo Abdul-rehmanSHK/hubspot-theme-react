@@ -2322,7 +2322,13 @@ export function Component({ fieldValues }) {
               const sessionDateTs = getDateTimestamp(session);
               const dateTimeDiv = document.createElement('div');
               dateTimeDiv.className = 'session-detail-datetime';
-              dateTimeDiv.textContent = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
+              // Format date/time and append venue name if available
+              let dateTimeText = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
+              // Add venue name if session has a room (and it's not 'Unknown Room')
+              if (session.room && session.room !== 'Unknown Room') {
+                dateTimeText += ' • ' + session.room;
+              }
+              dateTimeDiv.textContent = dateTimeText;
               body.appendChild(dateTimeDiv);
               
               // Session description (strip HTML tags like <span>)
