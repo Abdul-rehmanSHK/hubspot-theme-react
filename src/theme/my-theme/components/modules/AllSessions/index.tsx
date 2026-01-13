@@ -662,22 +662,26 @@ export function Component({ fieldValues }) {
               // This ensures 9:15AM comes before 5:15PM regardless of date
               const sortedSessions = sortSessionsByTimeOfDay(sessions);
               
-              // Separate sessions with rooms from sessions without rooms
-              const sessionsWithRooms = sortedSessions.filter(function(session) {
-                return session.room && session.room !== 'Unknown Room';
-              });
-              const sessionsWithoutRooms = sortedSessions.filter(function(session) {
-                return !session.room || session.room === 'Unknown Room';
-              });
-              
               // Create grid container
               const gridContainer = document.createElement('div');
               gridContainer.className = 'sessions-grid-container';
               
-              // Process sessions WITH rooms (normal grid cards)
-              sessionsWithRooms.forEach(function(session) {
+              // Process ALL sessions in chronological order (maintains time-based ordering)
+              // Breaks will appear in their proper time position, not at the end
+              sortedSessions.forEach(function(session) {
+                // Check if this is a break session (no room assigned)
+                const isBreak = !session.room || session.room === 'Unknown Room';
+                
                 const card = document.createElement('div');
-                card.className = 'sessions-grid-card';
+                card.className = 'sessions-grid-card' + (isBreak ? ' sessions-break-card' : '');
+                
+                // If it's a break, make it full width and un-clickable
+                if (isBreak) {
+                  card.style.width = '100%';
+                  card.style.gridColumn = '1 / -1';
+                  card.style.cursor = 'default';
+                  card.style.pointerEvents = 'none';
+                }
                 
                 // Date and time
                 const dateTimeDiv = document.createElement('div');
@@ -693,8 +697,8 @@ export function Component({ fieldValues }) {
                 titleDiv.textContent = session.title;
                 card.appendChild(titleDiv);
                 
-                // Speaker images and names
-                if (session.speakerIds && session.speakerIds.length > 0) {
+                // Speaker images and names (only for non-break sessions)
+                if (!isBreak && session.speakerIds && session.speakerIds.length > 0) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers';
                   
@@ -749,42 +753,14 @@ export function Component({ fieldValues }) {
                   card.appendChild(speakersDiv);
                 }
                 
-                // Add click event to open session detail modal
-                card.style.cursor = 'pointer';
-                card.setAttribute('data-session-id', session.id);
-                card.addEventListener('click', function() {
-                  openSessionDetailModal(session);
-                });
-                
-                gridContainer.appendChild(card);
-              });
-              
-              // Process sessions WITHOUT rooms (breaks - full width cards)
-              sessionsWithoutRooms.forEach(function(session) {
-                const card = document.createElement('div');
-                card.className = 'sessions-grid-card sessions-break-card';
-                // Make it full width
-                card.style.width = '100%';
-                card.style.gridColumn = '1 / -1';
-                // Make it un-clickable
-                card.style.cursor = 'default';
-                card.style.pointerEvents = 'none';
-                
-                // Date and time
-                const dateTimeDiv = document.createElement('div');
-                dateTimeDiv.className = 'sessions-card-datetime';
-                // Get date timestamp from date.name (not from start_time)
-                const sessionDateTs = getDateTimestamp(session);
-                dateTimeDiv.textContent = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
-                card.appendChild(dateTimeDiv);
-                
-                // Session title
-                const titleDiv = document.createElement('div');
-                titleDiv.className = 'sessions-card-title';
-                titleDiv.textContent = session.title;
-                card.appendChild(titleDiv);
-                
-                // No speakers for break sessions
+                // Add click event to open session detail modal (only for non-break sessions)
+                if (!isBreak) {
+                  card.style.cursor = 'pointer';
+                  card.setAttribute('data-session-id', session.id);
+                  card.addEventListener('click', function() {
+                    openSessionDetailModal(session);
+                  });
+                }
                 
                 gridContainer.appendChild(card);
               });
@@ -1421,22 +1397,26 @@ export function Component({ fieldValues }) {
               // This ensures 9:15AM comes before 5:15PM regardless of date
               const sortedSessions = sortSessionsByTimeOfDay(sessions);
               
-              // Separate sessions with rooms from sessions without rooms
-              const sessionsWithRooms = sortedSessions.filter(function(session) {
-                return session.room && session.room !== 'Unknown Room';
-              });
-              const sessionsWithoutRooms = sortedSessions.filter(function(session) {
-                return !session.room || session.room === 'Unknown Room';
-              });
-              
               // Create grid container
               const gridContainer = document.createElement('div');
               gridContainer.className = 'sessions-grid-container';
               
-              // Process sessions WITH rooms (normal grid cards)
-              sessionsWithRooms.forEach(function(session) {
+              // Process ALL sessions in chronological order (maintains time-based ordering)
+              // Breaks will appear in their proper time position, not at the end
+              sortedSessions.forEach(function(session) {
+                // Check if this is a break session (no room assigned)
+                const isBreak = !session.room || session.room === 'Unknown Room';
+                
                 const card = document.createElement('div');
-                card.className = 'sessions-grid-card';
+                card.className = 'sessions-grid-card' + (isBreak ? ' sessions-break-card' : '');
+                
+                // If it's a break, make it full width and un-clickable
+                if (isBreak) {
+                  card.style.width = '100%';
+                  card.style.gridColumn = '1 / -1';
+                  card.style.cursor = 'default';
+                  card.style.pointerEvents = 'none';
+                }
                 
                 // Date and time
                 const dateTimeDiv = document.createElement('div');
@@ -1452,8 +1432,8 @@ export function Component({ fieldValues }) {
                 titleDiv.textContent = session.title;
                 card.appendChild(titleDiv);
                 
-                // Speaker images and names
-                if (session.speakerIds && session.speakerIds.length > 0) {
+                // Speaker images and names (only for non-break sessions)
+                if (!isBreak && session.speakerIds && session.speakerIds.length > 0) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers';
                   
@@ -1508,42 +1488,14 @@ export function Component({ fieldValues }) {
                   card.appendChild(speakersDiv);
                 }
                 
-                // Add click event to open session detail modal
-                card.style.cursor = 'pointer';
-                card.setAttribute('data-session-id', session.id);
-                card.addEventListener('click', function() {
-                  openSessionDetailModal(session);
-                });
-                
-                gridContainer.appendChild(card);
-              });
-              
-              // Process sessions WITHOUT rooms (breaks - full width cards)
-              sessionsWithoutRooms.forEach(function(session) {
-                const card = document.createElement('div');
-                card.className = 'sessions-grid-card sessions-break-card';
-                // Make it full width
-                card.style.width = '100%';
-                card.style.gridColumn = '1 / -1';
-                // Make it un-clickable
-                card.style.cursor = 'default';
-                card.style.pointerEvents = 'none';
-                
-                // Date and time
-                const dateTimeDiv = document.createElement('div');
-                dateTimeDiv.className = 'sessions-card-datetime';
-                // Get date timestamp from date.name (not from start_time)
-                const sessionDateTs = getDateTimestamp(session);
-                dateTimeDiv.textContent = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
-                card.appendChild(dateTimeDiv);
-                
-                // Session title
-                const titleDiv = document.createElement('div');
-                titleDiv.className = 'sessions-card-title';
-                titleDiv.textContent = session.title;
-                card.appendChild(titleDiv);
-                
-                // No speakers for break sessions
+                // Add click event to open session detail modal (only for non-break sessions)
+                if (!isBreak) {
+                  card.style.cursor = 'pointer';
+                  card.setAttribute('data-session-id', session.id);
+                  card.addEventListener('click', function() {
+                    openSessionDetailModal(session);
+                  });
+                }
                 
                 gridContainer.appendChild(card);
               });
