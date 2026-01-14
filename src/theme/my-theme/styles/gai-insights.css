@@ -5793,7 +5793,7 @@ footer.footer {
         align-items: stretch;
         gap: 1.5rem;
     }
-    .newsletter-form input {
+.newsletter-form input {
         width: 100%;
         text-align: center;
         padding: 10px 0;

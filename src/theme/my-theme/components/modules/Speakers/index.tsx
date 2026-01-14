@@ -2,8 +2,8 @@ import {
   ModuleFields,
   TextField,
   UrlField,
+  BooleanField,
 } from '@hubspot/cms-components/fields';
-import { useState, useEffect } from 'react';
 
 export function Component({ fieldValues }) {
   const heading = fieldValues.heading || 'Past Speakers';
@@ -19,51 +19,16 @@ export function Component({ fieldValues }) {
 
   const linkText = fieldValues.linkText || '';
   const linkUrl = getUrl(fieldValues.linkUrl) || '#';
-  const ctaText = fieldValues.ctaText || 'All 2025 Speakers';
+  const ctaText = fieldValues.ctaText || '';
   const ctaUrl = getUrl(fieldValues.ctaUrl) || '#';
   
   // HubDB API configuration
   const portalId = '39650877';
   const tableId = '146265866'; // past_speakers table ID
   
-  // State for HubDB data - initialize as empty, will be populated by script
-  const [speakers, setSpeakers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Fetch speakers from HubDB using useEffect (fallback if hooks work)
-  useEffect(() => {
-    // This will only run if React hooks are supported in HubSpot environment
-    const fetchSpeakers = async () => {
-      try {
-        const apiUrl = `https://api.hubapi.com/cms/v3/hubdb/tables/${tableId}/rows?portalId=${portalId}`;
-        const response = await fetch(apiUrl);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        const transformedSpeakers = (data.results || []).map((row: any) => ({
-          speakerName: row.values?.name || '',
-          title: row.values?.title || '',
-          company: row.values?.company || '',
-          image: row.values?.image ? {
-            src: row.values.image.url || '',
-            alt: row.values.image.altText || row.values?.name || 'Speaker'
-          } : null,
-        }));
-        
-        setSpeakers(transformedSpeakers);
-        setLoading(false);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load');
-        setLoading(false);
-      }
-    };
-
-    fetchSpeakers();
-  }, []);
+  // Filter options - handle BooleanField values (can be boolean, string "true"/"false", or undefined)
+  const showFeaturedFemales = fieldValues.showFeaturedFemales === true || fieldValues.showFeaturedFemales === 'true';
+  const showRoundtableLeaders = fieldValues.showRoundtableLeaders === true || fieldValues.showRoundtableLeaders === 'true';
 
   const moduleId = `speakers-${fieldValues.moduleInstanceId || Math.random().toString(36).slice(2)}`;
   const sectionId = fieldValues.sectionId || 'previous-speakers-attendees';
@@ -84,11 +49,13 @@ export function Component({ fieldValues }) {
                 )}
               </div>
             </div>
-            <div className="col-md-4">
-                        <div className="speakers-btn">
-                            <a href={ctaUrl} className="transparent-btn speakers-cta-btn">{ctaText}</a>
-                          </div>
-            </div>
+            {ctaText && (
+              <div className="col-md-4">
+                <div className="speakers-btn">
+                  <a href={ctaUrl} className="transparent-btn speakers-cta-btn">{ctaText}</a>
+                </div>
+              </div>
+            )}
           </div>
           {/* Speakers will be loaded via JavaScript script below */}
           <div className="speaker-slider swiper">
@@ -127,11 +94,21 @@ export function Component({ fieldValues }) {
             const wrapper = root.querySelector('#speaker-wrapper-${moduleId}');
             const loadingDiv = root.querySelector('#speaker-loading-${moduleId}');
             const errorDiv = root.querySelector('#speaker-error-${moduleId}');
+            
+            // Filter settings from editor (passed as template variables)
+            const showFeaturedFemales = ${showFeaturedFemales};
+            const showRoundtableLeaders = ${showRoundtableLeaders};
+            
             let swiperInstance = null;
             
             // Fetch speakers from HubDB API
             async function fetchSpeakers() {
               try {
+                // Clear existing slides
+                if (wrapper) {
+                  wrapper.innerHTML = '';
+                }
+                
                 const apiUrl = 'https://api.hubapi.com/cms/v3/hubdb/tables/' + tableId + '/rows?portalId=' + portalId;
                 
                 const response = await fetch(apiUrl);
@@ -142,8 +119,17 @@ export function Component({ fieldValues }) {
                 
                 const data = await response.json();
                 
-                // Transform and render speakers
-                const speakers = (data.results || []).map(function(row) {
+                // Transform speakers with gender, featured, and leader
+                const allSpeakers = (data.results || []).map(function(row) {
+                  // Extract gender from row.values.gender (can be object with name property)
+                  const gender = row.values?.gender?.name || row.values?.gender || '';
+                  
+                  // Extract featured (can be 1/0 or true/false)
+                  const featured = row.values?.featured === 1 || row.values?.featured === true || row.values?.featured === '1';
+                  
+                  // Extract leader (can be 1/0 or true/false)
+                  const leader = row.values?.leader === 1 || row.values?.leader === true || row.values?.leader === '1';
+                  
                   return {
                     speakerName: row.values?.name || '',
                     title: row.values?.title || '',
@@ -151,11 +137,34 @@ export function Component({ fieldValues }) {
                     image: row.values?.image ? {
                       src: row.values.image.url || '',
                       alt: row.values.image.altText || row.values?.name || 'Speaker'
-                    } : null
+                    } : null,
+                    gender: gender.toLowerCase(),
+                    featured: featured,
+                    leader: leader
                   };
                 });
                 
-                if (speakers.length === 0) {
+                // Apply filter based on editor settings
+                let filteredSpeakers = allSpeakers;
+                
+                if (showFeaturedFemales) {
+                  // If "Show Featured Females" is checked, filter to female AND featured speakers
+                  filteredSpeakers = allSpeakers.filter(function(speaker) {
+                    return speaker.gender === 'female' && speaker.featured === true;
+                  });
+                } else if (showRoundtableLeaders) {
+                  // If "Show Roundtable Leaders" is checked, filter to leaders only
+                  filteredSpeakers = allSpeakers.filter(function(speaker) {
+                    return speaker.leader === true;
+                  });
+                } else {
+                  // Default: show featured speakers
+                  filteredSpeakers = allSpeakers.filter(function(speaker) {
+                    return speaker.featured === true;
+                  });
+                }
+                
+                if (filteredSpeakers.length === 0) {
                   loadingDiv.innerHTML = 'No speakers found';
                   loadingDiv.style.display = 'block';
                   return;
@@ -166,7 +175,7 @@ export function Component({ fieldValues }) {
                 errorDiv.style.display = 'none';
                 
                 // Render speakers
-                speakers.forEach(function(speaker, idx) {
+                filteredSpeakers.forEach(function(speaker, idx) {
                   const slide = document.createElement('div');
                   slide.className = 'swiper-slide';
                   
@@ -332,6 +341,18 @@ export const fields = (
       label="Heading"
       default="Past Speakers"
     />
+    <BooleanField
+      name="showFeaturedFemales"
+      label="Show Featured Females"
+      default={false}
+      helpText="Show only female speakers who are featured. Default: shows all featured speakers."
+    />
+    <BooleanField
+      name="showRoundtableLeaders"
+      label="Show Roundtable Leaders"
+      default={false}
+      helpText="Show only roundtable leaders (speakers with leader: 1). Default: shows all featured speakers."
+    />
     <TextField
       name="linkText"
       label="Link text"
@@ -346,7 +367,7 @@ export const fields = (
     <TextField
       name="ctaText"
       label="CTA button text"
-      default="All 2025 Speakers"
+      helpText="Leave empty to hide the CTA button"
     />
     <UrlField
       name="ctaUrl"

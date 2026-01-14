@@ -2,8 +2,8 @@ import {
   ModuleFields,
   TextField,
   UrlField,
+  BooleanField,
 } from '@hubspot/cms-components/fields';
-import { useState, useEffect } from 'react';
 
 export function Component({ fieldValues }) {
   const heading = fieldValues.heading || 'All Speakers';
@@ -27,44 +27,10 @@ export function Component({ fieldValues }) {
   const portalId = '39650877';
   const tableId = '146265866'; // past_speakers table ID
   
-  // State for HubDB data - initialize as empty, will be populated by script
-  const [speakers, setSpeakers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Fetch speakers from HubDB using useEffect (fallback if hooks work)
-  useEffect(() => {
-    // This will only run if React hooks are supported in HubSpot environment
-    const fetchSpeakers = async () => {
-      try {
-        const apiUrl = `https://api.hubapi.com/cms/v3/hubdb/tables/${tableId}/rows?portalId=${portalId}`;
-        const response = await fetch(apiUrl);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        const transformedSpeakers = (data.results || []).map((row: any) => ({
-          speakerName: row.values?.name || '',
-          title: row.values?.title || '',
-          company: row.values?.company || '',
-          image: row.values?.image ? {
-            src: row.values.image.url || '',
-            alt: row.values.image.altText || row.values?.name || 'Speaker'
-          } : null,
-        }));
-        
-        setSpeakers(transformedSpeakers);
-        setLoading(false);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load');
-        setLoading(false);
-      }
-    };
-
-    fetchSpeakers();
-  }, []);
+  // Filter options - handle BooleanField values (can be boolean, string "true"/"false", or undefined)
+  const showAllSpeakers = fieldValues.showAllSpeakers !== false && fieldValues.showAllSpeakers !== 'false';
+  const showFeaturedFemales = fieldValues.showFeaturedFemales === true || fieldValues.showFeaturedFemales === 'true';
+  const showRoundtableLeaders = fieldValues.showRoundtableLeaders === true || fieldValues.showRoundtableLeaders === 'true';
 
   const moduleId = `all-speakers-${fieldValues.moduleInstanceId || Math.random().toString(36).slice(2)}`;
   const sectionId = fieldValues.sectionId || 'all-speakers';
@@ -164,12 +130,31 @@ export function Component({ fieldValues }) {
             const loadingDiv = root.querySelector('#speaker-loading-${moduleId}');
             const errorDiv = root.querySelector('#speaker-error-${moduleId}');
             
+            // Filter settings from editor (passed as template variables)
+            const showAllSpeakers = ${showAllSpeakers};
+            const showFeaturedFemales = ${showFeaturedFemales};
+            const showRoundtableLeaders = ${showRoundtableLeaders};
+            
             // Store all speakers globally for search functionality
             let allSpeakersData = [];
             
             // Fetch ALL speakers from HubDB API (no filter - shows all featured and non-featured)
             async function fetchSpeakers() {
               try {
+                // Clear existing grid content before re-rendering
+                if (gridContainer) {
+                  gridContainer.innerHTML = '';
+                }
+                
+                // Show loading state
+                if (loadingDiv) {
+                  loadingDiv.style.display = 'block';
+                  loadingDiv.innerHTML = 'Loading speakers...';
+                }
+                if (errorDiv) {
+                  errorDiv.style.display = 'none';
+                }
+                
                 const apiUrl = 'https://api.hubapi.com/cms/v3/hubdb/tables/' + tableId + '/rows?portalId=' + portalId;
                 
                 const response = await fetch(apiUrl);
@@ -180,7 +165,7 @@ export function Component({ fieldValues }) {
                 
                 const data = await response.json();
                 
-                // Transform ALL speakers with topics
+                // Transform ALL speakers with topics and gender
                 const allSpeakers = (data.results || []).map(function(row) {
                   // Extract topic names from the topic array
                   const topics = (row.values?.topic || []).map(function(topicObj) {
@@ -188,6 +173,15 @@ export function Component({ fieldValues }) {
                   }).filter(function(name) {
                     return name && name.trim() !== '';
                   });
+                  
+                  // Extract gender from row.values.gender (can be object with name property)
+                  const gender = row.values?.gender?.name || row.values?.gender || '';
+                  
+                  // Extract featured (can be 1/0 or true/false)
+                  const featured = row.values?.featured === 1 || row.values?.featured === true || row.values?.featured === '1';
+                  
+                  // Extract leader (can be 1/0 or true/false)
+                  const leader = row.values?.leader === 1 || row.values?.leader === true || row.values?.leader === '1';
                   
                   return {
                     speakerName: row.values?.name || '',
@@ -197,87 +191,61 @@ export function Component({ fieldValues }) {
                       src: row.values.image.url || '',
                       alt: row.values.image.altText || row.values?.name || 'Speaker'
                     } : null,
-                    topics: topics
+                    topics: topics,
+                    gender: gender.toLowerCase(), // Normalize to lowercase for comparison
+                    featured: featured,
+                    leader: leader
                   };
                 });
                 
-                // Store speakers data globally for search
-                allSpeakersData = allSpeakers;
+                // Apply filter based on editor settings (mutually exclusive)
+                let filteredSpeakers = allSpeakers;
+                let skipTopicGrouping = false; // Flag to skip topic grouping for special filters
                 
-                if (allSpeakers.length === 0) {
+                if (showFeaturedFemales) {
+                  // If "Show Featured Females" is checked, filter to female AND featured speakers
+                  filteredSpeakers = allSpeakers.filter(function(speaker) {
+                    return speaker.gender === 'female' && speaker.featured === true;
+                  });
+                  skipTopicGrouping = true;
+                } else if (showRoundtableLeaders) {
+                  // If "Show Roundtable Leaders" is checked, filter to leaders only
+                  filteredSpeakers = allSpeakers.filter(function(speaker) {
+                    return speaker.leader === true;
+                  });
+                  skipTopicGrouping = true;
+                }
+                // If "Show All Speakers" is checked (or other filters are false), show all speakers
+                
+                // Store filtered speakers for search (so search only searches within displayed speakers)
+                allSpeakersData = filteredSpeakers;
+                
+                if (filteredSpeakers.length === 0) {
                   loadingDiv.innerHTML = 'No speakers found';
                   loadingDiv.style.display = 'block';
                   return;
                 }
                 
-                // Group speakers by topic and preserve API order
-                const topicMap = {};
-                const topicOrder = []; // Track order of topics as they appear in API response
-                
-                allSpeakers.forEach(function(speaker) {
-                  if (speaker.topics && speaker.topics.length > 0) {
-                    speaker.topics.forEach(function(topicName) {
-                      if (!topicMap[topicName]) {
-                        topicMap[topicName] = [];
-                        // Add to order array only when first encountered (preserves API order)
-                        topicOrder.push(topicName);
-                      }
-                      topicMap[topicName].push(speaker);
-                    });
+                // Hide/show topic filter button based on filter type
+                const topicFilterBtn = root.querySelector('#topic-filter-btn-${moduleId}');
+                if (topicFilterBtn) {
+                  if (skipTopicGrouping) {
+                    topicFilterBtn.style.display = 'none';
                   } else {
-                    // Speakers without topics go to "Other" category
-                    if (!topicMap['Other']) {
-                      topicMap['Other'] = [];
-                      topicOrder.push('Other');
-                    }
-                    topicMap['Other'].push(speaker);
+                    topicFilterBtn.style.display = '';
                   }
-                });
-                
-                // Use topics in the order they appeared in API response (no sorting)
-                const sortedTopics = topicOrder;
-                
-                // Populate side panel with topics
-                const panelList = root.querySelector('#topic-filter-list-${moduleId}');
-                if (panelList) {
-                  // Add "ALL" option first (set as active by default)
-                  const allItem = document.createElement('div');
-                  allItem.className = 'topic-filter-panel-item active';
-                  allItem.setAttribute('data-topic', 'all');
-                  allItem.innerHTML = '<span>ALL</span><span class="topic-count">(' + allSpeakers.length + ')</span>';
-                  panelList.appendChild(allItem);
-                  
-                  // Add each topic
-                  sortedTopics.forEach(function(topicName) {
-                    const topicItem = document.createElement('div');
-                    topicItem.className = 'topic-filter-panel-item';
-                    topicItem.setAttribute('data-topic', topicName);
-                    const speakerCount = topicMap[topicName] ? topicMap[topicName].length : 0;
-                    topicItem.innerHTML = '<span>' + topicName + '</span><span class="topic-count">(' + speakerCount + ')</span>';
-                    panelList.appendChild(topicItem);
-                  });
                 }
                 
                 // Hide loading, show speakers
                 loadingDiv.style.display = 'none';
                 errorDiv.style.display = 'none';
                 
-                // Render topics and speakers in grid layout
-                sortedTopics.forEach(function(topicName) {
-                  const topicSection = document.createElement('div');
-                  topicSection.className = 'topic-section';
-                  topicSection.setAttribute('data-topic', topicName);
-                  
-                  const topicHeading = document.createElement('h3');
-                  topicHeading.className = 'topic-heading';
-                  topicHeading.textContent = topicName;
-                  topicSection.appendChild(topicHeading);
-                  
+                if (skipTopicGrouping) {
+                  // Render speakers without topic grouping (for Featured Females and Roundtable Leaders)
                   const speakersGrid = document.createElement('div');
                   speakersGrid.className = 'speakers-grid';
                   
-                  const speakers = topicMap[topicName];
-                  speakers.forEach(function(speaker) {
+                  filteredSpeakers.forEach(function(speaker) {
                     const speakerCard = document.createElement('div');
                     speakerCard.className = 'speaker-card';
                     
@@ -298,9 +266,96 @@ export function Component({ fieldValues }) {
                     speakersGrid.appendChild(speakerCard);
                   });
                   
-                  topicSection.appendChild(speakersGrid);
-                  gridContainer.appendChild(topicSection);
-                });
+                  gridContainer.appendChild(speakersGrid);
+                } else {
+                  // Group speakers by topic and preserve API order (for All Speakers)
+                  const topicMap = {};
+                  const topicOrder = []; // Track order of topics as they appear in API response
+                  
+                  filteredSpeakers.forEach(function(speaker) {
+                    if (speaker.topics && speaker.topics.length > 0) {
+                      speaker.topics.forEach(function(topicName) {
+                        if (!topicMap[topicName]) {
+                          topicMap[topicName] = [];
+                          // Add to order array only when first encountered (preserves API order)
+                          topicOrder.push(topicName);
+                        }
+                        topicMap[topicName].push(speaker);
+                      });
+                    } else {
+                      // Speakers without topics go to "Other" category
+                      if (!topicMap['Other']) {
+                        topicMap['Other'] = [];
+                        topicOrder.push('Other');
+                      }
+                      topicMap['Other'].push(speaker);
+                    }
+                  });
+                  
+                  // Use topics in the order they appeared in API response (no sorting)
+                  const sortedTopics = topicOrder;
+                  
+                  // Populate side panel with topics
+                  const panelList = root.querySelector('#topic-filter-list-${moduleId}');
+                  if (panelList) {
+                    // Add "ALL" option first (set as active by default)
+                    const allItem = document.createElement('div');
+                    allItem.className = 'topic-filter-panel-item active';
+                    allItem.setAttribute('data-topic', 'all');
+                    allItem.innerHTML = '<span>ALL</span><span class="topic-count">(' + filteredSpeakers.length + ')</span>';
+                    panelList.appendChild(allItem);
+                    
+                    // Add each topic
+                    sortedTopics.forEach(function(topicName) {
+                      const topicItem = document.createElement('div');
+                      topicItem.className = 'topic-filter-panel-item';
+                      topicItem.setAttribute('data-topic', topicName);
+                      const speakerCount = topicMap[topicName] ? topicMap[topicName].length : 0;
+                      topicItem.innerHTML = '<span>' + topicName + '</span><span class="topic-count">(' + speakerCount + ')</span>';
+                      panelList.appendChild(topicItem);
+                    });
+                  }
+                  
+                  // Render topics and speakers in grid layout
+                  sortedTopics.forEach(function(topicName) {
+                    const topicSection = document.createElement('div');
+                    topicSection.className = 'topic-section';
+                    topicSection.setAttribute('data-topic', topicName);
+                    
+                    const topicHeading = document.createElement('h3');
+                    topicHeading.className = 'topic-heading';
+                    topicHeading.textContent = topicName;
+                    topicSection.appendChild(topicHeading);
+                    
+                    const speakersGrid = document.createElement('div');
+                    speakersGrid.className = 'speakers-grid';
+                    
+                    const speakers = topicMap[topicName];
+                    speakers.forEach(function(speaker) {
+                      const speakerCard = document.createElement('div');
+                      speakerCard.className = 'speaker-card';
+                      
+                      const imageSrc = speaker.image?.src || '';
+                      const imageAlt = speaker.image?.alt || speaker.speakerName || 'Speaker';
+                      
+                      speakerCard.innerHTML = '<div class="team-member">' +
+                        (imageSrc ? 
+                          '<img src="' + imageSrc + '" alt="' + imageAlt + '" />' :
+                          '<div style="width: 200px; height: 200px; border-radius: 50%; background: #06C7EE; display: flex; align-items: center; justify-content: center; color: #fff; margin: 0 auto;">No Image</div>'
+                        ) +
+                        '<div class="team-info">' +
+                        (speaker.speakerName ? '<h4>' + speaker.speakerName + '</h4>' : '') +
+                        (speaker.company ? '<p>' + speaker.company + '</p>' : '') +
+                        (speaker.title ? '<span>' + speaker.title + '</span>' : '') +
+                        '</div></div>';
+                      
+                      speakersGrid.appendChild(speakerCard);
+                    });
+                    
+                    topicSection.appendChild(speakersGrid);
+                    gridContainer.appendChild(topicSection);
+                  });
+                }
                 
                 // Initialize dropdown functionality
                 initTopicFilter();
@@ -510,6 +565,24 @@ export const fields = (
       name="heading"
       label="Heading"
       default="All Speakers"
+    />
+    <BooleanField
+      name="showAllSpeakers"
+      label="Show All Speakers"
+      default={true}
+      helpText="Show all speakers grouped by topics. Default: checked"
+    />
+    <BooleanField
+      name="showFeaturedFemales"
+      label="Show Featured Females"
+      default={false}
+      helpText="Show only female speakers who are featured. Speakers will not be grouped by topics."
+    />
+    <BooleanField
+      name="showRoundtableLeaders"
+      label="Show Roundtable Leaders"
+      default={false}
+      helpText="Show only roundtable leaders (speakers with leader: 1). Speakers will not be grouped by topics."
     />
     <TextField
       name="linkText"
