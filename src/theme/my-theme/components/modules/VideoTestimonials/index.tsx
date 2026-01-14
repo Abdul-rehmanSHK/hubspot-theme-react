@@ -594,24 +594,24 @@ export const fields = (
         />,
         <TextField
           name="personName"
-          label="Person Name"
-          required={true}
+          label="Person Name (optional)"
+          required={false}
           default="Whitney Bower"
-          helpText="Person's name"
+          helpText="Person's name. Leave empty to hide this field."
         />,
         <TextField
           name="company"
-          label="Company"
-          required={true}
+          label="Company (optional)"
+          required={false}
           default="Noble Rock Software"
-          helpText="Company name"
+          helpText="Company name. Leave empty to hide this field."
         />,
         <TextField
           name="jobTitle"
-          label="Job Title"
-          required={true}
+          label="Job Title (optional)"
+          required={false}
           default="Founder, Investor"
-          helpText="Job title/role"
+          helpText="Job title/role. Leave empty to hide this field."
         />,
       ]}
     />

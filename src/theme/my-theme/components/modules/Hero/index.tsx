@@ -170,9 +170,10 @@ export function Component({ fieldValues }) {
   };
 
   const sectionId = fieldValues.sectionId || '2025';
+  const sectionClass = fieldValues.sectionClass || 'hero';
 
   return (
-    <div className="hero" id={sectionId} style={heroStyle}>
+    <div className={sectionClass} id={sectionId} style={heroStyle}>
       <div className="container">
         <div className="hero-content">
           <div className="row g-5 align-items-center">
@@ -220,28 +221,28 @@ export function Component({ fieldValues }) {
                         // Use URL (YouTube, Vimeo, or direct video file)
                         isDirectVideo ? (
                           // Direct video file from URL - use <video> tag
-                          <video
-                            width="625"
-                            height="380"
-                            controls
-                            style={{ width: '100%', height: 'auto', maxWidth: '625px' }}
-                          >
+                      <video
+                        width="625"
+                        height="380"
+                        controls
+                        style={{ width: '100%', height: 'auto', maxWidth: '625px' }}
+                      >
                             <source src={processedVideoUrl} type="video/mp4" />
                             <source src={processedVideoUrl} type="video/ogg" />
                             <source src={processedVideoUrl} type="video/webm" />
-                            Your browser does not support the video tag.
-                          </video>
-                        ) : (
+                        Your browser does not support the video tag.
+                      </video>
+                    ) : (
                           // Embed URL (YouTube, Vimeo, etc.) - use <iframe>
-                          <iframe
-                            width="625"
-                            height="380"
+                      <iframe
+                        width="625"
+                        height="380"
                             src={processedVideoUrl}
-                            title={videoTitle || 'Video'}
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowFullScreen
-                          />
+                        title={videoTitle || 'Video'}
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
                         )
                       ) : hasVideoFile ? (
                         // File upload - use <video> tag
@@ -718,7 +719,7 @@ export function Component({ fieldValues }) {
               }
               
               // Clean up on unmount
-              const heroSection = document.querySelector('.hero[id="${sectionId}"]');
+              const heroSection = document.querySelector('[id="${sectionId}"]');
               if (heroSection) {
                 heroSection.addEventListener('cms:unmount', function() {
                   if (timeoutId) {
@@ -848,6 +849,12 @@ export const fields = (
       label="Section ID"
       default="2025"
       helpText="ID for anchor links (e.g., #2025). Leave empty for no ID."
+    />
+    <TextField
+      name="sectionClass"
+      label="Section CSS Class"
+      default="hero"
+      helpText="Custom CSS class for this section. Default: hero"
     />
   </ModuleFields>
 );

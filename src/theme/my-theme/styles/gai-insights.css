@@ -3987,9 +3987,61 @@ footer.footer::after {
   color: #050d51 !important;
   padding: 5px 0;
   margin: 0;
-  display: block;
-  visibility: visible;
-  opacity: 1;
+}
+
+/* Vertical line for simultaneous sessions (breakout sessions) */
+.sessions-breakout-line {
+  position: absolute;
+  width: 2px;
+  min-width: 2px;
+  background-color: #333;
+  z-index: 15;
+  pointer-events: none;
+  left: 50%;
+  transform: translateX(-50%);
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+/* Horizontal dashes at start and end of breakout line */
+.sessions-breakout-dash {
+  position: absolute;
+  background-color: #333;
+  z-index: 16;
+  pointer-events: none;
+  left: 50%;
+  transform: translateX(-50%);
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* BREAKOUT text label (rotated vertically) */
+.sessions-breakout-label {
+  position: absolute;
+  z-index: 17;
+  pointer-events: none;
+  left: 50%;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  color: #333;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 .sessions-time-label h3 {
   font-weight: 700;

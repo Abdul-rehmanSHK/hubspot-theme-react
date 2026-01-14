@@ -1301,6 +1301,195 @@ export function Component({ fieldValues }) {
                     }
                   });
                   
+                  // Identify simultaneous sessions (same start/end time in different rooms) and draw vertical lines
+                  // Group sessions by start_time and end_time (using UTC conversion for accurate comparison)
+                  const simultaneousSessionsMap = new Map();
+                  
+                  sessionsWithRooms.forEach(function(session) {
+                    // Use UTC time conversion for accurate comparison
+                    const startTimeKey = getTimeOfDayInMinutes(session.start_time);
+                    const endTimeKey = getTimeOfDayInMinutes(session.end_time);
+                    const timeKey = startTimeKey + '-' + endTimeKey;
+                    
+                    if (!simultaneousSessionsMap.has(timeKey)) {
+                      simultaneousSessionsMap.set(timeKey, []);
+                    }
+                    simultaneousSessionsMap.get(timeKey).push(session);
+                  });
+                  
+                  // Process each group of simultaneous sessions
+                  simultaneousSessionsMap.forEach(function(sessions, timeKey) {
+                    // Only draw lines if there are multiple sessions in different rooms
+                    if (sessions.length > 1) {
+                      // Check if sessions are in different rooms
+                      const uniqueRoomsInGroup = new Set();
+                      sessions.forEach(function(session) {
+                        if (session.room && session.room !== 'Unknown Room') {
+                          uniqueRoomsInGroup.add(session.room);
+                        }
+                      });
+                      
+                      // Only draw line if there are multiple different rooms
+                      if (uniqueRoomsInGroup.size > 1) {
+                        // Use the first session for time calculation (all have same start/end time)
+                        const referenceSession = sessions[0];
+                        const position = calculateSessionPosition(referenceSession, timeSlots, slotHeight);
+                        const startSlotIndex = position.startSlotIndex;
+                        
+                        // Find the time cell for this slot
+                        const timeCell = tbody.querySelector('tr[data-slot-index="' + startSlotIndex + '"] td.sessions-time-cell');
+                        if (timeCell && tableWrapper && table) {
+                          // Create the vertical line - use setTimeout to ensure table is fully rendered
+                          setTimeout(function() {
+                            // Ensure tableWrapper has position relative for absolute positioning
+                            const tableWrapperStyle = window.getComputedStyle(tableWrapper);
+                            if (tableWrapperStyle.position === 'static') {
+                              tableWrapper.style.position = 'relative';
+                            }
+                            
+                            // Get thead height for positioning calculation
+                            const theadElement = table.querySelector('thead');
+                            const theadHeight = theadElement ? theadElement.offsetHeight : 60;
+                            
+                            // Get time column header for width calculation
+                            const timeHeader = table.querySelector('th.sessions-time-header');
+                            if (timeHeader) {
+                            // Get the actual position by finding a room cell in the same row
+                            // Session boxes are positioned relative to room cells, so we use the same reference
+                            const timeRow = timeCell.parentElement;
+                            let absoluteTop = 0;
+                            
+                            if (timeRow && uniqueRooms.length > 0) {
+                              // Find a room cell in the same row to match session box positioning
+                              const roomCell = timeRow.querySelector('td.sessions-room-cell[data-slot-index="' + startSlotIndex + '"]');
+                              if (roomCell) {
+                                // Get the room cell's position - session boxes use this as their reference
+                                // Room cells are position: relative, and session boxes are position: absolute with top = position.top
+                                // So the absolute position from tableWrapper top is: room cell's top + position.top
+                                const roomCellRect = roomCell.getBoundingClientRect();
+                                const tableWrapperRect = tableWrapper.getBoundingClientRect();
+                                const roomCellTopRelativeToWrapper = roomCellRect.top - tableWrapperRect.top;
+                                // Add small fine-tuning offset to match session box positioning exactly
+                                // This accounts for any border/padding differences between time column and room columns
+                                // Fine-tune offset: adjust this value (in pixels) to perfectly align with session boxes
+                                const fineTuneOffset = 6; // Small adjustment in pixels for perfect alignment
+                                absoluteTop = roomCellTopRelativeToWrapper + position.top + fineTuneOffset;
+                              } else {
+                                // Fallback: use row's offsetTop
+                                const tbodyElement = table.querySelector('tbody');
+                                if (tbodyElement) {
+                                  absoluteTop = theadHeight + timeRow.offsetTop + position.top;
+                                } else {
+                                  absoluteTop = theadHeight + (startSlotIndex * slotHeight) + position.top;
+                                }
+                              }
+                            } else {
+                              // Fallback: calculate based on slot index
+                              absoluteTop = theadHeight + (startSlotIndex * slotHeight) + position.top;
+                            }
+                              
+                              // Get time column width from header
+                              const timeColumnWidth = timeHeader.offsetWidth || 120;
+                              
+                              // Position line at center of time column (time column starts at 0)
+                              const timeColumnCenter = timeColumnWidth / 2;
+                              
+                              // Verify height is valid (should be positive and reasonable)
+                              const lineHeight = position.height;
+                              
+                              // Create vertical line element
+                              const verticalLine = document.createElement('div');
+                              verticalLine.className = 'sessions-breakout-line';
+                              verticalLine.style.position = 'absolute';
+                              verticalLine.style.top = absoluteTop + 'px';
+                              verticalLine.style.left = timeColumnCenter + 'px';
+                              verticalLine.style.width = '2px';
+                              verticalLine.style.height = lineHeight + 'px';
+                              verticalLine.style.minHeight = lineHeight + 'px';
+                              verticalLine.style.backgroundColor = '#333';
+                              verticalLine.style.transform = 'translateX(-50%)';
+                              verticalLine.style.zIndex = '15';
+                              verticalLine.style.pointerEvents = 'none';
+                              verticalLine.style.display = 'block';
+                              verticalLine.style.visibility = 'visible';
+                              verticalLine.style.opacity = '1';
+                              verticalLine.style.boxSizing = 'border-box';
+                              verticalLine.style.margin = '0';
+                              verticalLine.style.padding = '0';
+                              
+                              // Create horizontal dash at the start (top) of the line
+                              const startDash = document.createElement('div');
+                              startDash.className = 'sessions-breakout-dash sessions-breakout-dash-start';
+                              startDash.style.position = 'absolute';
+                              startDash.style.top = absoluteTop + 'px';
+                              startDash.style.left = timeColumnCenter + 'px';
+                              startDash.style.width = '12px';
+                              startDash.style.height = '2px';
+                              startDash.style.backgroundColor = '#333';
+                              startDash.style.transform = 'translateX(-50%)';
+                              startDash.style.zIndex = '16';
+                              startDash.style.pointerEvents = 'none';
+                              startDash.style.display = 'block';
+                              startDash.style.visibility = 'visible';
+                              startDash.style.opacity = '1';
+                              startDash.style.boxSizing = 'border-box';
+                              startDash.style.margin = '0';
+                              startDash.style.padding = '0';
+                              
+                              // Create horizontal dash at the end (bottom) of the line
+                              const endDash = document.createElement('div');
+                              endDash.className = 'sessions-breakout-dash sessions-breakout-dash-end';
+                              endDash.style.position = 'absolute';
+                              endDash.style.top = (absoluteTop + lineHeight) + 'px';
+                              endDash.style.left = timeColumnCenter + 'px';
+                              endDash.style.width = '12px';
+                              endDash.style.height = '2px';
+                              endDash.style.backgroundColor = '#333';
+                              endDash.style.transform = 'translateX(-50%) translateY(-100%)';
+                              endDash.style.zIndex = '16';
+                              endDash.style.pointerEvents = 'none';
+                              endDash.style.display = 'block';
+                              endDash.style.visibility = 'visible';
+                              endDash.style.opacity = '1';
+                              endDash.style.boxSizing = 'border-box';
+                              endDash.style.margin = '0';
+                              endDash.style.padding = '0';
+                              
+                              // Create "BREAKOUT" text label in the middle of the vertical line (rotated vertically)
+                              const breakoutLabel = document.createElement('div');
+                              breakoutLabel.className = 'sessions-breakout-label';
+                              breakoutLabel.textContent = 'BREAKOUT';
+                              breakoutLabel.style.position = 'absolute';
+                              // Position in the middle of the vertical line
+                              breakoutLabel.style.top = (absoluteTop + (lineHeight / 2)) + 'px';
+                              breakoutLabel.style.left = timeColumnCenter + 'px';
+                              breakoutLabel.style.transform = 'translateX(-50%) translateY(-50%) rotate(-90deg)';
+                              breakoutLabel.style.zIndex = '17';
+                              breakoutLabel.style.pointerEvents = 'none';
+                              breakoutLabel.style.display = 'block';
+                              breakoutLabel.style.visibility = 'visible';
+                              breakoutLabel.style.opacity = '1';
+                              breakoutLabel.style.whiteSpace = 'nowrap';
+                              breakoutLabel.style.fontSize = '11px';
+                              breakoutLabel.style.fontWeight = '600';
+                              breakoutLabel.style.color = '#333';
+                              breakoutLabel.style.letterSpacing = '1px';
+                              breakoutLabel.style.textTransform = 'uppercase';
+                              breakoutLabel.style.margin = '0';
+                              breakoutLabel.style.padding = '0';
+                              
+                              // Append to tableWrapper so they can span across multiple rows
+                              tableWrapper.appendChild(verticalLine);
+                              tableWrapper.appendChild(startDash);
+                              tableWrapper.appendChild(endDash);
+                              tableWrapper.appendChild(breakoutLabel);
+                            }
+                          }, 50);
+                        }
+                      }
+                    }
+                  });
+                  
                   // After all sessions are placed, calculate and set wrapper height
                   if (tableWrapper) {
                     setTimeout(function() {
