@@ -1397,25 +1397,59 @@ export function Component({ fieldValues }) {
                               // Verify height is valid (should be positive and reasonable)
                               const lineHeight = position.height;
                               
-                              // Create vertical line element
-                              const verticalLine = document.createElement('div');
-                              verticalLine.className = 'sessions-breakout-line';
-                              verticalLine.style.position = 'absolute';
-                              verticalLine.style.top = absoluteTop + 'px';
-                              verticalLine.style.left = timeColumnCenter + 'px';
-                              verticalLine.style.width = '2px';
-                              verticalLine.style.height = lineHeight + 'px';
-                              verticalLine.style.minHeight = lineHeight + 'px';
-                              verticalLine.style.backgroundColor = '#333';
-                              verticalLine.style.transform = 'translateX(-50%)';
-                              verticalLine.style.zIndex = '15';
-                              verticalLine.style.pointerEvents = 'none';
-                              verticalLine.style.display = 'block';
-                              verticalLine.style.visibility = 'visible';
-                              verticalLine.style.opacity = '1';
-                              verticalLine.style.boxSizing = 'border-box';
-                              verticalLine.style.margin = '0';
-                              verticalLine.style.padding = '0';
+                              // Calculate gap for BREAKOUT text
+                              // Text is rotated -90deg, so its width becomes height
+                              // "BREAKOUT" = 8 chars, 11px font, 1px letter spacing
+                              // Approximate height when rotated: (8 * 11) + (7 * 1) = 95px
+                              // Add padding on each side: 15px top + 15px bottom = 30px
+                              const textGap = 100; // Total gap for text + padding
+                              const middlePoint = absoluteTop + (lineHeight / 2);
+                              
+                              // Only create gap if line is long enough
+                              const useGap = lineHeight > textGap + 20; // Need at least gap + 20px for top/bottom segments
+                              const gapStart = useGap ? (middlePoint - (textGap / 2)) : middlePoint;
+                              const gapEnd = useGap ? (middlePoint + (textGap / 2)) : middlePoint;
+                              
+                              // Create top vertical line segment (from start to gap)
+                              const topLineHeight = Math.max(0, gapStart - absoluteTop);
+                              const topLine = document.createElement('div');
+                              topLine.className = 'sessions-breakout-line sessions-breakout-line-top';
+                              topLine.style.position = 'absolute';
+                              topLine.style.top = absoluteTop + 'px';
+                              topLine.style.left = timeColumnCenter + 'px';
+                              topLine.style.width = '2px';
+                              topLine.style.height = topLineHeight + 'px';
+                              topLine.style.backgroundColor = '#e0e0e0';
+                              topLine.style.transform = 'translateX(-50%)';
+                              topLine.style.zIndex = '15';
+                              topLine.style.pointerEvents = 'none';
+                              topLine.style.display = topLineHeight > 0 ? 'block' : 'none';
+                              topLine.style.visibility = topLineHeight > 0 ? 'visible' : 'hidden';
+                              topLine.style.opacity = '1';
+                              topLine.style.boxSizing = 'border-box';
+                              topLine.style.margin = '0';
+                              topLine.style.padding = '0';
+                              
+                              // Create bottom vertical line segment (from gap to end)
+                              const bottomLineTop = gapEnd;
+                              const bottomLineHeight = Math.max(0, (absoluteTop + lineHeight) - gapEnd);
+                              const bottomLine = document.createElement('div');
+                              bottomLine.className = 'sessions-breakout-line sessions-breakout-line-bottom';
+                              bottomLine.style.position = 'absolute';
+                              bottomLine.style.top = bottomLineTop + 'px';
+                              bottomLine.style.left = timeColumnCenter + 'px';
+                              bottomLine.style.width = '2px';
+                              bottomLine.style.height = bottomLineHeight + 'px';
+                              bottomLine.style.backgroundColor = '#e0e0e0';
+                              bottomLine.style.transform = 'translateX(-50%)';
+                              bottomLine.style.zIndex = '15';
+                              bottomLine.style.pointerEvents = 'none';
+                              bottomLine.style.display = bottomLineHeight > 0 ? 'block' : 'none';
+                              bottomLine.style.visibility = bottomLineHeight > 0 ? 'visible' : 'hidden';
+                              bottomLine.style.opacity = '1';
+                              bottomLine.style.boxSizing = 'border-box';
+                              bottomLine.style.margin = '0';
+                              bottomLine.style.padding = '0';
                               
                               // Create horizontal dash at the start (top) of the line
                               const startDash = document.createElement('div');
@@ -1425,7 +1459,7 @@ export function Component({ fieldValues }) {
                               startDash.style.left = timeColumnCenter + 'px';
                               startDash.style.width = '12px';
                               startDash.style.height = '2px';
-                              startDash.style.backgroundColor = '#333';
+                              startDash.style.backgroundColor = '#e0e0e0';
                               startDash.style.transform = 'translateX(-50%)';
                               startDash.style.zIndex = '16';
                               startDash.style.pointerEvents = 'none';
@@ -1444,7 +1478,7 @@ export function Component({ fieldValues }) {
                               endDash.style.left = timeColumnCenter + 'px';
                               endDash.style.width = '12px';
                               endDash.style.height = '2px';
-                              endDash.style.backgroundColor = '#333';
+                              endDash.style.backgroundColor = '#e0e0e0';
                               endDash.style.transform = 'translateX(-50%) translateY(-100%)';
                               endDash.style.zIndex = '16';
                               endDash.style.pointerEvents = 'none';
@@ -1471,7 +1505,7 @@ export function Component({ fieldValues }) {
                               breakoutLabel.style.opacity = '1';
                               breakoutLabel.style.whiteSpace = 'nowrap';
                               breakoutLabel.style.fontSize = '11px';
-                              breakoutLabel.style.fontWeight = '600';
+                              breakoutLabel.style.fontWeight = '700';
                               breakoutLabel.style.color = '#333';
                               breakoutLabel.style.letterSpacing = '1px';
                               breakoutLabel.style.textTransform = 'uppercase';
@@ -1479,7 +1513,8 @@ export function Component({ fieldValues }) {
                               breakoutLabel.style.padding = '0';
                               
                               // Append to tableWrapper so they can span across multiple rows
-                              tableWrapper.appendChild(verticalLine);
+                              tableWrapper.appendChild(topLine);
+                              tableWrapper.appendChild(bottomLine);
                               tableWrapper.appendChild(startDash);
                               tableWrapper.appendChild(endDash);
                               tableWrapper.appendChild(breakoutLabel);
