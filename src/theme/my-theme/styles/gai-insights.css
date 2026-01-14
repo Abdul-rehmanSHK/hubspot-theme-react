@@ -202,7 +202,9 @@ max-width: 1297px;
     align-items: center;
     gap: 95px;
 }
-
+header.header nav.navbar ul.navbar-nav li.nav-item.active a.nav-link {
+    color: #fff !important;
+}
 /* Ensure single-card viewport and smooth sliding */
 .stats-carousel {
   overflow: hidden;
@@ -3353,7 +3355,7 @@ footer.footer::after {
 /* All Sessions Section Styles */
 .sessions-area {
   position: relative;
-  background: #fff;
+  background: #f8f5ee;
   width: 100%;
   overflow: hidden;
   padding: 100px 0;
@@ -3390,12 +3392,12 @@ footer.footer::after {
 }
 
 .sessions-inner {
-  background: transparent !important;
-  color: #050d51 !important;
-  border-radius: 0px !important;
-  position: relative;
-  z-index: 99 !important;
-  overflow: hidden;
+    background: transparent !important;
+    color: #050d51 !important;
+    border-radius: 0px !important;
+    position: relative;
+    z-index: 99 !important;
+    overflow: hidden;
 }
 
 .sessions-filters-row {
@@ -3420,6 +3422,9 @@ footer.footer::after {
   min-height: 44px;
   padding: 10px 20px;
   box-sizing: border-box;
+      background: #06C7EE;
+    border-color: #06C7EE;
+    color: #050d51;
 }
 
 .sessions-date-filter {
@@ -3433,8 +3438,8 @@ footer.footer::after {
   font-size: 16px;
   border: 2px solid #06C7EE;
   border-radius: 5px;
-  background: transparent;
-  color: #06C7EE;
+  background: #06C7EE;
+  color: #050d51;
   cursor: pointer;
   min-width: 200px;
   font-weight: 600;
@@ -3473,7 +3478,7 @@ footer.footer::after {
   gap: 15px;
   width: 100%;
   max-width: 600px;
-  background-color: transparent;
+  background-color: #06C7EE;
   border: 2px solid #06C7EE;
   border-radius: 5px;
   padding: 10px 20px;
@@ -3484,8 +3489,12 @@ footer.footer::after {
 
 .sessions-time-slider-container:hover {
   background: #06C7EE;
+      border-color: #06C7EE;
 }
-
+.sessions-filters-row .speaker-search-btn:hover, .sessions-filters-row .topic-filter-btn:hover {
+    background: #06c7ee;
+    border-color: #06c7ee;
+}
 .sessions-time-slider-container:hover .sessions-time-slider-label {
   color: #050d51;
 }
@@ -3519,7 +3528,7 @@ footer.footer::after {
   position: relative;
   width: 100%;
   height: 4px;
-  background-color: #e0e0e0;
+  background-color: #050d51;
   border-radius: 2px;
   cursor: pointer;
 }
@@ -3529,7 +3538,7 @@ footer.footer::after {
   top: 50%;
   transform: translateY(-50%);
   height: 4px;
-  background-color: #06C7EE;
+  background-color: #050d51;
   border-radius: 2px;
   pointer-events: none;
   z-index: 1;
@@ -3541,8 +3550,8 @@ footer.footer::after {
   transform: translate(-50%, -50%);
   width: 20px;
   height: 20px;
-  background-color: #fff;
-  border: 2px solid #06C7EE;
+  background-color: #06C7EE;
+  border: 2px solid #050d51;
   border-radius: 50%;
   cursor: grab;
   z-index: 2;
@@ -3615,7 +3624,7 @@ footer.footer::after {
 .sessions-time-header {
   width: 120px;
   min-width: 120px;
-  background: #f8f5ee;
+  background: #050d51;
   color: #050d51;
   padding: 15px 10px;
   text-align: center;
@@ -3625,8 +3634,8 @@ footer.footer::after {
   left: 0;
   top: 0;
   z-index: 15;
-  border-right: 2px solid #9f9f9f;
-  border-bottom: 2px solid #9f9f9f;
+  border-right: 1px solid #9f9f9f;
+  border-bottom: 0px solid #9f9f9f;
   box-sizing: border-box;
 }
 
@@ -3654,7 +3663,7 @@ footer.footer::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: #050d51;
   border: none;
   cursor: pointer;
   padding: 0;
@@ -3720,35 +3729,35 @@ footer.footer::after {
 .calendar-duplicate-table .sessions-time-header {
   width: 120px;
   min-width: 120px;
-  background: #f8f5ee;
+  background: #050d51;
   color: #050d51;
   padding: 15px 10px;
   text-align: center;
   font-weight: 700;
   font-size: 16px;
-  border-right: 2px solid #9f9f9f;
-  border-bottom: 2px solid #9f9f9f;
+  border-right: 1px solid #e0e0e0;
+  border-bottom: 0px solid #e0e0e0;
   box-sizing: border-box;
 }
 
 .calendar-duplicate-table .sessions-room-header {
-  background: #f8f5ee;
+  background: #050d51;
   color: #050d51;
   padding: 10px 10px;
   text-align: center;
   min-width: 200px;
   border-right: 1px solid #e0e0e0;
-  border-bottom: 2px solid #9f9f9f;
+  border-bottom: 0px solid #9f9f9f;
 }
 
 .calendar-duplicate-table .sessions-room-header:nth-child(2n+3) {
-  background: #fff;
+  background: #050d51;
 }
 
 .calendar-duplicate-table .sessions-room-header h3 {
   font-weight: 700;
   font-size: 18px !important;
-  color: #050d51;
+  color: #06c7ee;
   margin: 0;
   padding: 0;
 }
@@ -3821,9 +3830,9 @@ footer.footer::after {
   padding: 12px 15px;
   font-size: 16px;
   font-weight: 600;
-  color: #06C7EE;
-  background: transparent;
-  border: 2px solid #06C7EE;
+  color: #fff;
+  background: #050d51;
+  border: 2px solid #050d51;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -3832,14 +3841,15 @@ footer.footer::after {
 }
 .sessions-view-chip:hover
  {
-    background: rgb(6 199 238);
-    border-color: #06c7ee;
-    color: #050d51;
+    background: #050d51;;
+    border-color: #050d51;  ;
+    color: #fff;
+       opacity: 0.7;
 }
 .sessions-view-chip.active {
-  background: #06C7EE;
+  background: #050d51;
   color: #fff;
-  border-color: #06C7EE;
+  border-color: #050d51;
 }
 
 .sessions-grid-container {
@@ -3855,18 +3865,18 @@ footer.footer::after {
   border-radius: 8px;
   padding: 25px;
   transition: all 0.3s ease;
+  position: relative;
 }
-
 .sessions-grid-card:hover {
-  border-color: #06C7EE;
-  box-shadow: 0 4px 12px rgba(6, 199, 238, 0.15);
+    border-color: #06C7EE;
+    box-shadow: 0 4px 12px rgb(198 199 199 / 15%);
 }
 
 .sessions-card-datetime {
-  font-size: 14px;
+  font-size: 16px;
   color: #666;
   margin-bottom: 15px;
-  font-weight: 500;
+  font-weight: 500; 
 }
 
 .sessions-card-title {
@@ -3890,8 +3900,8 @@ footer.footer::after {
 }
 
 .sessions-card-speaker-image {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #e0e0e0;
@@ -3914,13 +3924,13 @@ footer.footer::after {
   margin-top: 20px;
 }
 .sessions-room-header {
-  background: #f8f5ee;
+  background: #050d51;
   color: #050d51;
   padding: 10px 10px;
   text-align: center;
   min-width: 200px;
   border-right: 1px solid #e0e0e0;
-  border-bottom: 2px solid #9f9f9f;
+  border-bottom: 0px solid #9f9f9f;
   position: sticky;
   top: 0;
   z-index: 14;
@@ -3930,7 +3940,7 @@ footer.footer::after {
 /* Time header is 1st child, so room headers start at 2nd child */
 /* We want 2nd room (3rd child), 4th room (5th child), 6th room (7th child) to be white */
 .sessions-room-header:nth-child(2n+3) {
-  background: #fff;
+  background: #050d51;
 }
 
 .sessions-room-header:last-child {
@@ -3948,7 +3958,7 @@ footer.footer::after {
   padding: 0 10px;
   text-align: center;
   vertical-align: top;
-  border-right: 2px solid #9f9f9f;
+  border-right: 2px solid #e0e0e0;
   position: sticky;
   left: 0;
   z-index: 13;
@@ -3992,7 +4002,7 @@ footer.footer::after {
 .sessions-room-name {
   font-weight: 700;
   font-size: 16px;
-  color: #050d51;
+  color: #06c7ee;
   margin: 0;
   padding: 0;
 }
@@ -4000,7 +4010,7 @@ footer.footer::after {
 .sessions-room-header h3 {
   font-weight: 700;
   font-size: 18px !important;
-  color: #050d51;
+  color: #06c7ee;
   margin: 0;
   padding: 0;
 }
