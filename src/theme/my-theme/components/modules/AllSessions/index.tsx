@@ -1511,6 +1511,12 @@ export function Component({ fieldValues }) {
             
             // Function to render table (called on initial load and date filter change)
             function renderTable() {
+              // Reset duplicate header state when table is being re-rendered
+              // This ensures the duplicate header will be recreated with new rooms after filtering
+              if (resetDuplicateHeaderState && typeof resetDuplicateHeaderState === 'function') {
+                resetDuplicateHeaderState();
+              }
+              
               // Clear existing table and grid
               if (tableWrapper) {
                 tableWrapper.innerHTML = '';
@@ -1884,6 +1890,9 @@ export function Component({ fieldValues }) {
               }, 300);
             }
             
+            // Store reset function reference for duplicate header (accessible from renderTable)
+            let resetDuplicateHeaderState = null;
+            
             // Initialize duplicate header replacement for calendar view
             function initStickyHeaderReplacement() {
               const pageHeader = document.querySelector('header.header');
@@ -1893,6 +1902,7 @@ export function Component({ fieldValues }) {
               let scrollTimeout = null;
               let theadElement = null;
               let duplicateHeader = null;
+              let currentTheadId = null; // Track thead to detect changes
               
               function createDuplicateHeader() {
                 if (!theadElement) return null;
@@ -1983,6 +1993,27 @@ export function Component({ fieldValues }) {
                 }
               }
               
+              // Function to reset duplicate header state (called when table is re-rendered)
+              function resetDuplicateHeaderStateFn() {
+                // Remove duplicate header if it exists
+                removeDuplicateHeader();
+                
+                // Reset state variables
+                isHeaderReplaced = false;
+                theadElement = null;
+                currentTheadId = null;
+                
+                // Restore page header if it was hidden
+                if (pageHeader) {
+                  pageHeader.style.transform = '';
+                  pageHeader.style.opacity = '';
+                  pageHeader.style.transition = '';
+                }
+              }
+              
+              // Expose reset function globally
+              resetDuplicateHeaderState = resetDuplicateHeaderStateFn;
+              
               function syncHorizontalScroll() {
                 if (duplicateHeader && isHeaderReplaced && tableWrapper) {
                   const scrollLeft = tableWrapper.scrollLeft;
@@ -2014,10 +2045,33 @@ export function Component({ fieldValues }) {
                 const table = tableWrapper.querySelector('.sessions-schedule-table');
                 if (!table) return;
                 
-                if (!theadElement) {
-                  theadElement = table.querySelector('thead');
+                const newTheadElement = table.querySelector('thead');
+                if (!newTheadElement) return;
+                
+                // Check if thead has changed (table was re-rendered with new rooms)
+                // Compare by checking if theadElement is null, or if it's not the same element
+                const theadChanged = !theadElement || theadElement !== newTheadElement;
+                
+                if (theadChanged) {
+                  // Thead has changed - reset state and update reference
+                  if (isHeaderReplaced) {
+                    // If duplicate header is currently showing, remove it
+                    removeDuplicateHeader();
+                    isHeaderReplaced = false;
+                    // Restore page header
+                    if (pageHeader) {
+                      pageHeader.style.transform = '';
+                      pageHeader.style.opacity = '';
+                      pageHeader.style.transition = '';
+                    }
+                  }
+                  // Update to new thead
+                  theadElement = newTheadElement;
+                  // Generate a unique ID for this thead to track changes
+                  currentTheadId = theadElement.getAttribute('data-thead-id') || 
+                    (theadElement.setAttribute('data-thead-id', 'thead-' + Date.now() + '-' + Math.random()),
+                     theadElement.getAttribute('data-thead-id'));
                 }
-                if (!theadElement) return;
                 
                 const tableRect = table.getBoundingClientRect();
                 const headerRect = pageHeader.getBoundingClientRect();
@@ -2041,7 +2095,13 @@ export function Component({ fieldValues }) {
                   isHeaderReplaced = true;
                   
                   // Create and show duplicate header
-                  if (!duplicateHeader) {
+                  // Always recreate if it doesn't exist or if thead has changed
+                  if (!duplicateHeader || theadChanged) {
+                    // Remove old duplicate header if it exists
+                    if (duplicateHeader) {
+                      removeDuplicateHeader();
+                    }
+                    // Create new duplicate header with current thead
                     duplicateHeader = createDuplicateHeader();
                   }
                   
