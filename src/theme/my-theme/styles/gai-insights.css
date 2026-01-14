@@ -4430,6 +4430,52 @@ footer.footer::after {
     font-size: 24px;
     line-height: 34px;
 }
+.text-area.venue-text .text-div {
+    font-size: 18px;
+    line-height: 28px;
+}
+  .text-img img {
+    border-radius: 10px;
+}
+  .hotel-details {
+    text-align: center;
+}
+p.last-text {
+    margin-bottom: 60px;
+}
+.text-tabs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 80px;
+}
+  .text-tab p strong {
+    display: block;
+    font-size: 30px;
+    font-family: 'Helvetica Neue';
+    margin-bottom: 15px;
+}
+.text-tab {
+    padding: 50px 20px 20px 20px;
+    border: 2px solid #e0e0e0;
+    width: 50%;
+    border-radius: 10px;
+    min-height: 330px;
+}
+  .text-div a.fill-btn {
+    margin: 0 auto;
+    display: block;
+    width: fit-content;
+    margin-top: 50px !important;
+}
+  .text-tab img {
+    max-width: 60px;
+    margin-bottom: 30px;
+}
+  .text-tab:last-child img {
+    max-width: 100px;
+}
   .text-area::before {
     content: "";
     position: absolute;
