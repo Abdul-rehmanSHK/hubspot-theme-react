@@ -228,6 +228,113 @@ a.nav-link:hover {
   color: #ffffff !important;
 }
 
+/* Dropdown Navigation Styles */
+.nav-item-dropdown {
+  position: relative;
+}
+
+.nav-link-dropdown {
+  cursor: default;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  color: #06C7EE !important;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.nav-item-dropdown:hover .nav-link-dropdown {
+  color: #ffffff !important;
+}
+
+.nav-link-dropdown .dropdown-icon {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+  margin-left: 4px;
+}
+
+.nav-item-dropdown:hover .nav-link-dropdown .dropdown-icon,
+.nav-link-dropdown.dropdown-active .dropdown-icon {
+  transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  display: none;
+  min-width: 200px;
+  background-color: #050d51;
+  border: 2px solid #06C7EE;
+  border-radius: 5px;
+  padding: 8px 0;
+  margin-top: 10px;
+  list-style: none;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.nav-item-dropdown:hover .nav-dropdown-menu {
+  display: block;
+}
+
+.nav-dropdown-menu li {
+  margin: 0;
+  padding: 0;
+}
+
+.nav-dropdown-link {
+  display: block;
+  padding: 12px 20px;
+  color: #06C7EE !important;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.nav-dropdown-link:hover {
+  background-color: #06C7EE;
+  color: #050d51 !important;
+}
+
+/* Ensure dropdown doesn't interfere with mobile menu */
+@media (max-width: 991px) {
+  .nav-item-dropdown {
+    position: static;
+  }
+  
+  .nav-dropdown-menu {
+    position: static;
+    display: block !important;
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    margin-left: 20px;
+    box-shadow: none;
+  }
+  
+  .nav-dropdown-link {
+    padding: 8px 15px;
+    font-size: 14px;
+    color: #050d51 !important;
+  }
+  
+  .nav-link-dropdown {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  
+  .nav-link-dropdown .dropdown-icon {
+    display: none;
+  }
+}
+
 a.transparent-btn {
   display: inline;
   color: #06C7EE;

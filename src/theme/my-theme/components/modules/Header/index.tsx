@@ -50,17 +50,46 @@ export function Component({ fieldValues }) {
               const linkUrl = getUrl(item.link);
               const openInNewWindow = item.openInNewWindow === true || item.openInNewWindow === 'true';
               const isActive = item.active === true || item.active === 'true';
+              const childNavItems = item.childNavItems || [];
+              const hasChildren = childNavItems.length > 0;
               
               return (
-                <li className={`nav-item ${isActive ? 'active' : ''}`} key={index}>
-                  <a
-                    className="nav-link"
-                    href={linkUrl}
-                    target={openInNewWindow ? '_blank' : undefined}
-                    rel={openInNewWindow ? 'noopener noreferrer' : undefined}
-                  >
-                    {item.text}
-                  </a>
+                <li className={`nav-item ${hasChildren ? 'nav-item-dropdown' : ''} ${isActive ? 'active' : ''}`} key={index}>
+                  {hasChildren ? (
+                    <>
+                      <span className="nav-link nav-link-dropdown">
+                        {item.text}
+                        <i className="fa-solid fa-chevron-down dropdown-icon"></i>
+                      </span>
+                      <ul className="nav-dropdown-menu">
+                        {childNavItems.map((childItem, childIndex) => {
+                          const childLinkUrl = getUrl(childItem.link);
+                          const childOpenInNewWindow = childItem.openInNewWindow === true || childItem.openInNewWindow === 'true';
+                          return (
+                            <li key={childIndex}>
+                              <a
+                                className="nav-dropdown-link"
+                                href={childLinkUrl}
+                                target={childOpenInNewWindow ? '_blank' : undefined}
+                                rel={childOpenInNewWindow ? 'noopener noreferrer' : undefined}
+                              >
+                                {childItem.text}
+                              </a>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </>
+                  ) : (
+                    <a
+                      className="nav-link"
+                      href={linkUrl}
+                      target={openInNewWindow ? '_blank' : undefined}
+                      rel={openInNewWindow ? 'noopener noreferrer' : undefined}
+                    >
+                      {item.text}
+                    </a>
+                  )}
                 </li>
               );
             })}
@@ -97,8 +126,39 @@ export function Component({ fieldValues }) {
               }
             }
 
-            // Handle navigation links
-            document.querySelectorAll('.header .nav-link').forEach(function(link) {
+            // Handle navigation links (only non-dropdown links)
+            document.querySelectorAll('.header .nav-link:not(.nav-link-dropdown)').forEach(function(link) {
+              link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                // Only handle if not opening in new window
+                if (!this.getAttribute('target')) {
+                  handleAnchorClick(e, href);
+                }
+              });
+            });
+
+            // Handle dropdown navigation hover
+            document.querySelectorAll('.header .nav-item-dropdown').forEach(function(dropdownItem) {
+              const dropdownMenu = dropdownItem.querySelector('.nav-dropdown-menu');
+              const navLink = dropdownItem.querySelector('.nav-link-dropdown');
+              
+              if (dropdownMenu && navLink) {
+                // Show dropdown on hover
+                dropdownItem.addEventListener('mouseenter', function() {
+                  dropdownMenu.style.display = 'block';
+                  navLink.classList.add('dropdown-active');
+                });
+                
+                // Hide dropdown when mouse leaves
+                dropdownItem.addEventListener('mouseleave', function() {
+                  dropdownMenu.style.display = 'none';
+                  navLink.classList.remove('dropdown-active');
+                });
+              }
+            });
+
+            // Handle dropdown child links
+            document.querySelectorAll('.header .nav-dropdown-link').forEach(function(link) {
               link.addEventListener('click', function(e) {
                 const href = this.getAttribute('href');
                 // Only handle if not opening in new window
@@ -203,8 +263,7 @@ export const fields = (
         <UrlField
           name="link"
           label="Link URL"
-          required={true}
-          helpText="Enter the URL for this navigation link"
+          helpText="Enter the URL for this navigation link. Leave empty if this is a dropdown parent."
         />,
         <BooleanField
           name="openInNewWindow"
@@ -217,6 +276,28 @@ export const fields = (
           label="Active"
           default={false}
           helpText="Check to mark this navigation link as active"
+        />,
+        <RepeatedFieldGroup
+          name="childNavItems"
+          label="Child navigation links (dropdown)"
+          helpText="Add child links to create a dropdown menu. If child links are added, the parent link will not be clickable."
+          children={[
+            <TextField
+              name="text"
+              label="Child link label"
+              required={true}
+            />,
+            <UrlField
+              name="link"
+              label="Child link URL"
+              required={true}
+            />,
+            <BooleanField
+              name="openInNewWindow"
+              label="Open in new window"
+              default={false}
+            />,
+          ]}
         />,
       ]}
     />
