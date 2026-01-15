@@ -23,7 +23,7 @@ export function Component({ fieldValues }) {
   };
 
   // Convert video URLs to appropriate format (YouTube, Vimeo, direct video files, or embed URLs)
-  const convertToEmbedUrl = (url) => {
+  const convertToEmbedUrl = (url, autoplay = false) => {
     if (!url || typeof url !== 'string') return '';
     
     const trimmedUrl = url.trim();
@@ -41,7 +41,19 @@ export function Component({ fieldValues }) {
     if (trimmedUrl.includes('youtube.com/embed/')) {
       const embedMatch = trimmedUrl.match(/youtube\.com\/embed\/([^&\n?#]+)/);
       if (embedMatch && embedMatch[1]) {
-        return `https://www.youtube.com/embed/${embedMatch[1]}`;
+        const videoId = embedMatch[1];
+        if (autoplay) {
+          // Check if URL already has query parameters
+          const hasParams = trimmedUrl.includes('?');
+          if (hasParams) {
+            // Append autoplay params to existing query string
+            const separator = trimmedUrl.includes('&') ? '&' : '&';
+            return `${trimmedUrl}${separator}autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+          }
+          return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+        }
+        // Return clean URL without autoplay
+        return `https://www.youtube.com/embed/${videoId}`;
       }
       return trimmedUrl;
     }
@@ -62,6 +74,9 @@ export function Component({ fieldValues }) {
     
     // If we found a YouTube video ID, convert to embed format
     if (videoId) {
+      if (autoplay) {
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+      }
       return `https://www.youtube.com/embed/${videoId}`;
     }
     
@@ -70,10 +85,18 @@ export function Component({ fieldValues }) {
       // Extract Vimeo video ID
       const vimeoMatch = trimmedUrl.match(/vimeo\.com\/(?:.*\/)?(\d+)/);
       if (vimeoMatch && vimeoMatch[1]) {
-        return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+        const vimeoId = vimeoMatch[1];
+        if (autoplay) {
+          return `https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=1&loop=1`;
+        }
+        return `https://player.vimeo.com/video/${vimeoId}`;
       }
-      // If already a Vimeo embed URL, return as is
+      // If already a Vimeo embed URL, add autoplay params if needed
       if (trimmedUrl.includes('player.vimeo.com')) {
+        if (autoplay && !trimmedUrl.includes('autoplay=1')) {
+          const separator = trimmedUrl.includes('?') ? '&' : '?';
+          return `${trimmedUrl}${separator}autoplay=1&muted=1&loop=1`;
+        }
         return trimmedUrl;
       }
     }
@@ -119,10 +142,13 @@ export function Component({ fieldValues }) {
   const showFeaturedPlusSponsorSlider = fieldValues.showFeaturedPlusSponsorSlider || false;
   const sponsorSliderPreTitle = fieldValues.sponsorSliderPreTitle || '';
   
+  // Handle autoplay setting
+  const videoAutoplay = fieldValues.videoAutoplay === true || fieldValues.videoAutoplay === 'true';
+  
   // Handle video: Check for URL first, then fall back to file upload
   // Use the same logic as VideoTestimonials component
   const rawVideoUrl = getUrl(fieldValues.videoUrl) || '';
-  const processedVideoUrl = rawVideoUrl ? convertToEmbedUrl(rawVideoUrl) : '';
+  const processedVideoUrl = rawVideoUrl ? convertToEmbedUrl(rawVideoUrl, videoAutoplay) : '';
   
   // Fall back to file upload if no URL provided
   const videoFile = fieldValues.videoFile;
@@ -225,6 +251,7 @@ export function Component({ fieldValues }) {
                         width="625"
                         height="380"
                         controls
+                        {...(videoAutoplay ? { autoPlay: true, loop: true, muted: true } : {})}
                         style={{ width: '100%', height: 'auto', maxWidth: '625px' }}
                       >
                             <source src={processedVideoUrl} type="video/mp4" />
@@ -250,6 +277,7 @@ export function Component({ fieldValues }) {
                           width="625"
                           height="380"
                           controls
+                          {...(videoAutoplay ? { autoPlay: true, loop: true, muted: true } : {})}
                           style={{ width: '100%', height: 'auto', maxWidth: '625px' }}
                         >
                           <source src={videoFileSrc} type="video/mp4" />
@@ -821,6 +849,12 @@ export const fields = (
       required={false}
       helpText="Upload a video file (MP4, OGG, WEBM, etc.). Leave empty if using a URL. URL takes priority over file upload."
       acceptedFormats="video/*"
+    />
+    <BooleanField
+      name="videoAutoplay"
+      label="Autoplay video"
+      default={false}
+      helpText="Check to autoplay the video in loop with muted audio when the page loads. Users can still manually stop or unmute the video."
     />
     <FileField
       name="imageFile"

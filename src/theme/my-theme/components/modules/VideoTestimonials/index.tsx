@@ -4,6 +4,7 @@ import {
   RepeatedFieldGroup,
   FileField,
   UrlField,
+  ImageField,
 } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
@@ -123,19 +124,82 @@ export function Component({ fieldValues }) {
                       }
                     }
                     
+                    // Handle thumbnail image
+                    const thumbnailImage = video.thumbnailImage;
+                    let thumbnailSrc = '';
+                    if (thumbnailImage) {
+                      if (typeof thumbnailImage === 'string') {
+                        thumbnailSrc = thumbnailImage;
+                      } else if (typeof thumbnailImage === 'object') {
+                        thumbnailSrc = thumbnailImage.src || thumbnailImage.url || thumbnailImage.href || thumbnailImage.path || '';
+                      }
+                    }
+                    const hasThumbnail = !!thumbnailSrc;
+                    
                     // Determine which video source to use
                     const hasVideoUrl = !!processedVideoUrl;
                     const hasVideoFile = !!videoFileSrc;
                     const isDirectVideo = hasVideoUrl && isDirectVideoFile(processedVideoUrl);
+                    const hasVideo = hasVideoUrl || hasVideoFile;
+                    
+                    // Unique ID for this video item
+                    const videoItemId = `video-item-${moduleId}-${idx}`;
                     
                     return (
                       <div
                         key={idx}
                         className="swiper-slide"
                       >
-                        <div className="video-item">
-                          {hasVideoUrl ? (
-                            // Use URL (YouTube, Vimeo, or direct video file)
+                        <div className="video-item" id={videoItemId}>
+                          {hasThumbnail && hasVideo ? (
+                            <>
+                              {/* Show thumbnail with play button overlay */}
+                              <div className="video-thumbnail-wrapper" style={{ position: 'relative', width: '350px', height: '250px', borderRadius: '10px 10px 0 0', overflow: 'hidden', cursor: 'pointer' }}>
+                                <img 
+                                  src={thumbnailSrc} 
+                                  alt={video.thumbnailAlt || 'Video thumbnail'}
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                  className="video-thumbnail-image"
+                                />
+                                <div className="video-thumbnail-overlay" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0, 0, 0, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.3s ease' }}>
+                                  <div className="video-play-button" style={{ width: '60px', height: '60px', background: '#06C7EE', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '24px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)' }}>
+                                    <i className="fa-solid fa-play" style={{ marginLeft: '4px' }}></i>
+                                  </div>
+                                </div>
+                              </div>
+                              {/* Hidden video player - will be shown when thumbnail is clicked */}
+                              <div className="video-player-container" style={{ display: 'none', width: '350px', height: '250px', borderRadius: '10px 10px 0 0', overflow: 'hidden' }}>
+                                {hasVideoUrl ? (
+                                  isDirectVideo ? (
+                                    <video width="350" height="250" controls style={{ width: '100%', height: '100%', display: 'block' }}>
+                                      <source src={processedVideoUrl} type="video/mp4" />
+                                      <source src={processedVideoUrl} type="video/ogg" />
+                                      <source src={processedVideoUrl} type="video/webm" />
+                                      Your browser does not support the video tag.
+                                    </video>
+                                  ) : (
+                                    <iframe
+                                      width="350"
+                                      height="250"
+                                      src={processedVideoUrl}
+                                      frameBorder="0"
+                                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                      allowFullScreen
+                                      style={{ borderRadius: '10px 10px 0 0', display: 'block', width: '100%', height: '100%' }}
+                                    ></iframe>
+                                  )
+                                ) : hasVideoFile ? (
+                                  <video width="350" height="250" controls style={{ width: '100%', height: '100%', display: 'block' }}>
+                                    <source src={videoFileSrc} type="video/mp4" />
+                                    <source src={videoFileSrc} type="video/ogg" />
+                                    <source src={videoFileSrc} type="video/webm" />
+                                    Your browser does not support the video tag.
+                                  </video>
+                                ) : null}
+                              </div>
+                            </>
+                          ) : hasVideoUrl ? (
+                            // Use URL (YouTube, Vimeo, or direct video file) - no thumbnail
                             isDirectVideo ? (
                               // Direct video file - use <video> tag
                               <video width="350" height="250" controls>
@@ -218,6 +282,57 @@ export function Component({ fieldValues }) {
             let videoElementToPlayer = {}; // Map video elements to their player instances
             let currentlyPlayingVideo = null; // Track which video element is currently playing
             let currentlyPlayingVideoType = null; // Track type: 'html5', 'youtube', 'vimeo'
+            
+            // Handle thumbnail clicks to show video
+            function setupThumbnailClicks() {
+              const thumbnailWrappers = root.querySelectorAll('.video-thumbnail-wrapper');
+              thumbnailWrappers.forEach(function(wrapper) {
+                wrapper.addEventListener('click', function() {
+                  const videoItem = this.closest('.video-item');
+                  const thumbnailWrapper = this;
+                  // Find the player container as a sibling within the same video-item
+                  const playerContainer = videoItem ? videoItem.querySelector('.video-player-container') : null;
+                  
+                  if (playerContainer) {
+                    // Hide thumbnail
+                    thumbnailWrapper.style.display = 'none';
+                    // Show video player
+                    playerContainer.style.display = 'block';
+                    
+                    // For iframes, update src to trigger autoplay if needed
+                    const iframe = playerContainer.querySelector('iframe');
+                    if (iframe) {
+                      const currentSrc = iframe.src;
+                      // Check if it's YouTube or Vimeo
+                      if (currentSrc.includes('youtube.com')) {
+                        // Add autoplay parameter if not present
+                        if (!currentSrc.includes('autoplay=1')) {
+                          const separator = currentSrc.includes('?') ? '&' : '?';
+                          iframe.src = currentSrc + separator + 'autoplay=1';
+                        }
+                      } else if (currentSrc.includes('vimeo.com')) {
+                        // Add autoplay parameter if not present
+                        if (!currentSrc.includes('autoplay=1')) {
+                          const separator = currentSrc.includes('?') ? '&' : '?';
+                          iframe.src = currentSrc + separator + 'autoplay=1';
+                        }
+                      }
+                    }
+                    
+                    // For HTML5 video, try to play
+                    const video = playerContainer.querySelector('video');
+                    if (video) {
+                      video.play().catch(function(e) {
+                        console.warn('Could not autoplay video:', e);
+                      });
+                    }
+                  }
+                });
+              });
+            }
+            
+            // Setup thumbnail clicks
+            setupThumbnailClicks();
             
             // Extract YouTube video ID from URL
             function extractYouTubeId(url) {
@@ -521,6 +636,7 @@ export function Component({ fieldValues }) {
               
               // Setup video event listeners after Swiper is initialized
               setTimeout(function() {
+                setupThumbnailClicks(); // Re-setup thumbnail clicks after Swiper initialization
                 setupVideoListeners();
                 loadYouTubeAPI();
                 loadVimeoAPI();
@@ -591,6 +707,18 @@ export const fields = (
           required={false}
           helpText="Upload a video file (MP4, OGG, etc.). Leave empty if using a URL."
           acceptedFormats="video/*"
+        />,
+        <ImageField
+          name="thumbnailImage"
+          label="Thumbnail Image (optional)"
+          required={false}
+          helpText="Upload a thumbnail image for this video. If provided, the thumbnail will be shown instead of the video player until clicked."
+        />,
+        <TextField
+          name="thumbnailAlt"
+          label="Thumbnail Alt Text (optional)"
+          required={false}
+          helpText="Alternative text for the thumbnail image (for accessibility)."
         />,
         <TextField
           name="personName"

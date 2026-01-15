@@ -65,10 +65,11 @@ export function Component({ fieldValues }) {
                         {childNavItems.map((childItem, childIndex) => {
                           const childLinkUrl = getUrl(childItem.link);
                           const childOpenInNewWindow = childItem.openInNewWindow === true || childItem.openInNewWindow === 'true';
+                          const childIsActive = childItem.active === true || childItem.active === 'true';
                           return (
                             <li key={childIndex}>
                               <a
-                                className="nav-dropdown-link"
+                                className={`nav-dropdown-link ${childIsActive ? 'active' : ''}`}
                                 href={childLinkUrl}
                                 target={childOpenInNewWindow ? '_blank' : undefined}
                                 rel={childOpenInNewWindow ? 'noopener noreferrer' : undefined}
@@ -296,6 +297,12 @@ export const fields = (
               name="openInNewWindow"
               label="Open in new window"
               default={false}
+            />,
+            <BooleanField
+              name="active"
+              label="Active"
+              default={false}
+              helpText="Check to mark this child navigation link as active"
             />,
           ]}
         />,

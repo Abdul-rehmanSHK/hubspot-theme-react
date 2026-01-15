@@ -31,6 +31,9 @@ export function Component({ fieldValues }) {
   const showAllSpeakers = fieldValues.showAllSpeakers !== false && fieldValues.showAllSpeakers !== 'false';
   const showFeaturedFemales = fieldValues.showFeaturedFemales === true || fieldValues.showFeaturedFemales === 'true';
   const showRoundtableLeaders = fieldValues.showRoundtableLeaders === true || fieldValues.showRoundtableLeaders === 'true';
+  const showSteeringCommittee = fieldValues.showSteeringCommittee === true || fieldValues.showSteeringCommittee === 'true';
+  const hideSearchIcon = fieldValues.hideSearchIcon === true || fieldValues.hideSearchIcon === 'true';
+  const hideTopicFilter = fieldValues.hideTopicFilter === true || fieldValues.hideTopicFilter === 'true';
 
   const moduleId = `all-speakers-${fieldValues.moduleInstanceId || Math.random().toString(36).slice(2)}`;
   const sectionId = fieldValues.sectionId || 'all-speakers';
@@ -45,12 +48,16 @@ export function Component({ fieldValues }) {
               <div className="speakers-heading-row">
                 <h2>{heading}</h2>
                 <div className="speakers-actions-wrapper">
-                  <button className="transparent-btn speaker-search-btn" id={`speaker-search-btn-${moduleId}`}>
-                    <i className="fa-solid fa-search"></i>
-                  </button>
-                  <button className="transparent-btn topic-filter-btn" id={`topic-filter-btn-${moduleId}`}>
-                    {filterButtonText} <i className="fa-solid fa-filter"></i>
-                  </button>
+                  {!hideSearchIcon && (
+                    <button className="transparent-btn speaker-search-btn" id={`speaker-search-btn-${moduleId}`}>
+                      <i className="fa-solid fa-search"></i>
+                    </button>
+                  )}
+                  {!hideTopicFilter && (
+                    <button className="transparent-btn topic-filter-btn" id={`topic-filter-btn-${moduleId}`}>
+                      {filterButtonText} <i className="fa-solid fa-filter"></i>
+                    </button>
+                  )}
                 </div>
               </div>
               {linkText && (
@@ -134,6 +141,9 @@ export function Component({ fieldValues }) {
             const showAllSpeakers = ${showAllSpeakers};
             const showFeaturedFemales = ${showFeaturedFemales};
             const showRoundtableLeaders = ${showRoundtableLeaders};
+            const showSteeringCommittee = ${showSteeringCommittee};
+            const hideSearchIcon = ${hideSearchIcon};
+            const hideTopicFilter = ${hideTopicFilter};
             
             // Store all speakers globally for search functionality
             let allSpeakersData = [];
@@ -183,6 +193,9 @@ export function Component({ fieldValues }) {
                   // Extract leader (can be 1/0 or true/false)
                   const leader = row.values?.leader === 1 || row.values?.leader === true || row.values?.leader === '1';
                   
+                  // Extract steering_committee (can be 1/0 or true/false)
+                  const steeringCommittee = row.values?.steering_committee === 1 || row.values?.steering_committee === true || row.values?.steering_committee === '1';
+                  
                   return {
                     speakerName: row.values?.name || '',
                     title: row.values?.title || '',
@@ -194,7 +207,8 @@ export function Component({ fieldValues }) {
                     topics: topics,
                     gender: gender.toLowerCase(), // Normalize to lowercase for comparison
                     featured: featured,
-                    leader: leader
+                    leader: leader,
+                    steeringCommittee: steeringCommittee
                   };
                 });
                 
@@ -214,6 +228,12 @@ export function Component({ fieldValues }) {
                     return speaker.leader === true;
                   });
                   skipTopicGrouping = true;
+                } else if (showSteeringCommittee) {
+                  // If "Show Steering Committee" is checked, filter to steering committee members only
+                  filteredSpeakers = allSpeakers.filter(function(speaker) {
+                    return speaker.steeringCommittee === true;
+                  });
+                  skipTopicGrouping = true;
                 }
                 // If "Show All Speakers" is checked (or other filters are false), show all speakers
                 
@@ -226,13 +246,23 @@ export function Component({ fieldValues }) {
                   return;
                 }
                 
-                // Hide/show topic filter button based on filter type
+                // Hide/show topic filter button based on filter type and hideTopicFilter setting
                 const topicFilterBtn = root.querySelector('#topic-filter-btn-${moduleId}');
                 if (topicFilterBtn) {
-                  if (skipTopicGrouping) {
+                  if (skipTopicGrouping || hideTopicFilter) {
                     topicFilterBtn.style.display = 'none';
                   } else {
                     topicFilterBtn.style.display = '';
+                  }
+                }
+                
+                // Hide/show search button based on hideSearchIcon setting
+                const searchBtn = root.querySelector('#speaker-search-btn-${moduleId}');
+                if (searchBtn) {
+                  if (hideSearchIcon) {
+                    searchBtn.style.display = 'none';
+                  } else {
+                    searchBtn.style.display = '';
                   }
                 }
                 
@@ -583,6 +613,24 @@ export const fields = (
       label="Show Roundtable Leaders"
       default={false}
       helpText="Show only roundtable leaders (speakers with leader: 1). Speakers will not be grouped by topics."
+    />
+    <BooleanField
+      name="showSteeringCommittee"
+      label="Show Steering Committee"
+      default={false}
+      helpText="Show only steering committee members (speakers with steering_committee: 1). Speakers will not be grouped by topics."
+    />
+    <BooleanField
+      name="hideSearchIcon"
+      label="Don't show search icon"
+      default={false}
+      helpText="Check to hide the search icon button. Default: unchecked (search icon will be shown)."
+    />
+    <BooleanField
+      name="hideTopicFilter"
+      label="Don't show topic filter button"
+      default={false}
+      helpText="Check to hide the topic filter button. Default: unchecked (topic filter button will be shown)."
     />
     <TextField
       name="linkText"
