@@ -265,10 +265,10 @@ a.nav-link:hover {
     top: 30px;
     left: 0;
     display: none;
-    min-width: 250px;
-    background-color: #050d51;
-    border: 0px solid #06C7EE;
-    padding: 0px 0px;
+    min-width: 290px;
+    background-color: #fff;
+    border: 2px solid #06C7EE;
+    padding: 20px 20px;
     margin-top: 10px;
     list-style: none;
     z-index: 1000;
@@ -4450,6 +4450,9 @@ p.last-text {
   .right-area img {
     border-radius: 10px;
 }
+ .submitted-message {
+    color: #090c51;
+} 
 /*---------------------------
          responsive
 ---------------------------*/
@@ -4493,10 +4496,20 @@ a.transparent-btn{
     max-width: 170px;
 }
 .navbar-nav {
-    gap: 20px;
+    gap: 10px;
 }
 h1{
   font-size: 42px;
+}
+a.nav-link {
+    font-size: 14px;
+}
+.nav-link-dropdown{
+  font-size: 14px;
+}
+.nav-dropdown-menu {
+    min-width: 260px;
+    padding: 10px 10px;
 }
 .location-div {
     font-size: 24px;
@@ -4565,6 +4578,9 @@ h3{
 }
 footer.footer{
   padding: 70px 0;
+}
+.sessions-area {
+    padding: 70px 0;
 }
 }
 
@@ -4646,14 +4662,9 @@ footer.footer{
        .text-div {
         padding: 30px 20px;
     }
-  .sessions-area {
-    padding: 70px 0;
-  }
-  
-  .sessions-inner {
-    padding: 50px 25px;
-  }
-  
+     .sessions-area {
+        padding: 60px 0 40px 0;
+    }
   .sessions-table-wrapper {
     overflow-y: hidden;
     height: auto;
@@ -4661,7 +4672,12 @@ footer.footer{
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
   }
-  
+  .sessions-schedule-container {
+    margin-top: 20px;
+}
+.sessions-filters-row {
+    margin: 30px 0 0px 0;
+}
   .sessions-time-header,
   .sessions-time-cell {
     width: 100px;
@@ -5310,7 +5326,7 @@ h3{
         padding: 6px 7px !important;
   }
 .topic-filter-panel-header h3 {
-    font-size: 24px !important;
+    font-size: 20px !important;
 }
 .speakers-inner .row {
     padding-bottom: 0px;
@@ -5859,12 +5875,12 @@ footer.footer {
 .footer-bottom a {
     display: block;
 }
- .sessions-area {
-    padding: 50px 0;
-  }
+    .sessions-area {
+        padding: 40px 0 30px 0;
+    }
   
   .sessions-inner {
-    padding: 40px 20px;
+    padding: 0px 0px;
   }
   
   .sessions-table-wrapper {
@@ -6179,4 +6195,54 @@ footer.footer {
     width: 150px;
     height: 150px;
   }
+  .sessions-header-row {
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.sessions-view-chip {
+    font-size: 12px;
+}
+.sessions-date-select{
+  font-size: 14px;
+}
+.sessions-grid-wrapper {
+    margin-top: 0px;
+}
+.sessions-grid-container {
+    grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+    gap: 20px;
+}
+.sessions-area::after,
+.sessions-area::before {
+    width: 300px;
+    height: 300px;
+  }
+  .sessions-grid-card {
+    padding: 20px 15px;
+}
+.sessions-card-datetime {
+    font-size: 14px;
+}
+.sessions-card-title {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+.sessions-card-speaker-names {
+    font-size: 15px;
+    margin-top: 0px;
+}
+.sessions-card-speaker-topics {
+    font-size: 13px;
+    margin-top: 0;
+}
+.sessions-time-label {
+    font-size: 14px !important;
+    padding: 5px 0;
+}
+.sessions-time-cell {
+    padding: 0 8px;
+  }
+  .sessions-room-header h3 {
+    font-size: 16px !important;
+}
 }
