@@ -218,13 +218,15 @@ header.header nav.navbar ul.navbar-nav li.nav-item.active a.nav-link {
     gap: 20px;
 }
 
-a.nav-link {
+a.nav-link,
+span.nav-link {
   font-size: 18px;
   color: #06C7EE !important;
   font-weight: 600;
 }
 
-a.nav-link:hover {
+a.nav-link:hover,
+span.nav-link:hover {
   color: #ffffff !important;
 }
 
@@ -4624,33 +4626,57 @@ footer.footer{
         padding: 50px 0;
     }
    .nav-item-dropdown {
-    position: static;
+    position: relative;
   }
   
   .nav-dropdown-menu {
     position: static;
-    display: block !important;
+    display: none;
     border: none;
     background-color: transparent;
     padding: 0;
     margin: 0;
-    margin-left: 20px;
+    margin-left: 0;
+    padding-left: 30px;
     box-shadow: none;
+    list-style: none;
+  }
+  
+  .nav-item-dropdown.active .nav-dropdown-menu {
+    display: block;
   }
   
   .nav-dropdown-link {
-    padding: 8px 15px;
-    font-size: 14px;
+    padding: 10px 15px;
+    font-size: 16px;
     color: #050d51 !important;
+    font-weight: 600;
+    display: block;
+    text-decoration: none;
   }
   
   .nav-link-dropdown {
     pointer-events: auto;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 16px;
+    color: #050d51 !important;
+    font-weight: 600;
+    padding: 10px 15px;
+    text-decoration: none;
   }
   
   .nav-link-dropdown .dropdown-icon {
-    display: none;
+    display: inline-block;
+    transition: transform 0.3s ease;
+    margin-left: 8px;
+  }
+  
+  .nav-item-dropdown.active .nav-link-dropdown .dropdown-icon {
+    transform: rotate(180deg);
   }
     .rank-filter-dropdown-mobile {
     display: none !important;
@@ -4734,11 +4760,20 @@ footer.footer{
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         border-radius: 15px;
     }
-.navbar-collapse a.nav-link {
+.navbar-collapse a.nav-link,
+.navbar-collapse .nav-link-dropdown {
     font-size: 16px;
     color: #050d51 !important;
     font-weight: 600;
     padding: 10px 15px;
+    text-decoration: none;
+}
+
+.navbar-collapse .nav-link-dropdown {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
 }
   .navbar-nav {
     flex-direction: column;

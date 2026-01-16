@@ -138,22 +138,88 @@ export function Component({ fieldValues }) {
               });
             });
 
-            // Handle dropdown navigation hover
+            // Handle dropdown navigation - hover for desktop, click toggle for mobile/tablet
             document.querySelectorAll('.header .nav-item-dropdown').forEach(function(dropdownItem) {
               const dropdownMenu = dropdownItem.querySelector('.nav-dropdown-menu');
               const navLink = dropdownItem.querySelector('.nav-link-dropdown');
               
               if (dropdownMenu && navLink) {
-                // Show dropdown on hover
-                dropdownItem.addEventListener('mouseenter', function() {
-                  dropdownMenu.style.display = 'block';
-                  navLink.classList.add('dropdown-active');
+                // Check if device is mobile/tablet (small screen)
+                function isMobileOrTablet() {
+                  return window.innerWidth <= 991;
+                }
+                
+                // Flag to track if nav link was just clicked (to prevent click-outside from interfering)
+                var navLinkJustClicked = false;
+                
+                // Handle click on nav link for mobile/tablet ONLY
+                // Use both click and touchstart for better mobile support
+                function handleNavLinkClick(e) {
+                  if (isMobileOrTablet()) {
+                    // Set flag to prevent click-outside handler from running
+                    navLinkJustClicked = true;
+                    setTimeout(function() {
+                      navLinkJustClicked = false;
+                    }, 200);
+                    
+                    if (e) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                    
+                    // Directly check and toggle
+                    var hasActiveClass = dropdownItem.classList.contains('active');
+                    
+                    if (hasActiveClass) {
+                      // Currently open - CLOSE it
+                      dropdownItem.classList.remove('active');
+                      navLink.classList.remove('dropdown-active');
+                    } else {
+                      // Currently closed - OPEN it
+                      // Close other open dropdowns first
+                      document.querySelectorAll('.header .nav-item-dropdown.active').forEach(function(item) {
+                        if (item !== dropdownItem) {
+                          item.classList.remove('active');
+                          var otherLink = item.querySelector('.nav-link-dropdown');
+                          if (otherLink) {
+                            otherLink.classList.remove('dropdown-active');
+                          }
+                        }
+                      });
+                      // Open this dropdown
+                      dropdownItem.classList.add('active');
+                      navLink.classList.add('dropdown-active');
+                    }
+                  }
+                }
+                
+                navLink.addEventListener('click', handleNavLinkClick);
+                navLink.addEventListener('touchend', function(e) {
+                  handleNavLinkClick(e);
                 });
                 
-                // Hide dropdown when mouse leaves
+                // Handle hover for desktop
+                dropdownItem.addEventListener('mouseenter', function() {
+                  if (!isMobileOrTablet()) {
+                    navLink.classList.add('dropdown-active');
+                  }
+                });
+                
                 dropdownItem.addEventListener('mouseleave', function() {
-                  dropdownMenu.style.display = 'none';
-                  navLink.classList.remove('dropdown-active');
+                  if (!isMobileOrTablet()) {
+                    navLink.classList.remove('dropdown-active');
+                  }
+                });
+                
+                // Close dropdown when clicking outside on mobile/tablet
+                document.addEventListener('click', function(e) {
+                  if (isMobileOrTablet() && !navLinkJustClicked) {
+                    // Check if click is outside the dropdown item
+                    if (!dropdownItem.contains(e.target)) {
+                      dropdownItem.classList.remove('active');
+                      navLink.classList.remove('dropdown-active');
+                    }
+                  }
                 });
               }
             });
