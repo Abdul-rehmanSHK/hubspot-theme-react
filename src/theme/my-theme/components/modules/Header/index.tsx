@@ -6,7 +6,7 @@ import {
   RepeatedFieldGroup,
   BooleanField,
 } from '@hubspot/cms-components/fields';
-import logo from '../../../assets/images/gai-insights-logo.png';
+import logo from '../../../assets/images/gai-insights-logo-1.webp';
 
 export function Component({ fieldValues }) {
   const navItems = fieldValues.navItems || [];
