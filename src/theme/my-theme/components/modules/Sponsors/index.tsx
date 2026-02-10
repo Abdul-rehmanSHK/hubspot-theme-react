@@ -21,7 +21,7 @@ export function Component({ fieldValues }) {
   const portalId = '39650877';
   const tableId = '146535020'; // sponsors table ID
   const sponsorRankTableId = '146800017'; // sponsor_rank table ID (update this with actual table ID)
-  
+
   // State for HubDB data - initialize as empty, will be populated by script
   const [sponsors, setSponsors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,11 +34,11 @@ export function Component({ fieldValues }) {
       try {
         const apiUrl = `https://api.hubapi.com/cms/v3/hubdb/tables/${tableId}/rows?portalId=${portalId}`;
         const response = await fetch(apiUrl);
-        
+
         if (!response.ok) {
           throw new Error(`Failed to fetch: ${response.status}`);
         }
-        
+
         const data = await response.json();
         const transformedSponsors = (data.results || []).map((row: any) => ({
           image: row.values?.image ? {
@@ -46,7 +46,7 @@ export function Component({ fieldValues }) {
             alt: row.values.image.altText || 'Sponsor'
           } : null,
         }));
-        
+
         setSponsors(transformedSponsors);
         setLoading(false);
       } catch (err: any) {
@@ -182,7 +182,8 @@ export function Component({ fieldValues }) {
                       src: row.values.image.url || '',
                       alt: row.values.image.altText || 'Sponsor'
                     } : null,
-                    ranks: ranks
+                    ranks: ranks,
+                    link: row.values?.link || ''
                   };
                 });
                 
@@ -295,19 +296,28 @@ export function Component({ fieldValues }) {
                   
                   const sponsors = rankMap[rankName];
                   sponsors.forEach(function(sponsor) {
-                    const sponsorCard = document.createElement('div');
-                    sponsorCard.className = 'sponsor-card';
-                    
                     const imageSrc = sponsor.image?.src || '';
                     const imageAlt = sponsor.image?.alt || 'Sponsor';
+                    const imageUrl = sponsor.link || '';
                     
-                    sponsorCard.innerHTML = 
-                      (imageSrc ? 
-                        '<img src="' + imageSrc + '" alt="' + imageAlt + '" />' :
-                        '<div style="width: 200px; height: 150px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; margin: 0 auto;">No Image</div>'
-                      );
-                    
-                    sponsorsGrid.appendChild(sponsorCard);
+                    const cardContent = imageSrc ? 
+                      '<img src="' + imageSrc + '" alt="' + imageAlt + '" />' :
+                      '<div style="width: 200px; height: 150px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; margin: 0 auto;">No Image</div>';
+
+                    if (imageUrl) {
+                      const anchor = document.createElement('a');
+                      anchor.href = imageUrl;
+                      anchor.target = '_blank';
+                      anchor.style.textDecoration = 'none';
+                      anchor.style.display = 'block';
+                      anchor.innerHTML = '<div class="sponsor-card">' + cardContent + '</div>';
+                      sponsorsGrid.appendChild(anchor);
+                    } else {
+                      const sponsorCard = document.createElement('div');
+                      sponsorCard.className = 'sponsor-card';
+                      sponsorCard.innerHTML = cardContent;
+                      sponsorsGrid.appendChild(sponsorCard);
+                    }
                   });
                   
                   rankSection.appendChild(sponsorsGrid);

@@ -203,7 +203,7 @@ max-width: 1297px;
     gap: 95px;
 }
 header.header nav.navbar ul.navbar-nav li.nav-item.active a.nav-link {
-    color: #fff !important;
+    color: #06C7EE !important;
 }
 /* Ensure single-card viewport and smooth sliding */
 .stats-carousel {
@@ -221,13 +221,13 @@ header.header nav.navbar ul.navbar-nav li.nav-item.active a.nav-link {
 a.nav-link,
 span.nav-link {
   font-size: 18px;
-  color: #06C7EE !important;
+  color: #fff !important;
   font-weight: 600;
 }
 
 a.nav-link:hover,
 span.nav-link:hover {
-  color: #ffffff !important;
+  color: #06C7EE !important;
 }
 
 /* Dropdown Navigation Styles */
@@ -269,8 +269,9 @@ span.nav-link:hover {
     display: none;
     min-width: 290px;
     background-color: #fff;
-    border: 2px solid #06C7EE;
-    padding: 20px 20px;
+    border: 0px solid #06C7EE;
+    padding: 20px 20px 40px 20px;
+    border-radius: 5px;
     margin-top: 10px;
     list-style: none;
     z-index: 1000;
@@ -286,13 +287,16 @@ span.nav-link:hover {
 .nav-dropdown-menu li {
   margin: 0;
   padding: 0;
-      border-bottom: 1px solid #e0e0e0;
 }
-
+.header-wrapper .logo-div img {
+    width: 200px;
+    max-width: 100%;
+}
 .nav-dropdown-link {
     display: block;
     padding: 10px 10px;
-    color: #06C7EE !important;
+    color: #050d51 !important;
+    border-bottom: 1px solid #050d51;
     font-size: 16px;
     font-weight: 600;
     text-decoration: none;
@@ -302,8 +306,9 @@ span.nav-link:hover {
 }
 
 .nav-dropdown-link:hover {
-  background-color: #06C7EE;
-  color: #050d51 !important;
+  background-color: #fff;
+ color: #06c7ee !important;
+ border-color: #06c7ee;
 }
 
 .nav-dropdown-link.active {
@@ -623,7 +628,7 @@ main .container-fluid {
 .location-div {
   font-size: 26px;
   line-height: 1.2em;
-  color: #06C7EE;
+  color: #fff;
 }
 .location-div img {
   width: auto;
@@ -4212,7 +4217,6 @@ footer.footer::after {
 
 .session-detail-speakers-list {
   display: flex;
-  flex-direction: column;
   gap: 20px;
 }
 
@@ -4224,6 +4228,7 @@ footer.footer::after {
   backdrop-filter: blur(10px);
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 32%;
 }
 
 .session-detail-speaker-image {
@@ -4511,7 +4516,6 @@ a.nav-link {
 }
 .nav-dropdown-menu {
     min-width: 260px;
-    padding: 10px 10px;
 }
 .location-div {
     font-size: 24px;
@@ -4590,7 +4594,9 @@ footer.footer{
     .calendar-duplicate-table {
     min-width: 800px;
   }
-  
+  a.nav-link, span.nav-link {
+    font-size: 14px;
+}
   .calendar-duplicate-table .sessions-time-header {
     width: 100px;
     min-width: 100px;
@@ -4629,31 +4635,35 @@ footer.footer{
     position: relative;
   }
   
-  .nav-dropdown-menu {
-    position: static;
-    display: none;
-    border: none;
-    background-color: transparent;
-    padding: 0;
-    margin: 0;
-    margin-left: 0;
-    padding-left: 30px;
-    box-shadow: none;
-    list-style: none;
-  }
+ .nav-dropdown-menu {
+        position: static;
+        display: none;
+        border: none;
+        background-color: transparent;
+        padding: 0;
+        margin: 0;
+        margin-left: 0;
+        padding-left: 0px;
+        box-shadow: none;
+        list-style: none;
+    }
   
   .nav-item-dropdown.active .nav-dropdown-menu {
     display: block;
   }
-  
-  .nav-dropdown-link {
-    padding: 10px 15px;
-    font-size: 16px;
-    color: #050d51 !important;
-    font-weight: 600;
-    display: block;
-    text-decoration: none;
-  }
+  ul.nav-dropdown-menu li:last-child a.nav-dropdown-link {
+    border-bottom: none;
+}
+    .nav-dropdown-link {
+        padding: 10px 15px;
+        font-size: 16px;
+        color: #050d51 !important;
+        font-weight: 600;
+        display: block;
+        text-decoration: none;
+        text-align: left;
+        border-bottom: 1px solid #050d51;
+    }
   
   .nav-link-dropdown {
     pointer-events: auto;
@@ -4760,14 +4770,13 @@ footer.footer{
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         border-radius: 15px;
     }
-.navbar-collapse a.nav-link,
-.navbar-collapse .nav-link-dropdown {
-    font-size: 16px;
-    color: #050d51 !important;
-    font-weight: 600;
-    padding: 10px 15px;
-    text-decoration: none;
-}
+    .navbar-collapse a.nav-link, .navbar-collapse .nav-link-dropdown {
+        font-size: 16px;
+        color: #050d51 !important;
+        font-weight: 600;
+        padding: 10px 4px;
+        text-decoration: none;
+    }
 
 .navbar-collapse .nav-link-dropdown {
     display: flex;
@@ -5284,6 +5293,15 @@ h3{
   .faq-answer-content {
     font-size: 16px;
   }
+  .session-detail-speakers-list {
+    flex-wrap: wrap;
+}
+.session-detail-speaker-card {
+    width: 48%;
+}
+.session-detail-header h3 {
+    max-width: 90%;
+}
  
 }
 
@@ -5969,28 +5987,31 @@ footer.footer {
     max-width: 100%;
   }
   
-  .session-detail-header {
-    padding: 15px 20px;
-  }
-  
+ .session-detail-header {
+        padding: 15px 0px;
+    }
   .session-detail-header h3 {
-    font-size: 20px;
+    font-size: 22px !important;
+    max-width: 88%;
   }
   
-  .session-detail-body {
-    padding: 20px;
-  }
+     .session-detail-body {
+        padding: 20px 0 0 0;
+    }
   
   .session-detail-title {
     font-size: 24px;
   }
   
-  .session-detail-speaker-card {
+     .session-detail-speaker-card {
+        flex-direction: column;
+        align-items: start;
+        text-align: left;
+        width: 100%;
+    }
+  .session-detail-speakers-list{
     flex-direction: column;
-    align-items: center;
-    text-align: center;
   }
-  
   .session-detail-speaker-image {
     width: 100px;
     height: 100px;
