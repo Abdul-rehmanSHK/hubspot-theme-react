@@ -1,4 +1,4 @@
-import { ModuleFields, TextField, UrlField } from '@hubspot/cms-components/fields';
+import { ModuleFields, TextField, UrlField, RichTextField } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
   // Handle UrlField structure - it can be a string or an object with url/href property
@@ -69,8 +69,9 @@ export function Component({ fieldValues }) {
             </div>
             <div className="col-md-8 custom-md-full">
               <div className="about-content">
-                <h2>{fieldValues.title}</h2>
-                <p>{fieldValues.description}</p>
+                {fieldValues.content && (
+                  <div dangerouslySetInnerHTML={{ __html: fieldValues.content }} />
+                )}
                 {fieldValues.ctaText && (
                   <a href={ctaUrl} className="transparent-btn about-cta-btn">
                     {fieldValues.ctaText}
@@ -179,12 +180,11 @@ export function Component({ fieldValues }) {
 
 export const fields = (
   <ModuleFields>
-    <TextField name="title" label="Title" default="What is GAI World?" />
-    <TextField
-      name="description"
-      label="Description"
-      default="GAI World (Generative AI World) is a major international conference focused on practical, real-world applications of generative artificial intelligence in business. It brings together industry leaders, AI experts, and enterprise professionals..."
-      multiline={true}
+    <RichTextField
+      name="content"
+      label="Content"
+      default="<h2>What is GAI World?</h2><p>GAI World (Generative AI World) is a major international conference focused on practical, real-world applications of generative artificial intelligence in business. It brings together industry leaders, AI experts, and enterprise professionals...</p>"
+      helpText="Add your heading and paragraph content here. Use the heading format for titles and regular text for paragraphs."
     />
     <TextField name="ctaText" label="CTA text" default="Learn More" />
     <UrlField name="ctaUrl" label="CTA URL" helpText="Enter URL or section ID (e.g., #contact-us)" />
