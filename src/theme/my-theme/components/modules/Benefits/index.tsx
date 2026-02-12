@@ -1,24 +1,12 @@
 import {
   ModuleFields,
   TextField,
-  UrlField,
   ImageField,
   RichTextField,
 } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
-  // Handle UrlField structure - it can be a string or an object with url/href property
-  const getUrl = (urlField) => {
-    if (!urlField) return '#';
-    if (typeof urlField === 'string') return urlField;
-    if (typeof urlField === 'object') {
-      return urlField.url || urlField.href || urlField.link || '#';
-    }
-    return '#';
-  };
-
   const heading = fieldValues.heading || 'Why Attend GAI?';
-  const ctaUrl = getUrl(fieldValues.ctaUrl) || '#';
   const benefitsContent = fieldValues.content || '';
   const sectionId = fieldValues.sectionId;
   const sectionClass = fieldValues.sectionClass || 'benefits-section';
@@ -31,13 +19,8 @@ export function Component({ fieldValues }) {
           <div className="row">
             <div className="col-md-4 custom-45 p-0">
               <div className="benefits-left">
-                <h2>{heading}</h2>
-                {fieldValues.ctaText && (
-                  <div className="benefits-btn">
-                    <a href={ctaUrl} className="transparent-btn benefits-cta-btn">
-                      {fieldValues.ctaText}
-                    </a>
-                  </div>
+                {heading && (
+                  <div className="benefits-heading" dangerouslySetInnerHTML={{ __html: heading }} />
                 )}
                 {fieldValues.image?.src && (
                   <div className="benefits-img">
@@ -186,30 +169,6 @@ export function Component({ fieldValues }) {
               parseBenefitsContent();
             }
 
-            // Handle smooth scrolling for Benefits CTA button
-            function handleAnchorClick(e, href) {
-              if (href && href.startsWith('#') && href.length > 1) {
-                e.preventDefault();
-                const targetId = href.substring(1);
-                const target = document.getElementById(targetId);
-                if (target) {
-                  target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                  });
-                }
-              }
-            }
-
-            const benefitsCtaBtn = root.querySelector('.benefits-cta-btn');
-            if (benefitsCtaBtn) {
-              benefitsCtaBtn.addEventListener('click', function(e) {
-                const href = this.getAttribute('href');
-                if (href && href.startsWith('#')) {
-                  handleAnchorClick(e, href);
-                }
-              });
-            }
           })();
         `,
         }}
@@ -220,9 +179,12 @@ export function Component({ fieldValues }) {
 
 export const fields = (
   <ModuleFields>
-    <TextField name="heading" label="Heading" default="Why Attend GAI?" />
-    <TextField name="ctaText" label="CTA text" default="Convince Your Boss to Send You" />
-    <UrlField name="ctaUrl" label="CTA URL" />
+    <RichTextField
+      name="heading"
+      label="Heading"
+      default="Why Attend GAI?"
+      helpText="Add your heading content here. Use H2 for the main heading."
+    />
     <ImageField
       name="image"
       label="Side image"

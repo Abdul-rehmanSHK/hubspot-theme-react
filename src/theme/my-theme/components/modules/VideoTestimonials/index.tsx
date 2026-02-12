@@ -5,6 +5,7 @@ import {
   FileField,
   UrlField,
   ImageField,
+  RichTextField,
 } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
@@ -90,7 +91,7 @@ export function Component({ fieldValues }) {
     return directVideoExtensions.test(url.trim());
   };
 
-  const heading = fieldValues.heading || 'AI Leaders rave about GAI World';
+  const heading = fieldValues.heading || '';
   const videos = fieldValues.videos || [];
   const sectionId = fieldValues.sectionId;
   const sectionClass = fieldValues.sectionClass || 'videos-area';
@@ -101,7 +102,9 @@ export function Component({ fieldValues }) {
     <div className={sectionClass} id={sectionId || undefined} data-videos-id={moduleId}>
       <div className="container">
         <div className="videos-slider">
-          <h2>{heading}</h2>
+          {heading && (
+            <div className="videos-heading" dangerouslySetInnerHTML={{ __html: heading }} />
+          )}
           {videos.length > 0 ? (
             <>
               <div className="videos-carousel swiper">
@@ -169,7 +172,7 @@ export function Component({ fieldValues }) {
                               </div>
                               {/* Hidden video player - will be shown when thumbnail is clicked */}
                               <div className="video-player-container" style={{ display: 'none', width: '350px', height: '250px', borderRadius: '10px 10px 0 0', overflow: 'hidden' }}>
-                                {hasVideoUrl ? (
+                          {hasVideoUrl ? (
                                   isDirectVideo ? (
                                     <video width="350" height="250" controls style={{ width: '100%', height: '100%', display: 'block' }}>
                                       <source src={processedVideoUrl} type="video/mp4" />
@@ -686,10 +689,10 @@ export function Component({ fieldValues }) {
 
 export const fields = (
   <ModuleFields>
-    <TextField
+    <RichTextField
       name="heading"
       label="Heading"
-      default="AI Leaders rave about GAI World"
+      helpText="Add your heading content here. Use H2 for the main heading. Leave empty to hide the heading."
     />
     <RepeatedFieldGroup
       name="videos"

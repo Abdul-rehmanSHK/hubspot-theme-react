@@ -1,11 +1,23 @@
-import { ModuleFields, RepeatedFieldGroup, ImageField, TextField } from '@hubspot/cms-components/fields';
+import { ModuleFields, RepeatedFieldGroup, ImageField, TextField, UrlField, BooleanField, RichTextField } from '@hubspot/cms-components/fields';
 
 const imagePath = (src?: string) =>
   src ? src : '';
 
+// Helper function to extract URL from UrlField
+const getUrl = (urlField: any): string => {
+  if (!urlField) return '#';
+  if (typeof urlField === 'string') return urlField;
+  if (typeof urlField === 'object') {
+    return urlField.url || urlField.href || urlField.value || '#';
+  }
+  return '#';
+};
+
 export function Component({ fieldValues }) {
-  const heading = fieldValues.heading || 'Snaps From GAI Insights';
-  const description = fieldValues.description || 'At GAI Insights, we help organizations cut through the noise and make GenAI work where it matters most, specific to their organizational needs.';
+  const content = fieldValues.content || '<h2>Learn from Dozens of Breakouts</h2><p>Breakout sessions focused on case studies. Tracks for Financial Services, Healthcare, Sales and Marketing, and Technology</p>';
+  const buttonText = fieldValues.buttonText || '';
+  const buttonLink = getUrl(fieldValues.buttonLink);
+  const buttonOpenInNewWindow = fieldValues.buttonOpenInNewWindow || false;
 
   const top = (fieldValues.topSnaps || []).map((item: any) => imagePath(item?.image?.src)).filter(Boolean);
   const bottom = (fieldValues.bottomSnaps || []).map((item: any) => imagePath(item?.image?.src)).filter(Boolean);
@@ -22,8 +34,33 @@ export function Component({ fieldValues }) {
     <div className={sectionClass} id={sectionId || undefined} data-snaps-id={moduleId}>
       <div className="container">
         <div className="snaps-text">
-          <h2>{heading}</h2>
-          <p>{description}</p>
+          <div className="snaps-content-wrapper">
+            <div className="snaps-content" dangerouslySetInnerHTML={{ __html: content }} />
+            {buttonText && (
+              <div className="snaps-button-desktop">
+                <a
+                  href={buttonLink}
+                  className="transparent-btn snaps-cta-btn"
+                  target={buttonOpenInNewWindow ? '_blank' : undefined}
+                  rel={buttonOpenInNewWindow ? 'noopener noreferrer' : undefined}
+                >
+                  {buttonText}
+                </a>
+              </div>
+            )}
+          </div>
+          {buttonText && (
+            <div className="snaps-button-mobile">
+              <a
+                href={buttonLink}
+                className="transparent-btn snaps-cta-btn"
+                target={buttonOpenInNewWindow ? '_blank' : undefined}
+                rel={buttonOpenInNewWindow ? 'noopener noreferrer' : undefined}
+              >
+                {buttonText}
+              </a>
+            </div>
+          )}
         </div>
       </div>
       <div className="event-slider">
@@ -99,6 +136,34 @@ export function Component({ fieldValues }) {
             startContinuousScroll('#topRow-${moduleId}', 'left', 0.35);
             startContinuousScroll('#bottomRow-${moduleId}', 'right', 0.35);
 
+            // Handle smooth scrolling for Snaps CTA button
+            function handleAnchorClick(e, href) {
+              // Only handle anchor links (starting with #) on same page
+              if (href && href.startsWith('#') && href.length > 1) {
+                e.preventDefault();
+                const targetId = href.substring(1); // Remove the #
+                const target = document.getElementById(targetId);
+                if (target) {
+                  target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                  });
+                }
+              }
+            }
+
+            // Handle Snaps CTA button
+            const snapsCtaBtn = root.querySelector('.snaps-cta-btn');
+            if (snapsCtaBtn) {
+              snapsCtaBtn.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                // Only handle if not opening in new window and is anchor link
+                if (!this.getAttribute('target') && href && href.startsWith('#')) {
+                  handleAnchorClick(e, href);
+                }
+              });
+            }
+
             const modal = root.querySelector('#imageModal-${moduleId}');
             const modalImg = root.querySelector('#modalImg-${moduleId}');
             if (modal && modalImg) {
@@ -131,12 +196,27 @@ export function Component({ fieldValues }) {
 
 export const fields = (
   <ModuleFields>
-    <TextField name="heading" label="Heading" default="Snaps From GAI Insights" />
+    <RichTextField
+      name="content"
+      label="Content"
+      default="<h2>Learn from Dozens of Breakouts</h2><p>Breakout sessions focused on case studies. Tracks for Financial Services, Healthcare, Sales and Marketing, and Technology</p>"
+      helpText="Add your heading and description here. Use H2 for the heading and P for the paragraph text."
+    />
     <TextField
-      name="description"
-      label="Description"
-      default="At GAI Insights, we help organizations cut through the noise and make GenAI work where it matters most, specific to their organizational needs."
-      multiline={true}
+      name="buttonText"
+      label="Button Text"
+      helpText="Enter text for the button. Leave empty to hide the button."
+    />
+    <UrlField
+      name="buttonLink"
+      label="Button Link"
+      helpText="Link URL for the button (can be internal page or external URL)"
+    />
+    <BooleanField
+      name="buttonOpenInNewWindow"
+      label="Open Button Link in New Window"
+      default={false}
+      helpText="Check to open the button link in a new tab/window"
     />
     <RepeatedFieldGroup
       name="topSnaps"
