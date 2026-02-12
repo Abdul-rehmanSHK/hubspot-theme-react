@@ -1621,7 +1621,8 @@ border-color: #050d51;
 .speakers-inner .row {
     padding-bottom: 30px;
 }
-.speakers-text h2 {
+.speakers-text h2,
+.speakers-heading h2 {
   color: #050d51 !important;
   margin-bottom: 0 !important;
 }
@@ -3234,6 +3235,29 @@ footer.footer::after {
   z-index: 1;
 }
 
+.faq-inner.faq-with-image {
+  padding: 60px 40px;
+}
+
+.faq-inner .row {
+  align-items: center;
+}
+
+.faq-image {
+  margin-bottom: 0;
+}
+
+.faq-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.faq-content {
+  width: 100%;
+}
+
 .faq-inner::before {
   content: "";
   position: absolute;
@@ -3255,10 +3279,20 @@ footer.footer::after {
     align-items: end;
     justify-content: space-between;
 }
-.faq-header h2 {
+.faq-header h2,
+.faq-heading h2 {
   color: #050d51 !important;
   margin-bottom: 0px !important;
 }
+.faq-cta-wrapper {
+  margin-top: 30px;
+  text-align: left;
+}
+
+.faq-cta-btn {
+  display: inline-block;
+}
+
 .faq-cta-btn:hover {
   background: #06C7EE;
   color: #050d51;
@@ -4526,6 +4560,18 @@ p.last-text {
 .faq-inner{
   padding: 60px 30px;
 }
+
+.faq-inner.faq-with-image {
+  padding: 60px 30px;
+}
+
+.faq-inner.faq-with-image .row {
+  flex-direction: row;
+}
+
+.faq-image {
+  margin-bottom: 0;
+}
 .help-inner {
     padding: 60px 30px;
 }
@@ -5339,6 +5385,34 @@ h3{
   .faq-inner {
     padding: 40px 20px;
   }
+
+  .faq-inner.faq-with-image {
+    padding: 40px 20px;
+  }
+
+  .faq-inner.faq-with-image .row {
+    flex-direction: column;
+  }
+
+  .faq-image {
+    margin-bottom: 30px;
+    order: -1;
+  }
+
+  .faq-content {
+    width: 100%;
+  }
+
+  .faq-cta-wrapper {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .faq-cta-btn {
+    width: 100%;
+    text-align: center;
+  }
+
     .faq-question {
         padding: 15px 0;
         font-size: 22px;
@@ -5399,6 +5473,14 @@ h3{
      .faq-inner {
         padding: 30px 15px;
     }
+
+  .faq-inner.faq-with-image {
+    padding: 30px 15px;
+  }
+
+  .faq-image {
+    margin-bottom: 20px;
+  }
   
   .faq-header {
     margin-bottom: 30px;
@@ -5407,6 +5489,16 @@ h3{
   .faq-header h2 {
     font-size: 28px !important;
     margin-bottom: 0px !important;
+  }
+
+  .faq-cta-wrapper {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .faq-cta-btn {
+    width: 100%;
+    text-align: center;
   }
   
   .faq-item {

@@ -2,11 +2,12 @@ import {
   ModuleFields,
   TextField,
   UrlField,
+  RichTextField,
 } from '@hubspot/cms-components/fields';
 import { useState, useEffect } from 'react';
 
 export function Component({ fieldValues }) {
-  const heading = fieldValues.heading || 'Featured Speakers';
+  const heading = fieldValues.heading || '<h2>Previous Speakers</h2>';
   // Handle UrlField structure - it can be a string or an object with url/href property
   const getUrl = (urlField) => {
     if (!urlField) return '#';
@@ -17,8 +18,6 @@ export function Component({ fieldValues }) {
     return '#';
   };
 
-  const linkText = fieldValues.linkText || '';
-  const linkUrl = getUrl(fieldValues.linkUrl) || '#';
   const ctaText = fieldValues.ctaText || '';
   const ctaUrl = getUrl(fieldValues.ctaUrl) || '#';
   
@@ -76,11 +75,8 @@ export function Component({ fieldValues }) {
           <div className="row">
             <div className="col-md-8">
               <div className="speakers-text">
-                <h2>{heading}</h2>
-                {linkText && (
-                  <p>
-                    <a href={linkUrl} className="speakers-link">{linkText}</a>
-                  </p>
+                {heading && (
+                  <div className="speakers-heading" dangerouslySetInnerHTML={{ __html: heading }} />
                 )}
               </div>
             </div>
@@ -333,21 +329,11 @@ export function Component({ fieldValues }) {
 
 export const fields = (
   <ModuleFields>
-    <TextField
+    <RichTextField
       name="heading"
       label="Heading"
-      default="Featured Speakers"
-    />
-    <TextField
-      name="linkText"
-      label="Link text"
-      default="Contact Paul.Baier@GAIinsights.com or book an appointment to learn more."
-      helpText="Text for the link (will be displayed in bold cyan)"
-    />
-    <UrlField
-      name="linkUrl"
-      label="Link URL"
-      helpText="URL for the link (e.g., mailto:email@example.com or https://example.com)"
+      default="<h2>Previous Speakers</h2>"
+      helpText="Add your heading content here. Use H2 for the main heading."
     />
     <TextField
       name="ctaText"

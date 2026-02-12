@@ -1,8 +1,10 @@
 import {
   ModuleFields,
   TextField,
-  UrlField,
   RepeatedFieldGroup,
+  RichTextField,
+  UrlField,
+  ImageField,
 } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
@@ -16,10 +18,12 @@ export function Component({ fieldValues }) {
     return '#';
   };
 
-  const heading = fieldValues.heading || 'Frequently Asked Questions';
+  const heading = fieldValues.heading || '';
+  const faqs = fieldValues.faqs || [];
   const ctaText = fieldValues.ctaText || '';
   const ctaUrl = getUrl(fieldValues.ctaUrl) || '#';
-  const faqs = fieldValues.faqs || [];
+  const image = fieldValues.image;
+  const hasImage = image && image.src;
   const sectionId = fieldValues.sectionId;
   const sectionClass = fieldValues.sectionClass || 'faq-section';
 
@@ -28,53 +32,74 @@ export function Component({ fieldValues }) {
   return (
     <div className={sectionClass} id={sectionId || undefined} data-faq-id={moduleId}>
       <div className="container">
-        <div className="faq-inner">
-          <div className="faq-header">
-            <h2>{heading}</h2>
-            {ctaText && (
-              <a href={ctaUrl} className="transparent-btn faq-cta-btn">
-                {ctaText}
-              </a>
-            )}
-          </div>
-          <div className="faq-list">
-            {faqs.length > 0 ? (
-              faqs.map((faq: any, index: number) => {
-                const question = faq.question || '';
-                const answer = faq.answer || '';
-                const faqId = `faq-item-${moduleId}-${index}`;
-                
-                return (
-                  <div key={index} className="faq-item">
-                    <button
-                      className="faq-question"
-                      type="button"
-                      aria-expanded="false"
-                      aria-controls={faqId}
-                      id={`faq-question-${faqId}`}
-                    >
-                      <span className="faq-question-text">{question}</span>
-                      <span className="faq-icon">
-                        <i className="fa-solid fa-chevron-down"></i>
-                      </span>
-                    </button>
-                    <div
-                      className="faq-answer"
-                      id={faqId}
-                      aria-labelledby={`faq-question-${faqId}`}
-                    >
-                      <div className="faq-answer-content">
-                        {answer}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="faq-empty">
-                <p>No FAQs added yet.</p>
+        <div className={`faq-inner ${hasImage ? 'faq-with-image' : ''}`}>
+          <div className="row">
+            {hasImage && (
+              <div className="col-md-5">
+                <div className="faq-image">
+                  <img
+                    src={image.src}
+                    alt={image.alt || 'FAQ Image'}
+                    className="img-fluid"
+                  />
+                </div>
               </div>
             )}
+            <div className={hasImage ? 'col-md-7' : 'col-12'}>
+              <div className="faq-content">
+                {heading && (
+                  <div className="faq-header">
+                    <div className="faq-heading" dangerouslySetInnerHTML={{ __html: heading }} />
+                  </div>
+                )}
+                <div className="faq-list">
+                  {faqs.length > 0 ? (
+                    faqs.map((faq: any, index: number) => {
+                      const question = faq.question || '';
+                      const answer = faq.answer || '';
+                      const faqId = `faq-item-${moduleId}-${index}`;
+                      
+                      return (
+                        <div key={index} className="faq-item">
+                          <button
+                            className="faq-question"
+                            type="button"
+                            aria-expanded="false"
+                            aria-controls={faqId}
+                            id={`faq-question-${faqId}`}
+                          >
+                            <span className="faq-question-text">{question}</span>
+                            <span className="faq-icon">
+                              <i className="fa-solid fa-chevron-down"></i>
+                            </span>
+                          </button>
+                          <div
+                            className="faq-answer"
+                            id={faqId}
+                            aria-labelledby={`faq-question-${faqId}`}
+                          >
+                            <div className="faq-answer-content">
+                              {answer}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="faq-empty">
+                      <p>No FAQs added yet.</p>
+                    </div>
+                  )}
+                </div>
+                {ctaText && (
+                  <div className="faq-cta-wrapper">
+                    <a href={ctaUrl} className="transparent-btn faq-cta-btn">
+                      {ctaText}
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -227,6 +252,7 @@ export function Component({ fieldValues }) {
                 }
               });
             }
+            
           })();
         `,
         }}
@@ -237,20 +263,10 @@ export function Component({ fieldValues }) {
 
 export const fields = (
   <ModuleFields>
-    <TextField
+    <RichTextField
       name="heading"
       label="Heading"
-      default="Frequently Asked Questions"
-    />
-    <TextField
-      name="ctaText"
-      label="CTA button text (optional)"
-      helpText="Leave empty to hide the CTA button"
-    />
-    <UrlField
-      name="ctaUrl"
-      label="CTA button URL"
-      helpText="URL for the CTA button. Use #sectionid for smooth scrolling to a section."
+      helpText="Add your heading content here. Use H2 for the main heading. Leave empty to hide the heading."
     />
     <RepeatedFieldGroup
       name="faqs"
@@ -271,6 +287,21 @@ export const fields = (
           default="GAI World is a premier conference for Generative AI leaders and innovators."
         />,
       ]}
+    />
+    <TextField
+      name="ctaText"
+      label="CTA Button Text (optional)"
+      helpText="Leave empty to hide the CTA button. Button will appear below FAQ items."
+    />
+    <UrlField
+      name="ctaUrl"
+      label="CTA Button URL"
+      helpText="URL for the CTA button. Use #sectionid for smooth scrolling to a section."
+    />
+    <ImageField
+      name="image"
+      label="Side Image (optional)"
+      helpText="Upload an image to display on the left side. If provided, content will be shown in two columns."
     />
     <TextField
       name="sectionId"
