@@ -5,6 +5,7 @@ import {
   UrlField,
   RepeatedFieldGroup,
   BooleanField,
+  RichTextField,
 } from '@hubspot/cms-components/fields';
 import logo from '../../../assets/images/gai-insights-logo.png';
 
@@ -71,10 +72,9 @@ export function Component({ fieldValues }) {
             </div>
           </div>
           <div className="footer-text">
-            <h4>{fieldValues.footerHeadline || 'Stay ahead of what\'s next. Get first access to GAI news and updates.'}</h4>
-            <p>
-              {fieldValues.footerCopy || 'We\'re committed to your privacy. GAI Insights uses the information you provide to us to contact you about GAI Insights content and events. You may unsubscribe from these communications at any time. For more information, check out our privacy policy.'}
-            </p>
+            {fieldValues.footerContent && (
+              <div dangerouslySetInnerHTML={{ __html: fieldValues.footerContent }} />
+            )}
           </div>
           <div className="footer-bottom">
             <p>© {fieldValues.copyrightYear || new Date().getFullYear()} by GAI Insights</p>
@@ -142,16 +142,11 @@ export const fields = (
       default="Enter your email address"
     />
     <TextField name="newsletterButtonText" label="Newsletter button" default="SUBSCRIBE" />
-    <TextField
-      name="footerHeadline"
-      label="Footer headline"
-      default="Stay ahead of what's next. Get first access to GAI news and updates."
-    />
-    <TextField
-      name="footerCopy"
-      label="Footer copy"
-      multiline={true}
-      default="We're committed to your privacy. GAI Insights uses the information you provide to us to contact you about GAI Insights content and events. You may unsubscribe from these communications at any time. For more information, check out our privacy policy."
+    <RichTextField
+      name="footerContent"
+      label="Footer Content"
+      default="<h4>Stay ahead of what's next. Get first access to GAI news and updates.</h4><p>We're committed to your privacy. GAI Insights uses the information you provide to us to contact you about GAI Insights content and events. You may unsubscribe from these communications at any time. For more information, check out our privacy policy.</p>"
+      helpText="Add your footer headline and copy here. Use H4 for the headline and P for the paragraph text."
     />
     <TextField
       name="copyrightYear"

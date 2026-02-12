@@ -2,6 +2,7 @@ import {
   ModuleFields,
   TextField,
   FormField,
+  RichTextField,
 } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
@@ -61,11 +62,9 @@ export function Component({ fieldValues }) {
           <div className="row align-items-center">
             <div className="col-md-6">
               <div className="help-content">
-                <h2>{fieldValues.heading || 'Contact Us Today'}</h2>
-                <p>
-                  {fieldValues.description ||
-                    'GAI Insights is the premier source of GenAI news, research, and learning communities for companies and AI vendors.'}
-                </p>
+                {fieldValues.content && (
+                  <div dangerouslySetInnerHTML={{ __html: fieldValues.content }} />
+                )}
               </div>
             </div>
             <div className="col-md-6">
@@ -155,16 +154,11 @@ export function Component({ fieldValues }) {
 
 export const fields = (
   <ModuleFields>
-    <TextField
-      name="heading"
-      label="Heading"
-      default="Contact Us Today"
-    />
-    <TextField
-      name="description"
-      label="Description"
-      default="GAI Insights is the premier source of GenAI news, research, and learning communities for companies and AI vendors."
-      multiline={true}
+    <RichTextField
+      name="content"
+      label="Contact Content"
+      default="<h2>Contact Us Today</h2><p>GAI Insights is the premier source of GenAI news, research, and learning communities for companies and AI vendors.</p>"
+      helpText="Add your contact heading and description here. Use H2 for the heading and P for the paragraph text."
     />
     <FormField
       name="selectedForm"
