@@ -156,9 +156,7 @@ export function Component({ fieldValues }) {
                 });
                 
                 // Step 4: Transform sponsors and attach order from rank table.
-                // If a sponsor has no sponsor_rank assigned, treat it as "Others" and show in Others category.
-                // Only sponsors that have a sponsor rank set (or assigned Others) are shown.
-                const RANK_OTHERS = 'Others';
+                // Do not assign any rank to sponsors that don't have a rank in HubDB. Only show sponsors that have at least one sponsor_rank set.
                 const allSponsorsRaw = (sponsorsData.results || []).map(function(row) {
                   const ranks = (row.values?.sponsor_rank || []).map(function(rankRef) {
                     const rankId = rankRef.id;
@@ -170,18 +168,17 @@ export function Component({ fieldValues }) {
                   }).filter(function(rank) {
                     return rank.name && rank.name.trim() !== '';
                   });
-                  const effectiveRanks = ranks.length > 0 ? ranks : [{ name: RANK_OTHERS, order: null }];
                   return {
                     image: row.values?.image ? {
                       src: row.values.image.url || '',
                       alt: row.values.image.altText || 'Sponsor'
                     } : null,
-                    ranks: effectiveRanks,
+                    ranks: ranks,
                     link: row.values?.link || ''
                   };
                 });
                 
-                // Only show sponsors that have a sponsor rank set (we've assigned "Others" to the rest, so all have a rank)
+                // Only show sponsors that have a sponsor rank set in HubDB. Exclude unranked sponsors entirely (no "Others").
                 const allSponsors = allSponsorsRaw.filter(function(sponsor) {
                   return sponsor.ranks && sponsor.ranks.length > 0;
                 });

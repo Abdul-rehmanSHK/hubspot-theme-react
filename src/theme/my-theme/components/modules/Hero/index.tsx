@@ -140,6 +140,7 @@ export function Component({ fieldValues }) {
   // Sponsor slider checkbox
   const showSponsorSlider = fieldValues.showSponsorSlider || false;
   const showFeaturedPlusSponsorSlider = fieldValues.showFeaturedPlusSponsorSlider || false;
+  const showAttendees = fieldValues.showAttendees || false;
   const sponsorSliderPreTitle = fieldValues.sponsorSliderPreTitle || '';
   
   // Handle autoplay setting
@@ -315,6 +316,20 @@ export function Component({ fieldValues }) {
                 <div className="hero-sponsor-slider-row">
                   <div className="hero-sponsor-slide-track" id={`hero-featured-plus-sponsor-track-${sectionId}`}>
                     {/* Featured Plus Sponsor logos will be inserted here by JavaScript */}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {showAttendees && (
+            <div className="hero-sponsor-slider-wrapper">
+              {sponsorSliderPreTitle && (
+                <div className="hero-sponsor-slider-pre-title">{sponsorSliderPreTitle}</div>
+              )}
+              <div className="hero-sponsor-slider" id={`hero-attendees-slider-${sectionId}`}>
+                <div className="hero-sponsor-slider-row">
+                  <div className="hero-sponsor-slide-track" id={`hero-attendees-track-${sectionId}`}>
+                    {/* Unranked sponsors (attendees) will be inserted here by JavaScript */}
                   </div>
                 </div>
               </div>
@@ -693,6 +708,117 @@ export function Component({ fieldValues }) {
               }
             }
             
+            // Fetch and display unranked sponsors (attendees) for hero slider
+            const showAttendees = ${JSON.stringify(showAttendees)};
+            if (showAttendees) {
+              const attendeesSliderContainer = document.getElementById('hero-attendees-slider-${sectionId}');
+              const attendeesTrack = document.getElementById('hero-attendees-track-${sectionId}');
+              
+              if (attendeesSliderContainer && attendeesTrack) {
+                const portalId = '39650877';
+                const tableId = '146535020';
+                
+                async function fetchAttendees() {
+                  try {
+                    const apiUrl = 'https://api.hubapi.com/cms/v3/hubdb/tables/' + tableId + '/rows?portalId=' + portalId;
+                    const response = await fetch(apiUrl);
+                    
+                    if (!response.ok) {
+                      throw new Error('Failed to fetch sponsors: ' + response.status);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Unranked = no sponsor_rank or empty sponsor_rank array (attendees)
+                    const unrankedSponsors = (data.results || []).filter(function(row) {
+                      var r = row.values?.sponsor_rank;
+                      return !r || !Array.isArray(r) || r.length === 0;
+                    }).map(function(row) {
+                      return {
+                        image: row.values?.image ? {
+                          src: row.values.image.url || '',
+                          alt: row.values.image.altText || 'Sponsor'
+                        } : null
+                      };
+                    }).filter(function(sponsor) {
+                      return sponsor.image && sponsor.image.src;
+                    });
+                    
+                    if (unrankedSponsors.length === 0) {
+                      attendeesSliderContainer.style.display = 'none';
+                      return;
+                    }
+                    
+                    const sponsorImages = [...unrankedSponsors, ...unrankedSponsors];
+                    attendeesTrack.innerHTML = '';
+                    sponsorImages.forEach(function(sponsor, idx) {
+                      const card = document.createElement('div');
+                      card.className = 'hero-sponsor-slide-card';
+                      card.innerHTML = '<img src="' + sponsor.image.src + '" alt="' + (sponsor.image.alt || 'Sponsor ' + (idx + 1)) + '" />';
+                      attendeesTrack.appendChild(card);
+                    });
+                    
+                    function startAttendeesScroll() {
+                      const track = attendeesTrack;
+                      if (!track) return;
+                      const images = track.querySelectorAll('img');
+                      var imagesLoaded = 0;
+                      var totalImages = images.length;
+                      if (totalImages === 0) return;
+                      function checkImagesLoaded() {
+                        images.forEach(function(img) {
+                          if (img.complete && img.naturalWidth > 0) {
+                            imagesLoaded++;
+                          } else {
+                            img.addEventListener('load', function() {
+                              imagesLoaded++;
+                              if (imagesLoaded === totalImages) initAnimation();
+                            }, { once: true });
+                            img.addEventListener('error', function() {
+                              imagesLoaded++;
+                              if (imagesLoaded === totalImages) initAnimation();
+                            }, { once: true });
+                          }
+                        });
+                        if (imagesLoaded === totalImages) setTimeout(initAnimation, 50);
+                      }
+                      function initAnimation() {
+                        track.offsetWidth;
+                        var trackWidth = track.scrollWidth;
+                        var halfWidth = trackWidth / 2;
+                        if (halfWidth <= 0) {
+                          setTimeout(initAnimation, 100);
+                          return;
+                        }
+                        var position = 0;
+                        var speed = 0.35;
+                        function animate() {
+                          position -= speed;
+                          if (position <= -halfWidth) position = 0;
+                          track.style.transform = 'translateX(' + position + 'px)';
+                          requestAnimationFrame(animate);
+                        }
+                        animate();
+                      }
+                      checkImagesLoaded();
+                    }
+                    startAttendeesScroll();
+                  } catch (err) {
+                    console.warn('Error loading attendees (unranked sponsors):', err);
+                    attendeesSliderContainer.style.display = 'none';
+                  }
+                }
+                
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(fetchAttendees, 100);
+                  });
+                } else {
+                  setTimeout(fetchAttendees, 100);
+                }
+              }
+            }
+            
             // Typewriter animation for multiple subheadings
             const subheadingElement = document.getElementById('hero-subheading-${sectionId}');
             const cursorElement = document.querySelector('.hero-subheading-container .typewriter-cursor');
@@ -818,6 +944,12 @@ export const fields = (
       label="Show Featured Plus Sponsor Slider"
       default={false}
       helpText="Check this to display featured plus sponsor logos sliding above the subheading. Logos will be fetched from the Sponsors HubDB table (featured_plus: 1 only)."
+    />
+    <BooleanField
+      name="showAttendees"
+      label="Show Attendees"
+      default={false}
+      helpText="Check this to display unranked sponsors (no sponsor rank assigned in HubDB) sliding in the hero section, using the same slider style as sponsor sliders."
     />
     <TextField
       name="sponsorSliderPreTitle"
