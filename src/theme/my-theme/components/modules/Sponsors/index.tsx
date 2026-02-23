@@ -155,36 +155,35 @@ export function Component({ fieldValues }) {
                   }
                 });
                 
-                // Step 4: Transform sponsors and attach order from rank table
-                const allSponsors = (sponsorsData.results || []).map(function(row) {
-                  // Extract rank info from sponsor_rank array and look up order from rank table
+                // Step 4: Transform sponsors and attach order from rank table.
+                // If a sponsor has no sponsor_rank assigned, treat it as "Others" and show in Others category.
+                // Only sponsors that have a sponsor rank set (or assigned Others) are shown.
+                const RANK_OTHERS = 'Others';
+                const allSponsorsRaw = (sponsorsData.results || []).map(function(row) {
                   const ranks = (row.values?.sponsor_rank || []).map(function(rankRef) {
                     const rankId = rankRef.id;
                     const rankData = rankById[rankId] || null;
-                    
                     if (rankData && rankData.name) {
-                      return {
-                        name: rankData.name,
-                        order: rankData.order
-                      };
+                      return { name: rankData.name, order: rankData.order };
                     }
-                    // Fallback to name from reference if rank not found in table
-                    return {
-                      name: rankRef.name || '',
-                      order: null
-                    };
+                    return { name: rankRef.name || '', order: null };
                   }).filter(function(rank) {
                     return rank.name && rank.name.trim() !== '';
                   });
-                  
+                  const effectiveRanks = ranks.length > 0 ? ranks : [{ name: RANK_OTHERS, order: null }];
                   return {
                     image: row.values?.image ? {
                       src: row.values.image.url || '',
                       alt: row.values.image.altText || 'Sponsor'
                     } : null,
-                    ranks: ranks,
+                    ranks: effectiveRanks,
                     link: row.values?.link || ''
                   };
+                });
+                
+                // Only show sponsors that have a sponsor rank set (we've assigned "Others" to the rest, so all have a rank)
+                const allSponsors = allSponsorsRaw.filter(function(sponsor) {
+                  return sponsor.ranks && sponsor.ranks.length > 0;
                 });
                 
                 if (allSponsors.length === 0) {
@@ -193,31 +192,19 @@ export function Component({ fieldValues }) {
                   return;
                 }
                 
-                // Group sponsors by rank and track rank order
                 const rankMap = {};
-                const rankOrderMap = {}; // Store order for each rank
-                
+                const rankOrderMap = {};
                 allSponsors.forEach(function(sponsor) {
-                  if (sponsor.ranks && sponsor.ranks.length > 0) {
-                    sponsor.ranks.forEach(function(rankObj) {
-                      const rankName = rankObj.name;
-                      if (!rankMap[rankName]) {
-                        rankMap[rankName] = [];
-                        // Store the order for this rank (use the first order value found)
-                        if (rankObj.order !== null && rankObj.order !== undefined) {
-                          rankOrderMap[rankName] = rankObj.order;
-                        }
+                  sponsor.ranks.forEach(function(rankObj) {
+                    const rankName = rankObj.name;
+                    if (!rankMap[rankName]) {
+                      rankMap[rankName] = [];
+                      if (rankObj.order !== null && rankObj.order !== undefined) {
+                        rankOrderMap[rankName] = rankObj.order;
                       }
-                      rankMap[rankName].push(sponsor);
-                    });
-                  } else {
-                    // Sponsors without ranks go to "Other" category
-                    if (!rankMap['Other']) {
-                      rankMap['Other'] = [];
-                      rankOrderMap['Other'] = null; // No order for "Other"
                     }
-                    rankMap['Other'].push(sponsor);
-                  }
+                    rankMap[rankName].push(sponsor);
+                  });
                 });
                 
                 // Sort ranks by order (ascending - lowest first), then alphabetically for ties or missing orders
