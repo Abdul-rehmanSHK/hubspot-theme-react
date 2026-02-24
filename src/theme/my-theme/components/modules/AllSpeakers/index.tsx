@@ -111,7 +111,7 @@ export function Component({ fieldValues }) {
               type="text" 
               className="speaker-search-input" 
               id={`speaker-search-input-${moduleId}`}
-              placeholder="Search by name, company, or title..."
+              placeholder="Search by speaker name..."
               autoComplete="off"
             />
             <i className="fa-solid fa-search speaker-search-icon"></i>
@@ -550,15 +550,13 @@ export function Component({ fieldValues }) {
                       return;
                     }
                     
-                    // Search in speaker name, company, and title
+                    // Search only in speaker name
                     const matchingSpeakers = allSpeakersData.filter(function(speaker) {
-                      const nameMatch = speaker.speakerName.toLowerCase().includes(query);
-                      const companyMatch = speaker.company.toLowerCase().includes(query);
-                      const titleMatch = speaker.title.toLowerCase().includes(query);
-                      return nameMatch || companyMatch || titleMatch;
+                      const name = (speaker.speakerName || '').toLowerCase();
+                      return name.includes(query);
                     });
                     
-                    // Display results
+                    // Display results: rounded small image above name, then name, company, role
                     if (matchingSpeakers.length === 0) {
                       searchResults.innerHTML = '<div class="speaker-search-empty">No speakers found matching "' + query + '"</div>';
                     } else {
@@ -566,7 +564,13 @@ export function Component({ fieldValues }) {
                       resultsHTML += '<div class="speaker-search-results-grid">';
                       
                       matchingSpeakers.forEach(function(speaker) {
+                        const imageSrc = speaker.image?.src || '';
+                        const imageAlt = speaker.image?.alt || speaker.speakerName || 'Speaker';
+                        const imgHTML = imageSrc
+                          ? '<div class="speaker-search-result-avatar"><img src="' + imageSrc + '" alt="' + imageAlt + '" /></div>'
+                          : '<div class="speaker-search-result-avatar speaker-search-result-avatar-placeholder">No Image</div>';
                         resultsHTML += '<div class="speaker-search-result-card">' +
+                          imgHTML +
                           '<div class="team-info">' +
                           (speaker.speakerName ? '<h4>' + speaker.speakerName + '</h4>' : '') +
                           (speaker.company ? '<p>' + speaker.company + '</p>' : '') +

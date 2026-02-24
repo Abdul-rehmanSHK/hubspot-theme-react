@@ -2177,6 +2177,44 @@ border-color: #050d51;
   height: 150px;
 }
 
+/* Rounded small image above name in search results */
+.speaker-search-result-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.speaker-search-result-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  margin-bottom: 10px;
+  background: #06C7EE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.speaker-search-result-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.speaker-search-result-avatar-placeholder {
+  color: #fff;
+  font-size: 11px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.speaker-search-result-card .team-info {
+  text-align: center;
+}
+
 .speaker-search-empty {
   text-align: center;
   padding: 60px 20px;
@@ -2298,8 +2336,8 @@ border-color: #050d51;
   border: 2px solid #050d51 !important;
   transform-origin: center center !important;
 }
-.speaker-search-result-card .team-info{
-   text-align: left;
+.speaker-search-result-card .team-info {
+  text-align: center;
 }
 .team-info {
     padding: 0;
