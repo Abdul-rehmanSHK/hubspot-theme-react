@@ -2069,7 +2069,22 @@ export function Component({ fieldValues }) {
                         // Get date timestamp from date.name (not from start_time)
                         const sessionDateTs = getDateTimestamp(session);
                         const dateTime = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
+                        // Speaker images (same small rounded icons as grid view)
+                        var imagesHTML = '';
+                        if (session.speakerIds && session.speakerIds.length > 0) {
+                          var firstImages = [];
+                          session.speakerIds.forEach(function(speakerId) {
+                            var speaker = allSpeakersData[speakerId];
+                            if (speaker && speaker.image && speaker.image.src) {
+                              firstImages.push('<img class="sessions-card-speaker-image" src="' + (speaker.image.src || '') + '" alt="' + (speaker.image.alt || speaker.name || '').replace(/"/g, '&quot;') + '" />');
+                            }
+                          });
+                          if (firstImages.length > 0) {
+                            imagesHTML = '<div class="sessions-card-speaker-images">' + firstImages.join('') + '</div>';
+                          }
+                        }
                         resultsHTML += '<div class="speaker-search-result-card" data-session-id="' + session.id + '">' +
+                          imagesHTML +
                           '<div class="team-info">' +
                           '<h4>' + (session.title || 'Untitled Session') + '</h4>' +
                           '<p>' + dateTime + '</p>' +
