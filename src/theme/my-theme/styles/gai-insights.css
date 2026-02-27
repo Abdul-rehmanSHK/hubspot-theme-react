@@ -522,6 +522,18 @@ a.transparent-btn:hover {
   height: 40px;
 }
 
+.hero-cta-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 30px;
+}
+
+.hero-cta-buttons .fill-btn {
+  margin-top: 0;
+}
+
 a.fill-btn {
     display: inline-block;
     color: #001D57;

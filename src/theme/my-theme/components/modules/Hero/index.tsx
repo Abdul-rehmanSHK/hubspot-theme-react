@@ -125,6 +125,9 @@ export function Component({ fieldValues }) {
   const ctaText = fieldValues.ctaText || '';
   const ctaUrl = getUrlWithHash(fieldValues.ctaUrl) || '#';
   const ctaOpenInNewWindow = fieldValues.ctaOpenInNewWindow || false;
+  const ctaText2 = (fieldValues.ctaText2 || '').trim();
+  const ctaUrl2 = getUrlWithHash(fieldValues.ctaUrl2) || '#';
+  const ctaOpenInNewWindow2 = fieldValues.ctaOpenInNewWindow2 || false;
   const rawDownArrowUrl = getUrlWithHash(fieldValues.downArrowUrl);
   const downArrowUrl = (rawDownArrowUrl && rawDownArrowUrl !== '#') ? rawDownArrowUrl : '';
   
@@ -219,14 +222,27 @@ export function Component({ fieldValues }) {
                     {locationLine && <span>{locationLine}</span>}
                   </div>
                 )}
-                {ctaText && (
-                  <a 
-                    href={ctaUrl} 
-                    className="fill-btn"
-                    {...(ctaOpenInNewWindow ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                  >
-                    {ctaText}
-                  </a>
+                {(ctaText || ctaText2) && (
+                  <div className="hero-cta-buttons">
+                    {ctaText && (
+                      <a 
+                        href={ctaUrl} 
+                        className="fill-btn"
+                        {...(ctaOpenInNewWindow ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      >
+                        {ctaText}
+                      </a>
+                    )}
+                    {ctaText2 && (
+                      <a 
+                        href={ctaUrl2} 
+                        className="fill-btn"
+                        {...(ctaOpenInNewWindow2 ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      >
+                        {ctaText2}
+                      </a>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -372,17 +388,16 @@ export function Component({ fieldValues }) {
               }
             }
 
-            // Handle Hero CTA button (fill-btn)
-            const heroCtaBtn = document.querySelector('.hero .fill-btn');
-            if (heroCtaBtn) {
-              heroCtaBtn.addEventListener('click', function(e) {
+            // Handle Hero CTA buttons (fill-btn) - both primary and second CTA
+            const heroCtaBtns = document.querySelectorAll('.hero .fill-btn');
+            heroCtaBtns.forEach(function(btn) {
+              btn.addEventListener('click', function(e) {
                 const href = this.getAttribute('href');
-                // Only handle if not opening in new window and is anchor link
                 if (!this.getAttribute('target') && href && href.startsWith('#')) {
                   handleAnchorClick(e, href);
                 }
               });
-            }
+            });
 
             // Handle down arrow button (aero-btn) - same logic as CTA button
             const aeroBtn = document.querySelector('.hero .aero-btn');
@@ -927,6 +942,22 @@ export const fields = (
       label="Open CTA in new window"
       default={false}
       helpText="Check this to open the CTA button link in a new window/tab"
+    />
+    <TextField
+      name="ctaText2"
+      label="Second CTA button text"
+      helpText="Optional second button shown to the right of the main CTA. Leave empty to hide."
+    />
+    <UrlField
+      name="ctaUrl2"
+      label="Second CTA button URL"
+      helpText="Link URL for the second CTA button"
+    />
+    <BooleanField
+      name="ctaOpenInNewWindow2"
+      label="Open second CTA in new window"
+      default={false}
+      helpText="Check to open the second CTA link in a new window/tab"
     />
     <UrlField
       name="downArrowUrl"
