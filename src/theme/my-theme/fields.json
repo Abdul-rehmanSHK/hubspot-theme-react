@@ -7,5 +7,12 @@
       "color": "#2d3e50",
       "opacity": 100
     }
+  },
+  {
+    "type": "Number",
+    "name": "header_menu_id",
+    "label": "Header menu (HubSpot nav)",
+    "default": 0,
+    "help_text": "Set to your HubSpot menu ID to show that menu in the global header. Leave 0 to use the header's manual Navigation links."
   }
 ]
