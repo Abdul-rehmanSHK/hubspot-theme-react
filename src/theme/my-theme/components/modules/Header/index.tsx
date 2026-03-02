@@ -3,7 +3,6 @@ import {
   ImageField,
   TextField,
   UrlField,
-  RepeatedFieldGroup,
   BooleanField,
   MenuField,
 } from '@hubspot/cms-components/fields';
@@ -73,7 +72,7 @@ export function Component({ fieldValues, hublParameters, hublData }) {
 
   const hasMenu = hasMenuItemsValue(menuItems);
 
-  const navItems = hasMenu ? getMenuItemsAsNavItems(menuItems) : (fieldValues.navItems || []);
+  const navItems = hasMenu ? getMenuItemsAsNavItems(menuItems) : [];
   const usingDynamicMenu = hasMenu;
 
   const normalizePathname = (pathname) => {
@@ -151,16 +150,15 @@ export function Component({ fieldValues, hublParameters, hublData }) {
           <ul className="navbar-nav">
             {navItems.map((item, index) => {
               const linkUrl = getUrl(item.link);
-              const openInNewWindow = item.openInNewWindow === true || item.openInNewWindow === 'true';
+              const openInNewWindow = !!item.openInNewWindow;
               const childNavItems = item.childNavItems || [];
               const hasChildren = childNavItems.length > 0;
-              const manualIsActive = item.active === true || item.active === 'true';
               const dynamicSelfActive = usingDynamicMenu && isDynamicLinkActive(linkUrl);
               const dynamicChildActive =
                 usingDynamicMenu &&
                 Array.isArray(childNavItems) &&
                 childNavItems.some((c) => isDynamicLinkActive(getUrl(c?.link)));
-              const isActive = manualIsActive || dynamicSelfActive || dynamicChildActive;
+              const isActive = dynamicSelfActive || dynamicChildActive;
               
               return (
                 <li className={`nav-item ${hasChildren ? 'nav-item-dropdown' : ''} ${isActive ? 'active' : ''}`} key={index}>
@@ -173,10 +171,8 @@ export function Component({ fieldValues, hublParameters, hublData }) {
                       <ul className="nav-dropdown-menu">
                         {childNavItems.map((childItem, childIndex) => {
                           const childLinkUrl = getUrl(childItem.link);
-                          const childOpenInNewWindow = childItem.openInNewWindow === true || childItem.openInNewWindow === 'true';
-                          const childManualIsActive = childItem.active === true || childItem.active === 'true';
-                          const childDynamicIsActive = usingDynamicMenu && isDynamicLinkActive(childLinkUrl);
-                          const childIsActive = childManualIsActive || childDynamicIsActive;
+                          const childOpenInNewWindow = !!childItem.openInNewWindow;
+                          const childIsActive = usingDynamicMenu && isDynamicLinkActive(childLinkUrl);
                           return (
                             <li key={childIndex}>
                               <a
@@ -429,66 +425,8 @@ export const fields = (
     />
     <MenuField
       name="menu"
-      label="HubSpot menu (optional)"
-      helpText="Select a HubSpot menu to use in this header. If not selected, the manual Navigation links below are used."
-    />
-    <RepeatedFieldGroup
-      name="navItems"
-      label="Navigation links (used when no menu is passed from layout)"
-      required={false}
-      children={[
-        <TextField
-          name="text"
-          label="Label"
-          required={true}
-          default="GAI World 2025"
-        />,
-        <UrlField
-          name="link"
-          label="Link URL"
-          helpText="Enter the URL for this navigation link. Leave empty if this is a dropdown parent."
-        />,
-        <BooleanField
-          name="openInNewWindow"
-          label="Open in new window"
-          default={false}
-          helpText="Check to open this link in a new tab/window"
-        />,
-        <BooleanField
-          name="active"
-          label="Active"
-          default={false}
-          helpText="Check to mark this navigation link as active"
-        />,
-        <RepeatedFieldGroup
-          name="childNavItems"
-          label="Child navigation links (dropdown)"
-          helpText="Add child links to create a dropdown menu. If child links are added, the parent link will not be clickable."
-          children={[
-            <TextField
-              name="text"
-              label="Child link label"
-              required={true}
-            />,
-            <UrlField
-              name="link"
-              label="Child link URL"
-              required={true}
-            />,
-            <BooleanField
-              name="openInNewWindow"
-              label="Open in new window"
-              default={false}
-            />,
-            <BooleanField
-              name="active"
-              label="Active"
-              default={false}
-              helpText="Check to mark this child navigation link as active"
-            />,
-          ]}
-        />,
-      ]}
+      label="HubSpot menu"
+      helpText="Select a HubSpot menu to show in the header."
     />
     <TextField name="ctaText" label="CTA text" default="Contact Us" />
     <UrlField
