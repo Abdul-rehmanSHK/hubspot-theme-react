@@ -2,11 +2,13 @@ import {
   ModuleFields,
   TextField,
   UrlField,
+  BooleanField,
 } from '@hubspot/cms-components/fields';
 import { useState, useEffect } from 'react';
 
 export function Component({ fieldValues }) {
   const heading = fieldValues.heading || 'Sponsors';
+  const showAttendees = fieldValues.showAttendees === true;
   // Handle UrlField structure - it can be a string or an object with url/href property
   const getUrl = (urlField) => {
     if (!urlField) return '#';
@@ -73,26 +75,26 @@ export function Component({ fieldValues }) {
               </div>
             </div>
           </div>
-          {/* Desktop: Chips filter - Full width, centered */}
-          <div className="row">
-            <div className="col-12">
-              <div className="rank-filter-chips-wrapper">
-                <div className="rank-filter-chips" id={`rank-filter-chips-${moduleId}`}>
-                  {/* Chips will be inserted here by JavaScript */}
-                </div>
-                {/* Mobile: Dropdown filter */}
-                <div className="topic-filter-dropdown rank-filter-dropdown-mobile">
-                  <button className="transparent-btn topic-filter-btn" id={`rank-filter-btn-${moduleId}`}>
-                    ALL <i className="fa-solid fa-chevron-down"></i>
-                  </button>
-                  <div className="topic-dropdown-menu" id={`rank-dropdown-${moduleId}`} style={{ display: 'none' }}>
-                    <div className="topic-dropdown-item" data-rank="all">ALL</div>
+          {!showAttendees && (
+            <div className="row">
+              <div className="col-12">
+                <div className="rank-filter-chips-wrapper">
+                  <div className="rank-filter-chips" id={`rank-filter-chips-${moduleId}`}>
+                    {/* Chips will be inserted here by JavaScript */}
+                  </div>
+                  <div className="topic-filter-dropdown rank-filter-dropdown-mobile">
+                    <button className="transparent-btn topic-filter-btn" id={`rank-filter-btn-${moduleId}`}>
+                      ALL <i className="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div className="topic-dropdown-menu" id={`rank-dropdown-${moduleId}`} style={{ display: 'none' }}>
+                      <div className="topic-dropdown-item" data-rank="all">ALL</div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          {/* Sponsors will be loaded via JavaScript script below - Grid layout grouped by rank */}
+          )}
+          {/* Sponsors will be loaded via JavaScript script below */}
           <div id={`sponsors-grid-${moduleId}`} className="all-speakers-grid">
             {/* Ranks and sponsors will be inserted here by JavaScript */}
           </div>
@@ -116,35 +118,88 @@ export function Component({ fieldValues }) {
             const portalId = '${portalId}';
             const tableId = '${tableId}';
             const sponsorRankTableId = '${sponsorRankTableId}';
+            const attendeesTableId = '196648113';
             const moduleId = '${moduleId}';
+            const showAttendees = ${JSON.stringify(showAttendees)};
             const gridContainer = root.querySelector('#sponsors-grid-${moduleId}');
             const loadingDiv = root.querySelector('#sponsor-loading-${moduleId}');
             const errorDiv = root.querySelector('#sponsor-error-${moduleId}');
             
-            // Fetch ALL sponsors from HubDB API
+            function renderSponsorCard(sponsor, parentEl) {
+              const imageSrc = sponsor.image?.src || '';
+              const imageAlt = sponsor.image?.alt || 'Sponsor';
+              const imageUrl = sponsor.link || '';
+              const cardContent = imageSrc ?
+                '<img src="' + imageSrc + '" alt="' + imageAlt + '" />' :
+                '<div style="width: 200px; height: 150px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; margin: 0 auto;">No Image</div>';
+              if (imageUrl) {
+                const anchor = document.createElement('a');
+                anchor.href = imageUrl;
+                anchor.target = '_blank';
+                anchor.style.textDecoration = 'none';
+                anchor.style.display = 'block';
+                anchor.innerHTML = '<div class="sponsor-card">' + cardContent + '</div>';
+                parentEl.appendChild(anchor);
+              } else {
+                const sponsorCard = document.createElement('div');
+                sponsorCard.className = 'sponsor-card';
+                sponsorCard.innerHTML = cardContent;
+                parentEl.appendChild(sponsorCard);
+              }
+            }
+            
             async function fetchSponsors() {
               try {
-                // Step 1: Fetch sponsors
+                if (showAttendees) {
+                  var attendeesApiUrl = 'https://api.hubapi.com/cms/v3/hubdb/tables/' + attendeesTableId + '/rows?portalId=' + portalId;
+                  var attendeesResponse = await fetch(attendeesApiUrl);
+                  if (!attendeesResponse.ok) {
+                    throw new Error('Failed to fetch attendees: ' + attendeesResponse.status);
+                  }
+                  var attendeesData = await attendeesResponse.json();
+                  var rows = attendeesData.results || [];
+                  var ticketAttendees = rows.filter(function(row) {
+                    var cat = row.values && row.values.category;
+                    if (!Array.isArray(cat)) return false;
+                    return cat.some(function(c) { return c && (c.name || '').trim() === 'Tickets'; });
+                  }).map(function(row) {
+                    return {
+                      image: row.values && row.values.image ? {
+                        src: row.values.image.url || '',
+                        alt: row.values.image.altText || 'Sponsor'
+                      } : null,
+                      link: (row.values && row.values.link) || ''
+                    };
+                  });
+                  loadingDiv.style.display = 'none';
+                  errorDiv.style.display = 'none';
+                  if (ticketAttendees.length === 0) {
+                    gridContainer.innerHTML = '<p style="text-align:center;color:#666;">No attendees of tickets to show.</p>';
+                    return;
+                  }
+                  var sponsorsGrid = document.createElement('div');
+                  sponsorsGrid.className = 'sponsors-grid';
+                  ticketAttendees.forEach(function(sponsor) {
+                    renderSponsorCard(sponsor, sponsorsGrid);
+                  });
+                  gridContainer.appendChild(sponsorsGrid);
+                  return;
+                }
+                
                 const sponsorsApiUrl = 'https://api.hubapi.com/cms/v3/hubdb/tables/' + tableId + '/rows?portalId=' + portalId;
                 const sponsorsResponse = await fetch(sponsorsApiUrl);
-                
                 if (!sponsorsResponse.ok) {
                   throw new Error('Failed to fetch sponsors: ' + sponsorsResponse.status);
                 }
-                
                 const sponsorsData = await sponsorsResponse.json();
                 
-                // Step 2: Fetch sponsor ranks to get order field
                 const ranksApiUrl = 'https://api.hubapi.com/cms/v3/hubdb/tables/' + sponsorRankTableId + '/rows?portalId=' + portalId;
                 const ranksResponse = await fetch(ranksApiUrl);
-                
                 if (!ranksResponse.ok) {
                   throw new Error('Failed to fetch sponsor ranks: ' + ranksResponse.status);
                 }
-                
                 const ranksData = await ranksResponse.json();
                 
-                // Step 3: Create a map of rank ID to rank data (including order)
                 const rankById = {};
                 (ranksData.results || []).forEach(function(rankRow) {
                   if (rankRow.id) {
@@ -155,8 +210,6 @@ export function Component({ fieldValues }) {
                   }
                 });
                 
-                // Step 4: Transform sponsors and attach order from rank table.
-                // Do not assign any rank to sponsors that don't have a rank in HubDB. Only show sponsors that have at least one sponsor_rank set.
                 const allSponsorsRaw = (sponsorsData.results || []).map(function(row) {
                   const ranks = (row.values?.sponsor_rank || []).map(function(rankRef) {
                     const rankId = rankRef.id;
@@ -178,8 +231,7 @@ export function Component({ fieldValues }) {
                   };
                 });
                 
-                // Only show sponsors that have a sponsor rank set in HubDB. Exclude unranked sponsors entirely (no "Others").
-                const allSponsors = allSponsorsRaw.filter(function(sponsor) {
+                var allSponsors = allSponsorsRaw.filter(function(sponsor) {
                   return sponsor.ranks && sponsor.ranks.length > 0;
                 });
                 
@@ -280,28 +332,7 @@ export function Component({ fieldValues }) {
                   
                   const sponsors = rankMap[rankName];
                   sponsors.forEach(function(sponsor) {
-                    const imageSrc = sponsor.image?.src || '';
-                    const imageAlt = sponsor.image?.alt || 'Sponsor';
-                    const imageUrl = sponsor.link || '';
-                    
-                    const cardContent = imageSrc ? 
-                      '<img src="' + imageSrc + '" alt="' + imageAlt + '" />' :
-                      '<div style="width: 200px; height: 150px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; margin: 0 auto;">No Image</div>';
-
-                    if (imageUrl) {
-                      const anchor = document.createElement('a');
-                      anchor.href = imageUrl;
-                      anchor.target = '_blank';
-                      anchor.style.textDecoration = 'none';
-                      anchor.style.display = 'block';
-                      anchor.innerHTML = '<div class="sponsor-card">' + cardContent + '</div>';
-                      sponsorsGrid.appendChild(anchor);
-                    } else {
-                      const sponsorCard = document.createElement('div');
-                      sponsorCard.className = 'sponsor-card';
-                      sponsorCard.innerHTML = cardContent;
-                      sponsorsGrid.appendChild(sponsorCard);
-                    }
+                    renderSponsorCard(sponsor, sponsorsGrid);
                   });
                   
                   rankSection.appendChild(sponsorsGrid);
@@ -415,6 +446,12 @@ export const fields = (
       name="heading"
       label="Heading"
       default="Sponsors"
+    />
+    <BooleanField
+      name="showAttendees"
+      label="Show Attendees of Tickets"
+      default={false}
+      helpText={'When checked, fetches from the Attendees table and shows only rows with category "Tickets"—heading and grid only, no rank filter.'}
     />
     <TextField
       name="sectionId"
