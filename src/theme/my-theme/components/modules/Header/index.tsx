@@ -41,10 +41,8 @@ function getMenuItemsAsNavItems(menuValue) {
 }
 
 export function Component({ fieldValues, hublParameters, hublData }) {
-  // Priority:
-  // 1) Module-selected HubSpot menu (field "menu") resolved via hublDataTemplate -> props.hublData.menuItems
-  // 2) Theme-level menu passed from layout via hublParameters.menuItems
-  // 3) Manual Navigation links (fieldValues.navItems)
+  // Menu priority: (1) Header component's menu selection (module) overrides; (2) theme header_menu_id from layout (all pages); (3) manual nav.
+  // So theme menu is default for all pages unless this Header instance has another menu selected.
   const normalizeMenuParam = (v) => {
     if (!v) return null;
     if (typeof v === 'string') {
@@ -113,25 +111,62 @@ export function Component({ fieldValues, hublParameters, hublData }) {
     return false;
   };
 
-  // Handle UrlField structure - it can be a string or an object with url/href property
+  // Handle UrlField / link field: string, or object with url/href/link or nested url.href
   const getUrl = (urlField) => {
     if (!urlField) return '#';
     if (typeof urlField === 'string') return urlField;
     if (typeof urlField === 'object') {
-      return urlField.url || urlField.href || urlField.link || '#';
+      const u = urlField.url ?? urlField;
+      const h = typeof u === 'object' ? (u?.href ?? u?.link) : u;
+      if (h) return h;
+      return urlField.href ?? urlField.link ?? '#';
     }
     return '#';
   };
 
-  const logoLink = getUrl(fieldValues.logoLink);
+  const getOpenInNewTab = (linkField) => {
+    if (!linkField || typeof linkField !== 'object') return false;
+    return linkField.open_in_new_tab === true || linkField.openInNewTab === true;
+  };
+
+  // Base URL (origin) of the current site for default logo link when none set
+  const getBaseUrl = () => {
+    const pageUrl = hublParameters?.pageUrl;
+    if (pageUrl && typeof pageUrl === 'string') {
+      try {
+        return new URL(pageUrl).origin;
+      } catch {
+        // fallthrough
+      }
+    }
+    if (typeof window !== 'undefined' && window.location && window.location.origin) {
+      return window.location.origin;
+    }
+    return '/';
+  };
+
+  // Logo: theme (from layout) overrides module when set; otherwise use module logo/link; empty link -> base URL
+  let themeLogo = hublParameters?.headerLogo;
+  if (typeof themeLogo === 'string') {
+    try {
+      themeLogo = JSON.parse(themeLogo);
+    } catch {
+      themeLogo = null;
+    }
+  }
+  const useThemeLogo = themeLogo && themeLogo.src;
+  const logoImg = useThemeLogo ? themeLogo : (fieldValues.logo || null);
+  let logoLink = getUrl(fieldValues.logoLink);
+  if (!logoLink || logoLink === '#') logoLink = getBaseUrl();
+  const logoOpenInNewTab = !!(fieldValues.logoLink && typeof fieldValues.logoLink === 'object' && (fieldValues.logoLink.open_in_new_tab || fieldValues.logoLink.openInNewTab));
   const ctaLink = getUrl(fieldValues.ctaLink);
 
   return (
     <header className="header">
       <div className="header-wrapper">
         <div className="logo-div">
-        <a href={logoLink}>
-          <img src={fieldValues.logo?.src} alt={fieldValues.logo?.alt || 'Logo'} />
+        <a href={logoLink} target={logoOpenInNewTab ? '_blank' : undefined} rel={logoOpenInNewTab ? 'noopener noreferrer' : undefined}>
+          <img src={logoImg?.src} alt={logoImg?.alt || 'Logo'} />
         </a>
       </div>
       <nav className="navbar navbar-expand-lg navbar-light">
@@ -206,7 +241,7 @@ export function Component({ fieldValues, hublParameters, hublData }) {
       </nav>
       <div className="header-btn">
         <a 
-          href={ctaLink || '#conatct-us'} 
+          href={ctaLink || '#conatct-us'}
           className="transparent-btn"
           target={fieldValues.ctaOpenInNewWindow ? '_blank' : undefined}
           rel={fieldValues.ctaOpenInNewWindow ? 'noopener noreferrer' : undefined}
@@ -447,14 +482,23 @@ export const meta = {
   label: 'GAI Header',
 };
 
-// Resolve module-selected menu and current path into props.hublData so it works even when Header is added via the page editor.
-// Tokens are built with escapes so the raw source doesn't contain `{%` / `%}`.
+// Resolve menu in MODULE context (same as when user picks menu in UI): module.menu wins; else theme.header_menu_id. menu(id) only works correctly here, not in layout.
 const _hsStmtOpen = '\x7b\x25'; // {%
 const _hsStmtClose = '\x25\x7d'; // %}
 export const hublDataTemplate =
   _hsStmtOpen + ' set _mid = module.menu ' + _hsStmtClose +
   _hsStmtOpen + ' if _mid is mapping and _mid.id is defined ' + _hsStmtClose +
   _hsStmtOpen + ' set _mid = _mid.id ' + _hsStmtClose +
+  _hsStmtOpen + ' endif ' + _hsStmtClose +
+  _hsStmtOpen + ' if not _mid ' + _hsStmtClose +
+  _hsStmtOpen + ' set _tid = theme.header_menu_id|default(0) ' + _hsStmtClose +
+  _hsStmtOpen + ' if _tid is mapping and _tid.id is defined ' + _hsStmtClose +
+  _hsStmtOpen + ' set _tid = _tid.id ' + _hsStmtClose +
+  _hsStmtOpen + ' endif ' + _hsStmtClose +
+  _hsStmtOpen + ' set _tid = _tid|string|replace(",","")|replace(" ","")|trim|int ' + _hsStmtClose +
+  _hsStmtOpen + ' if _tid ' + _hsStmtClose +
+  _hsStmtOpen + ' set _mid = _tid ' + _hsStmtClose +
+  _hsStmtOpen + ' endif ' + _hsStmtClose +
   _hsStmtOpen + ' endif ' + _hsStmtClose +
   _hsStmtOpen + ' if _mid ' + _hsStmtClose +
   _hsStmtOpen + ' set hublData = {"menuItems": menu(_mid), "currentPath": request.path} ' + _hsStmtClose +

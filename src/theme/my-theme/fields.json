@@ -1,6 +1,6 @@
 [
   {
-    "type": "Color",
+    "type": "color",
     "name": "brand_color",
     "label": "Brand Color",
     "default": {
@@ -9,10 +9,27 @@
     }
   },
   {
-    "type": "Number",
+    "type": "number",
     "name": "header_menu_id",
     "label": "Header menu (HubSpot nav)",
     "default": 0,
     "help_text": "Set to your HubSpot menu ID to show that menu in the global header. Leave 0 to use the header's manual Navigation links."
+  },
+  {
+    "name": "header_logo",
+    "label": "Header logo",
+    "type": "image",
+    "required": false,
+    "locked": false,
+    "responsive": true,
+    "resizable": true,
+    "show_loading": false,
+    "help_text": "Logo shown in the header. When set, applies to all pages. Leave empty to use the logo set in the Header module.",
+    "default": {
+      "size_type": "auto",
+      "src": "",
+      "alt": "",
+      "loading": "disabled"
+    }
   }
 ]

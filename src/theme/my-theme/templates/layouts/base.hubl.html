@@ -34,13 +34,10 @@
   </head>
   <body>
     <div class="body-wrapper {{ builtin_body_classes }}">
-      {# Pass resolved HubSpot menu to header when set (theme field "Header menu" or variable header_menu_id). #}
-      {% set header_menu_id = header_menu_id|default(theme.header_menu_id)|default(0) %}
-      {% if header_menu_id is mapping and header_menu_id.id is defined %}{% set header_menu_id = header_menu_id.id %}{% endif %}
-      {% if header_menu_id %}{% set _header_menu_items = menu(header_menu_id) %}{% else %}{% set _header_menu_items = [] %}{% endif %}
-      {% set _header_menu_json = _header_menu_items|tojson %}
       {% set _current_path = request.path %}
-      {% module "global_header" path="../../components/modules/Header" label="Global Header" menuItems=_header_menu_json currentPath=_current_path %}
+      {% set _page_url = request.full_url|default(request.url)|default('') %}
+      {% set _header_logo_json = theme.header_logo|tojson %}
+      {% module "global_header" path="../../components/modules/Header" label="Global Header" currentPath=_current_path pageUrl=_page_url headerLogo=_header_logo_json %}
       <main>
       {% block body %}
       {% endblock body %}
