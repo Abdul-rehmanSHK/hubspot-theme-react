@@ -6,7 +6,7 @@ import {
 } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
-  const heading = fieldValues.heading || 'Why Attend GAI?';
+  const heading = fieldValues.heading || '';
   const benefitsContent = fieldValues.content || '';
   const sectionId = fieldValues.sectionId;
   const sectionClass = fieldValues.sectionClass || 'benefits-section';
@@ -182,7 +182,7 @@ export const fields = (
     <RichTextField
       name="heading"
       label="Heading"
-      default="Why Attend GAI?"
+      default=""
       helpText="Add your heading content here. Use H2 for the main heading."
     />
     <ImageField
