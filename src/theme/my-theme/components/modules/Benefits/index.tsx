@@ -3,6 +3,8 @@ import {
   TextField,
   ImageField,
   RichTextField,
+  RepeatedFieldGroup,
+  BooleanField,
 } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
@@ -11,18 +13,32 @@ export function Component({ fieldValues }) {
   const sectionId = fieldValues.sectionId;
   const sectionClass = fieldValues.sectionClass || 'benefits-section';
   const moduleId = `benefits-${fieldValues.moduleInstanceId || Math.random().toString(36).slice(2)}`;
+  const cards = fieldValues.cards || [];
+  const hasCards = cards.length > 0;
+  const hasImage = fieldValues.image?.src;
+  const equalColumns = fieldValues.equalColumns === true;
+  const leftColClass = equalColumns ? 'col-md-6 p-0' : 'col-md-4 custom-45 p-0';
+  const rightColClass = equalColumns ? 'col-md-6 p-0' : 'col-md-8 custom-md-full p-0';
 
   return (
     <div className={sectionClass} id={sectionId || undefined} data-benefits-id={moduleId}>
       <div className="container">
         <div className="benefits-inner">
           <div className="row">
-            <div className="col-md-4 custom-45 p-0">
+            <div className={leftColClass}>
               <div className="benefits-left">
                 {heading && (
                   <div className="benefits-heading" dangerouslySetInnerHTML={{ __html: heading }} />
                 )}
-                {fieldValues.image?.src && (
+                {hasCards ? (
+                  <div className="cards-grid">
+                    {cards.map((card, index) => (
+                      <div key={index} className="gai-card">
+                        <div className="card-text" dangerouslySetInnerHTML={{ __html: card.cardContent || '' }} />
+                      </div>
+                    ))}
+                  </div>
+                ) : hasImage ? (
                   <div className="benefits-img">
                     <img
                       src={fieldValues.image.src}
@@ -30,10 +46,10 @@ export function Component({ fieldValues }) {
                       className="img-fluid"
                     />
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
-            <div className="col-md-8 custom-md-full p-0">
+            <div className={rightColClass}>
               <div className="benefits-right">
                 {benefitsContent && (
                   <div 
@@ -188,7 +204,20 @@ export const fields = (
     <ImageField
       name="image"
       label="Side image"
-      helpText="Upload the vertical image for the left side"
+      helpText="Upload the vertical image for the left side. Ignored if cards are added below."
+    />
+    <RepeatedFieldGroup
+      name="cards"
+      label="Left-side cards"
+      helpText="Optional. Add cards to show on the left instead of the image. Same style as Event section (gai-card). If any cards are added, the side image is not shown."
+      children={[
+        <RichTextField
+          name="cardContent"
+          label="Card content"
+          default=""
+          helpText="Rich text content for this card."
+        />,
+      ]}
     />
     <RichTextField
       name="content"
@@ -206,6 +235,12 @@ export const fields = (
       label="Section CSS Class"
       default="benefits-section"
       helpText="Custom CSS class for this section. Default: benefits-section"
+    />
+    <BooleanField
+      name="equalColumns"
+      label="Equal columns"
+      default={false}
+      helpText="When checked, left and right columns are 6/6. When unchecked, default is 4/8."
     />
   </ModuleFields>
 );
