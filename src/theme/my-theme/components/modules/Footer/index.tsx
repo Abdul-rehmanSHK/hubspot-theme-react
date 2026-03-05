@@ -6,6 +6,7 @@ import {
   RepeatedFieldGroup,
   BooleanField,
   RichTextField,
+  FormField,
 } from '@hubspot/cms-components/fields';
 import logo from '../../../assets/images/gai-insights-logo.png';
 
@@ -25,6 +26,23 @@ export function Component({ fieldValues }) {
   const footerLinks = fieldValues.footerLinks || [];
   const footerLogoLink = getUrl(fieldValues.footerLogoLink);
 
+  const selectedForm = fieldValues.footerForm || null;
+  let formId = '';
+  let portalId = '39650877';
+  let region = 'na1';
+  if (selectedForm) {
+    if (typeof selectedForm === 'string') {
+      formId = selectedForm.trim();
+    } else if (typeof selectedForm === 'object' && selectedForm !== null) {
+      formId = selectedForm.guid || selectedForm.formId || selectedForm.id || selectedForm.value || selectedForm.form_id ||
+        (selectedForm.form && (selectedForm.form.guid || selectedForm.form.formId || selectedForm.form.id)) || '';
+      portalId = selectedForm.portalId || selectedForm.portal_id || (selectedForm.form && selectedForm.form.portalId) || '39650877';
+      region = selectedForm.region || (selectedForm.form && selectedForm.form.region) || 'na1';
+      if (formId) formId = String(formId).trim();
+    }
+  }
+  const formContainerId = `hs-form-footer-${formId ? formId.replace(/[^a-zA-Z0-9]/g, '') : 'empty'}`;
+
   return (
     <footer className="footer">
       <div className="container">
@@ -35,6 +53,22 @@ export function Component({ fieldValues }) {
                 <a href={footerLogoLink}>
                   <img src={fieldValues.logo?.src} alt={fieldValues.logo?.alt || 'logo'} />
                 </a>
+              </div>
+              <div className="footer-text">
+                {fieldValues.footerContent && (
+                  <div dangerouslySetInnerHTML={{ __html: fieldValues.footerContent }} />
+                )}
+              </div>
+              <div className="footer-bottom">
+                <p>© {fieldValues.copyrightYear || new Date().getFullYear()} by GAI Insights</p>
+                {footerLinks.map((item, index) => {
+                  const linkUrl = getUrl(item.link);
+                  return (
+                    <a key={index} href={linkUrl}>
+                      {item.text}
+                    </a>
+                  );
+                })}
               </div>
             </div>
             <div className="col-md-6">
@@ -60,35 +94,57 @@ export function Component({ fieldValues }) {
                     );
                   })}
                 </div>
-                <form className="newsletter-form" onSubmit={(e) => e.preventDefault()}>
-                  <input
-                    type="email"
-                    placeholder={fieldValues.newsletterPlaceholder || 'Enter your email address'}
-                    required
-                  />
-                  <button type="submit">{fieldValues.newsletterButtonText || 'SUBSCRIBE'}</button>
-                </form>
+                {formId ? (
+                  <>
+                    <div id={formContainerId} className="newsletter-form" />
+                    <script
+                      dangerouslySetInnerHTML={{
+                        __html: `
+                        (function() {
+                          var containerId = '${formContainerId}';
+                          var formId = '${formId}';
+                          var portalId = '${portalId}';
+                          var region = '${region}';
+                          var retryCount = 0;
+                          var maxRetries = 50;
+                          function initForm() {
+                            var container = document.getElementById(containerId);
+                            if (!container) {
+                              retryCount++;
+                              if (retryCount < maxRetries) setTimeout(initForm, 100);
+                              return;
+                            }
+                            if (container.querySelector('iframe') || container.querySelector('.hs-form') || container.querySelector('form')) return;
+                            if (typeof hbspt !== 'undefined' && hbspt.forms && typeof hbspt.forms.create === 'function') {
+                              try {
+                                hbspt.forms.create({ portalId: portalId, formId: formId, region: region, target: '#' + containerId });
+                              } catch (e) {
+                                container.innerHTML = '<div style="padding:20px;text-align:center;color:#d32f2f;">Error loading form.</div>';
+                              }
+                            } else {
+                              retryCount++;
+                              if (retryCount < maxRetries) setTimeout(initForm, 100);
+                            }
+                          }
+                          if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function() { setTimeout(initForm, 200); });
+                          else setTimeout(initForm, 200);
+                        })();
+                        `,
+                      }}
+                    />
+                  </>
+                ) : (
+                  <form className="newsletter-form" onSubmit={(e) => e.preventDefault()}>
+                    <input
+                      type="email"
+                      placeholder={fieldValues.newsletterPlaceholder || 'Enter your email address'}
+                      required
+                    />
+                    <button type="submit">{fieldValues.newsletterButtonText || 'SUBSCRIBE'}</button>
+                  </form>
+                )}
               </div>
             </div>
-          </div>
-          <div className="footer-text">
-            {fieldValues.footerContent && (
-              <div dangerouslySetInnerHTML={{ __html: fieldValues.footerContent }} />
-            )}
-          </div>
-          <div className="footer-bottom">
-            <p>© {fieldValues.copyrightYear || new Date().getFullYear()} by GAI Insights</p>
-            {footerLinks.map((item, index) => {
-              const linkUrl = getUrl(item.link);
-              return (
-                <a
-                  key={index}
-                  href={linkUrl}
-                >
-                  {item.text}
-                </a>
-              );
-            })}
           </div>
         </div>
       </div>
@@ -142,6 +198,11 @@ export const fields = (
       default="Enter your email address"
     />
     <TextField name="newsletterButtonText" label="Newsletter button" default="SUBSCRIBE" />
+    <FormField
+      name="footerForm"
+      label="Footer form"
+      helpText="Optional. Select a HubSpot form to show instead of the email placeholder and button. Leave unset to keep the default email input and Subscribe button."
+    />
     <RichTextField
       name="footerContent"
       label="Footer Content"

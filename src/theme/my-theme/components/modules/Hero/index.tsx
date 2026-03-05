@@ -1,4 +1,4 @@
-import { ModuleFields, ImageField, TextField, UrlField, FileField, RepeatedFieldGroup, BooleanField } from '@hubspot/cms-components/fields';
+import { ModuleFields, ImageField, TextField, UrlField, FileField, RepeatedFieldGroup, BooleanField, RichTextField } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
   // Handle UrlField structure - it can be a string or an object with url/href property
@@ -118,6 +118,7 @@ export function Component({ fieldValues }) {
   };
 
   // All values are now editable from content editor - no defaults, only show if content exists
+  const headingOverride = (fieldValues.headingOverride || '').trim();
   const preTitle = fieldValues.preTitle || '';
   const title = fieldValues.title || '';
   const dateLine = fieldValues.dateLine || '';
@@ -209,18 +210,24 @@ export function Component({ fieldValues }) {
           <div className="row g-5 align-items-center">
             <div className="col-md-6">
               <div className="left-area">
-                {(preTitle || title) && (
-                  <div className="heading">
-                    {preTitle && <div className="pre-title">{preTitle}</div>}
-                    {title && <h1>{title}</h1>}
-                  </div>
-                )}
-                {(dateLine || locationLine) && (
-                  <div className="location-div">
-                    {dateLine && <span>{dateLine}</span>}
-                    {dateLine && locationLine && <br />}
-                    {locationLine && <span>{locationLine}</span>}
-                  </div>
+                {headingOverride ? (
+                  <div className="heading heading-override" dangerouslySetInnerHTML={{ __html: headingOverride }} />
+                ) : (
+                  <>
+                    {(preTitle || title) && (
+                      <div className="heading">
+                        {preTitle && <div className="pre-title">{preTitle}</div>}
+                        {title && <h1>{title}</h1>}
+                      </div>
+                    )}
+                    {(dateLine || locationLine) && (
+                      <div className="location-div">
+                        {dateLine && <span>{dateLine}</span>}
+                        {dateLine && locationLine && <br />}
+                        {locationLine && <span>{locationLine}</span>}
+                      </div>
+                    )}
+                  </>
                 )}
                 {(ctaText || ctaText2) && (
                   <div className="hero-cta-buttons">
@@ -926,6 +933,12 @@ export const fields = (
       name="locationLine"
       label="Location line"
       helpText="Second line of date/location info. Leave empty to hide."
+    />
+    <RichTextField
+      name="headingOverride"
+      label="Heading override (rich text)"
+      default=""
+      helpText="Optional. When set, this content is shown instead of the four fields above (text above title, title, date line, location). Leave empty to use those fields."
     />
     <TextField
       name="ctaText"
