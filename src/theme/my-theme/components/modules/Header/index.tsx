@@ -243,12 +243,39 @@ export function Component({ fieldValues, hublParameters, hublData }) {
         <a 
           href={ctaLink || '#conatct-us'}
           className="transparent-btn"
+          data-header-cta
           target={fieldValues.ctaOpenInNewWindow ? '_blank' : undefined}
           rel={fieldValues.ctaOpenInNewWindow ? 'noopener noreferrer' : undefined}
         >
           {fieldValues.ctaText || 'Contact Us'}
         </a>
       </div>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+          (function() {
+            function applyHubDbCta() {
+              var btn = document.querySelector('.header [data-header-cta]');
+              if (!btn) return;
+              fetch('https://api.hubapi.com/cms/v3/hubdb/tables/199638385/rows?portalId=39650877')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                  var results = data && data.results;
+                  if (!results || results.length === 0) return;
+                  var last = results[results.length - 1];
+                  var values = last && last.values;
+                  if (!values) return;
+                  if (values.cta_url) btn.setAttribute('href', values.cta_url);
+                  if (values.cta_text) btn.textContent = values.cta_text;
+                })
+                .catch(function() {});
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyHubDbCta);
+            else applyHubDbCta();
+          })();
+          `,
+        }}
+      />
       <script
         dangerouslySetInnerHTML={{
           __html: `

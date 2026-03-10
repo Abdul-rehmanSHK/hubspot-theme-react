@@ -1,6 +1,7 @@
 import {
   ModuleFields,
   TextField,
+  ImageField,
 } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
@@ -20,11 +21,19 @@ export function Component({ fieldValues }) {
                 <div className="speakers-text sessions-header-row">
                   <h2>{heading}</h2>
                   <div className="sessions-view-toggle">
-                    <button className="sessions-view-chip active" id={`grid-view-btn-${moduleId}`} data-view="grid">
-                      Grid View
+                    <button className="sessions-view-chip active" id={`grid-view-btn-${moduleId}`} data-view="grid" type="button" aria-label="Grid view">
+                      {fieldValues.gridViewIcon?.src ? (
+                        <img src={fieldValues.gridViewIcon.src} alt="Grid view" className="sessions-view-chip-icon" />
+                      ) : (
+                        'Grid View'
+                      )}
                     </button>
-                    <button className="sessions-view-chip" id={`calendar-view-btn-${moduleId}`} data-view="calendar">
-                      Calendar
+                    <button className="sessions-view-chip" id={`calendar-view-btn-${moduleId}`} data-view="calendar" type="button" aria-label="Calendar view">
+                      {fieldValues.calendarViewIcon?.src ? (
+                        <img src={fieldValues.calendarViewIcon.src} alt="Calendar view" className="sessions-view-chip-icon" />
+                      ) : (
+                        'Calendar'
+                      )}
                     </button>
                   </div>
                 </div>
@@ -2854,6 +2863,16 @@ export const fields = (
       label="Section CSS Class"
       default="sessions-area"
       helpText="Custom CSS class for this section. Default: sessions-area"
+    />
+    <ImageField
+      name="gridViewIcon"
+      label="Grid view button icon"
+      helpText="Upload an icon to show instead of 'Grid View' text. Leave empty to show text."
+    />
+    <ImageField
+      name="calendarViewIcon"
+      label="Calendar view button icon"
+      helpText="Upload an icon to show instead of 'Calendar' text. Leave empty to show text."
     />
   </ModuleFields>
 );
