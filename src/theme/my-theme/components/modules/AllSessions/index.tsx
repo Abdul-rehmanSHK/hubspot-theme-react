@@ -2651,50 +2651,57 @@ export function Component({ fieldValues }) {
                     const speakerCard = document.createElement('div');
                     speakerCard.className = 'session-detail-speaker-card';
                     
-                    // Speaker image
+                    // Row 1: image + (name + topic)
+                    const speakerRow = document.createElement('div');
+                    speakerRow.className = 'session-detail-speaker-row';
                     if (speaker.image && speaker.image.src) {
                       const img = document.createElement('img');
                       img.src = speaker.image.src;
                       img.alt = speaker.image.alt || speaker.name;
                       img.className = 'session-detail-speaker-image';
-                      speakerCard.appendChild(img);
+                      speakerRow.appendChild(img);
                     }
-                    
-                    // Speaker info
-                    const speakerInfo = document.createElement('div');
-                    speakerInfo.className = 'session-detail-speaker-info';
-                    
+                    const nameTopicCol = document.createElement('div');
+                    nameTopicCol.className = 'session-detail-speaker-name-topics';
                     if (speaker.name) {
                       const nameDiv = document.createElement('div');
                       nameDiv.className = 'session-detail-speaker-name';
                       nameDiv.textContent = speaker.name;
-                      speakerInfo.appendChild(nameDiv);
+                      nameTopicCol.appendChild(nameDiv);
                     }
+                    if (speaker.topics && speaker.topics.length > 0) {
+                      const speakerTopicsDiv = document.createElement('div');
+                      speakerTopicsDiv.className = 'session-detail-speaker-topics';
+                      speaker.topics.forEach(function(topic) {
+                        const topicTag = document.createElement('span');
+                        topicTag.className = 'session-detail-speaker-topic-tag';
+                        topicTag.textContent = topic;
+                        speakerTopicsDiv.appendChild(topicTag);
+                      });
+                      nameTopicCol.appendChild(speakerTopicsDiv);
+                    }
+                    speakerRow.appendChild(nameTopicCol);
+                    speakerCard.appendChild(speakerRow);
                     
-                    // Show description if available (richtext field from HubDB)
+                    // Row 2: description + links (full width)
+                    const speakerDetail = document.createElement('div');
+                    speakerDetail.className = 'session-detail-speaker-detail';
                     if (speaker.description && speaker.description.trim()) {
                       const descDiv = document.createElement('div');
                       descDiv.className = 'session-detail-speaker-description';
-                      // Remove only <span> tags while preserving other HTML (like links)
                       descDiv.innerHTML = removeSpanTags(speaker.description);
-                      speakerInfo.appendChild(descDiv);
+                      speakerDetail.appendChild(descDiv);
                     }
-                    
-                    // Legacy bio field (keep for backward compatibility)
                     if (speaker.bio) {
                       const bioDiv = document.createElement('div');
                       bioDiv.className = 'session-detail-speaker-bio';
                       bioDiv.textContent = speaker.bio;
-                      speakerInfo.appendChild(bioDiv);
+                      speakerDetail.appendChild(bioDiv);
                     }
-                    
-                    // Social media links (below description, above topics)
-                    if ((speaker.linkedin_profile && speaker.linkedin_profile.trim()) || 
+                    if ((speaker.linkedin_profile && speaker.linkedin_profile.trim()) ||
                         (speaker.portfolio_site && speaker.portfolio_site.trim())) {
                       const socialDiv = document.createElement('div');
                       socialDiv.className = 'session-detail-speaker-social';
-                      
-                      // LinkedIn link
                       if (speaker.linkedin_profile && speaker.linkedin_profile.trim()) {
                         const linkedinLink = document.createElement('a');
                         linkedinLink.href = speaker.linkedin_profile;
@@ -2705,8 +2712,6 @@ export function Component({ fieldValues }) {
                         linkedinLink.innerHTML = '<i class="fa-brands fa-linkedin"></i>';
                         socialDiv.appendChild(linkedinLink);
                       }
-                      
-                      // Portfolio site link
                       if (speaker.portfolio_site && speaker.portfolio_site.trim()) {
                         const portfolioLink = document.createElement('a');
                         portfolioLink.href = speaker.portfolio_site;
@@ -2717,23 +2722,9 @@ export function Component({ fieldValues }) {
                         portfolioLink.innerHTML = '<i class="fa-solid fa-globe"></i>';
                         socialDiv.appendChild(portfolioLink);
                       }
-                      
-                      speakerInfo.appendChild(socialDiv);
+                      speakerDetail.appendChild(socialDiv);
                     }
-                    
-                    if (speaker.topics && speaker.topics.length > 0) {
-                      const speakerTopicsDiv = document.createElement('div');
-                      speakerTopicsDiv.className = 'session-detail-speaker-topics';
-                      speaker.topics.forEach(function(topic) {
-                        const topicTag = document.createElement('span');
-                        topicTag.className = 'session-detail-speaker-topic-tag';
-                        topicTag.textContent = topic;
-                        speakerTopicsDiv.appendChild(topicTag);
-                      });
-                      speakerInfo.appendChild(speakerTopicsDiv);
-                    }
-                    
-                    speakerCard.appendChild(speakerInfo);
+                    speakerCard.appendChild(speakerDetail);
                     speakersList.appendChild(speakerCard);
                   }
                 });
