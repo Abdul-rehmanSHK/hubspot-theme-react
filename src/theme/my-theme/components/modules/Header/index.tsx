@@ -85,6 +85,22 @@ export function Component({ fieldValues, hublParameters, hublData }) {
       ''
   );
 
+  const currentOrigin = (() => {
+    const pageUrl = hublParameters?.pageUrl ?? hublParameters?.page_url;
+    if (pageUrl && typeof pageUrl === 'string') {
+      try {
+        const o = new URL(pageUrl).origin;
+        if (o) return o;
+      } catch {
+        // fallthrough
+      }
+    }
+    if (typeof window !== 'undefined' && window.location && window.location.origin) {
+      return window.location.origin;
+    }
+    return '';
+  })();
+
   const getComparablePathFromUrl = (rawUrl) => {
     if (rawUrl == null) return '';
     const str = typeof rawUrl === 'string' ? rawUrl.trim() : String(rawUrl).trim();
@@ -104,6 +120,15 @@ export function Component({ fieldValues, hublParameters, hublData }) {
 
   const isDynamicLinkActive = (rawUrl) => {
     if (!currentPath) return false;
+    const str = rawUrl == null ? '' : (typeof rawUrl === 'string' ? rawUrl.trim() : String(rawUrl).trim());
+    if (str.startsWith('http')) {
+      try {
+        const linkUrl = new URL(str, 'https://example.invalid');
+        if (currentOrigin && linkUrl.origin !== currentOrigin) return false;
+      } catch {
+        return false;
+      }
+    }
     const itemPath = getComparablePathFromUrl(rawUrl);
     if (!itemPath) return false;
     if (currentPath === itemPath) return true;
@@ -288,6 +313,27 @@ export function Component({ fieldValues, hublParameters, hublData }) {
         dangerouslySetInnerHTML={{
           __html: `
           (function() {
+            // Remove active only from nav items whose MAIN link is cross-origin (fixes wrong active on other domain home)
+            function fixActiveByOrigin() {
+              try {
+                var currentOrigin = window.location.origin;
+                if (!currentOrigin) return;
+                document.querySelectorAll('.header .nav-item').forEach(function(item) {
+                  var mainLink = item.querySelector(':scope > .nav-link, :scope > .nav-link-dropdown');
+                  if (!mainLink || !mainLink.getAttribute('href') || !mainLink.getAttribute('href').startsWith('http')) return;
+                  try {
+                    var linkOrigin = new URL(mainLink.getAttribute('href')).origin;
+                    if (linkOrigin !== currentOrigin) {
+                      item.classList.remove('active');
+                      mainLink.classList.remove('dropdown-active');
+                    }
+                  } catch (err) {}
+                });
+              } catch (e) {}
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fixActiveByOrigin);
+            else fixActiveByOrigin();
+
             // Handle smooth scrolling for anchor links in header
             function handleAnchorClick(e, href) {
               // Only handle anchor links (starting with #) on same page
