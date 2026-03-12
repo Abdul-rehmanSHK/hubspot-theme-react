@@ -165,8 +165,8 @@ export function Component({ fieldValues, hublParameters, hublData }) {
     <header className="header">
       <div className="header-wrapper">
         <div className="logo-div">
-        <a href={logoLink} target={logoOpenInNewTab ? '_blank' : undefined} rel={logoOpenInNewTab ? 'noopener noreferrer' : undefined}>
-          <img src={logoImg?.src} alt={logoImg?.alt || 'Logo'} />
+        <a href={logoLink} target={logoOpenInNewTab ? '_blank' : undefined} rel={logoOpenInNewTab ? 'noopener noreferrer' : undefined} data-header-logo>
+          <img src={logoImg?.src} alt={logoImg?.alt || 'Logo'} data-header-logo-img />
         </a>
       </div>
       <nav className="navbar navbar-expand-lg navbar-light">
@@ -254,9 +254,10 @@ export function Component({ fieldValues, hublParameters, hublData }) {
         dangerouslySetInnerHTML={{
           __html: `
           (function() {
-            function applyHubDbCta() {
+            function applyHubDbHeader() {
               var btn = document.querySelector('.header [data-header-cta]');
-              if (!btn) return;
+              var logoLink = document.querySelector('.header [data-header-logo]');
+              var logoImg = document.querySelector('.header [data-header-logo-img]');
               fetch('https://api.hubapi.com/cms/v3/hubdb/tables/199638385/rows?portalId=39650877')
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
@@ -265,13 +266,20 @@ export function Component({ fieldValues, hublParameters, hublData }) {
                   var last = results[results.length - 1];
                   var values = last && last.values;
                   if (!values) return;
-                  if (values.cta_url) btn.setAttribute('href', values.cta_url);
-                  if (values.cta_text) btn.textContent = values.cta_text;
+                  if (btn) {
+                    if (values.cta_url) btn.setAttribute('href', values.cta_url);
+                    if (values.cta_text) btn.textContent = values.cta_text;
+                  }
+                  if (logoLink && values.logo_url) logoLink.setAttribute('href', values.logo_url);
+                  if (logoImg && values.logo_image && values.logo_image.url) {
+                    logoImg.setAttribute('src', values.logo_image.url);
+                    if (values.logo_image.altText) logoImg.setAttribute('alt', values.logo_image.altText);
+                  }
                 })
                 .catch(function() {});
             }
-            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyHubDbCta);
-            else applyHubDbCta();
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyHubDbHeader);
+            else applyHubDbHeader();
           })();
           `,
         }}

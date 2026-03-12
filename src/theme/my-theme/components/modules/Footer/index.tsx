@@ -50,8 +50,8 @@ export function Component({ fieldValues }) {
           <div className="row g-5">
             <div className="col-md-6">
               <div className="footer-top">
-                <a href={footerLogoLink}>
-                  <img src={fieldValues.logo?.src} alt={fieldValues.logo?.alt || 'logo'} />
+                <a href={footerLogoLink} data-footer-logo>
+                  <img src={fieldValues.logo?.src} alt={fieldValues.logo?.alt || 'logo'} data-footer-logo-img />
                 </a>
               </div>
               <div className="footer-text">
@@ -148,6 +148,35 @@ export function Component({ fieldValues }) {
           </div>
         </div>
       </div>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+          (function() {
+            function applyHubDbFooterLogo() {
+              var logoLink = document.querySelector('.footer [data-footer-logo]');
+              var logoImg = document.querySelector('.footer [data-footer-logo-img]');
+              fetch('https://api.hubapi.com/cms/v3/hubdb/tables/199638385/rows?portalId=39650877')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                  var results = data && data.results;
+                  if (!results || results.length === 0) return;
+                  var last = results[results.length - 1];
+                  var values = last && last.values;
+                  if (!values) return;
+                  if (logoLink && values.logo_url) logoLink.setAttribute('href', values.logo_url);
+                  if (logoImg && values.logo_image && values.logo_image.url) {
+                    logoImg.setAttribute('src', values.logo_image.url);
+                    if (values.logo_image.altText) logoImg.setAttribute('alt', values.logo_image.altText);
+                  }
+                })
+                .catch(function() {});
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyHubDbFooterLogo);
+            else applyHubDbFooterLogo();
+          })();
+          `,
+        }}
+      />
     </footer>
   );
 }
