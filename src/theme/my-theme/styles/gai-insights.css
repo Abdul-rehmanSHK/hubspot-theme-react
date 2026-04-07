@@ -4452,6 +4452,19 @@ footer.footer::after {
   gap: 8px;
 }
 
+.session-detail-speaker-role-tag {
+  display: inline-block;
+  margin: 6px 0 4px;
+  padding: 4px 12px;
+  background: rgba(6, 199, 238, 0.15);
+  color: #06C7EE;
+  border: 1px solid #06C7EE;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  width: fit-content;
+}
+
 .session-detail-speaker-topic-tag {
   display: inline-block;
   padding: 4px 12px;

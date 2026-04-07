@@ -334,6 +334,24 @@ export function Component({ fieldValues }) {
                 return timeA - timeB;
               });
             }
+
+            // Helper function to sort sessions by DATE first, then TIME (used for "All Days" grid view)
+            function sortSessionsByDateThenTime(sessions) {
+              if (!sessions || sessions.length === 0) return sessions;
+              return sessions.slice().sort(function(a, b) {
+                const dateA = getDateTimestamp(a);
+                const dateB = getDateTimestamp(b);
+                if (dateA !== dateB) return dateA - dateB;
+                const timeA = getTimeOfDayInMinutes(a.start_time);
+                const timeB = getTimeOfDayInMinutes(b.start_time);
+                if (timeA !== timeB) return timeA - timeB;
+                const titleA = (a.title || '').toLowerCase();
+                const titleB = (b.title || '').toLowerCase();
+                if (titleA < titleB) return -1;
+                if (titleA > titleB) return 1;
+                return String(a.id || '').localeCompare(String(b.id || ''));
+              });
+            }
             
             // Helper function to get minutes from start of day (PST) for a timestamp (alias for consistency)
             function getMinutesFromStartOfDayPST(timestamp) {
@@ -663,13 +681,13 @@ export function Component({ fieldValues }) {
             }
             
             // Render grid view
-            function renderGridView(sessions) {
+            function renderGridView(sessions, selectedDateValue) {
               // Clear grid wrapper
               gridWrapper.innerHTML = '';
               
-              // Sort sessions by time of day only (not full timestamp)
-              // This ensures 9:15AM comes before 5:15PM regardless of date
-              const sortedSessions = sortSessionsByTimeOfDay(sessions);
+              const sortedSessions = selectedDateValue === 'all'
+                ? sortSessionsByDateThenTime(sessions)
+                : sortSessionsByTimeOfDay(sessions);
               
               // Create grid container
               const gridContainer = document.createElement('div');
@@ -822,6 +840,19 @@ export function Component({ fieldValues }) {
                   }).filter(function(name) {
                     return name && name.trim() !== '';
                   });
+
+                  // Extract moderator IDs and names (same shape as speakers)
+                  const moderatorSpeakerIds = (row.values?.moderator || []).map(function(s) {
+                    return s.id || '';
+                  }).filter(function(id) {
+                    return id && id.trim() !== '';
+                  });
+
+                  const moderators = (row.values?.moderator || []).map(function(s) {
+                    return s.name || '';
+                  }).filter(function(name) {
+                    return name && name.trim() !== '';
+                  });
                   
                   // Extract date from row.values.date
                   const dateValue = row.values?.date && row.values.date.length > 0
@@ -836,6 +867,8 @@ export function Component({ fieldValues }) {
                     room: room,
                     speakerIds: speakerIds,
                     speakers: speakers,
+                    moderatorSpeakerIds: moderatorSpeakerIds,
+                    moderators: moderators,
                     description: row.values?.description || '',
                     date: dateValue ? [dateValue] : null
                   };
@@ -972,9 +1005,16 @@ export function Component({ fieldValues }) {
                 if (searchQuery && searchQuery.trim().length > 0) {
                   const query = searchQuery.trim().toLowerCase();
                   filteredSessions = filteredSessions.filter(function(session) {
-                    // Search in session title
+                    // Search in session title OR speaker name(s)
                     const titleMatch = session.title && session.title.toLowerCase().includes(query);
-                    return titleMatch;
+                    if (titleMatch) return true;
+                    if (session.speakerIds && session.speakerIds.length > 0) {
+                      return session.speakerIds.some(function(speakerId) {
+                        const speaker = allSpeakersData[speakerId];
+                        return speaker && speaker.name && String(speaker.name).toLowerCase().includes(query);
+                      });
+                    }
+                    return false;
                   });
                 }
                 
@@ -1593,7 +1633,7 @@ export function Component({ fieldValues }) {
                   if (tableWrapper) {
                     tableWrapper.style.display = 'none';
                   }
-                  renderGridView(filteredSessions);
+                  renderGridView(filteredSessions, normalizedSelectedDate);
                 } else {
                   // Calendar view - Hide loading and grid, show table
                   if (loadingDiv) {
@@ -1622,13 +1662,13 @@ export function Component({ fieldValues }) {
             }
             
             // Render grid view
-            function renderGridView(sessions) {
+            function renderGridView(sessions, selectedDateValue) {
               // Clear grid wrapper
               gridWrapper.innerHTML = '';
               
-              // Sort sessions by time of day only (not full timestamp)
-              // This ensures 9:15AM comes before 5:15PM regardless of date
-              const sortedSessions = sortSessionsByTimeOfDay(sessions);
+              const sortedSessions = selectedDateValue === 'all'
+                ? sortSessionsByDateThenTime(sessions)
+                : sortSessionsByTimeOfDay(sessions);
               
               // Create grid container
               const gridContainer = document.createElement('div');
@@ -2062,9 +2102,17 @@ export function Component({ fieldValues }) {
                       return;
                     }
                     
-                    // Search in session titles
+                    // Search in session titles OR speaker names
                     const matchingSessions = allSessionsData.filter(function(session) {
-                      return session.title && session.title.toLowerCase().includes(searchQuery);
+                      const titleMatch = session.title && session.title.toLowerCase().includes(searchQuery);
+                      if (titleMatch) return true;
+                      if (session.speakerIds && session.speakerIds.length > 0) {
+                        return session.speakerIds.some(function(speakerId) {
+                          const speaker = allSpeakersData[speakerId];
+                          return speaker && speaker.name && String(speaker.name).toLowerCase().includes(searchQuery);
+                        });
+                      }
+                      return false;
                     });
                     
                     // Display results
@@ -2651,6 +2699,14 @@ export function Component({ fieldValues }) {
                     const speakerCard = document.createElement('div');
                     speakerCard.className = 'session-detail-speaker-card';
                     
+                    const moderatorIds = Array.isArray(session.moderatorSpeakerIds) ? session.moderatorSpeakerIds : [];
+                    const moderatorNames = Array.isArray(session.moderators)
+                      ? session.moderators.map(function(n) { return String(n || '').toLowerCase().trim(); }).filter(Boolean)
+                      : [];
+                    const isModerator =
+                      (moderatorIds.length > 0 && moderatorIds.indexOf(speakerId) !== -1) ||
+                      (speaker.name && moderatorNames.indexOf(String(speaker.name).toLowerCase().trim()) !== -1);
+                    
                     // Row 1: image + (name + topic)
                     const speakerRow = document.createElement('div');
                     speakerRow.className = 'session-detail-speaker-row';
@@ -2668,6 +2724,12 @@ export function Component({ fieldValues }) {
                       nameDiv.className = 'session-detail-speaker-name';
                       nameDiv.textContent = speaker.name;
                       nameTopicCol.appendChild(nameDiv);
+                    }
+                    if (isModerator) {
+                      const roleTag = document.createElement('span');
+                      roleTag.className = 'session-detail-speaker-role-tag';
+                      roleTag.textContent = 'Moderator';
+                      nameTopicCol.appendChild(roleTag);
                     }
                     if (speaker.topics && speaker.topics.length > 0) {
                       const speakerTopicsDiv = document.createElement('div');
@@ -2807,7 +2869,7 @@ export function Component({ fieldValues }) {
               type="text" 
               className="speaker-search-input" 
               id={`session-search-input-${moduleId}`}
-              placeholder="Search by session name..."
+              placeholder="Search by session or speaker name..."
               autoComplete="off"
             />
             <i className="fa-solid fa-search speaker-search-icon"></i>
