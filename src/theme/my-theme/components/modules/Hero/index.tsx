@@ -145,6 +145,8 @@ export function Component({ fieldValues }) {
   const showSponsorSlider = fieldValues.showSponsorSlider || false;
   const showFeaturedPlusSponsorSlider = fieldValues.showFeaturedPlusSponsorSlider || false;
   const showAttendees = fieldValues.showAttendees || false;
+  const showPastAttendees = fieldValues.showPastAttendees || false;
+  const showPastSponsors = fieldValues.showPastSponsors || false;
   const sponsorSliderPreTitle = fieldValues.sponsorSliderPreTitle || '';
   
   // Handle autoplay setting
@@ -353,6 +355,34 @@ export function Component({ fieldValues }) {
                 <div className="hero-sponsor-slider-row">
                   <div className="hero-sponsor-slide-track" id={`hero-attendees-track-${sectionId}`}>
                     {/* Unranked sponsors (attendees) will be inserted here by JavaScript */}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {showPastAttendees && (
+            <div className="hero-sponsor-slider-wrapper">
+              {sponsorSliderPreTitle && (
+                <div className="hero-sponsor-slider-pre-title">{sponsorSliderPreTitle}</div>
+              )}
+              <div className="hero-sponsor-slider" id={`hero-past-attendees-slider-${sectionId}`}>
+                <div className="hero-sponsor-slider-row">
+                  <div className="hero-sponsor-slide-track" id={`hero-past-attendees-track-${sectionId}`}>
+                    {/* Past attendees will be inserted here by JavaScript */}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {showPastSponsors && (
+            <div className="hero-sponsor-slider-wrapper">
+              {sponsorSliderPreTitle && (
+                <div className="hero-sponsor-slider-pre-title">{sponsorSliderPreTitle}</div>
+              )}
+              <div className="hero-sponsor-slider" id={`hero-past-sponsors-slider-${sectionId}`}>
+                <div className="hero-sponsor-slider-row">
+                  <div className="hero-sponsor-slide-track" id={`hero-past-sponsors-track-${sectionId}`}>
+                    {/* Past sponsors will be inserted here by JavaScript */}
                   </div>
                 </div>
               </div>
@@ -840,6 +870,166 @@ export function Component({ fieldValues }) {
                 }
               }
             }
+
+            // Fetch and display past attendees slider (table: 240083827)
+            const showPastAttendees = ${JSON.stringify(showPastAttendees)};
+            if (showPastAttendees) {
+              const pastAttendeesSliderContainer = document.getElementById('hero-past-attendees-slider-${sectionId}');
+              const pastAttendeesTrack = document.getElementById('hero-past-attendees-track-${sectionId}');
+              if (pastAttendeesSliderContainer && pastAttendeesTrack) {
+                async function fetchPastAttendees() {
+                  try {
+                    const apiUrl = 'https://api.hubapi.com/cms/v3/hubdb/tables/240083827/rows?portalId=39650877';
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) throw new Error('Failed to fetch past attendees: ' + response.status);
+                    const data = await response.json();
+                    const items = (data.results || []).map(function(row) {
+                      return {
+                        image: row.values?.image ? {
+                          src: row.values.image.url || '',
+                          alt: row.values.image.altText || 'Past Attendee'
+                        } : null
+                      };
+                    }).filter(function(x) { return x.image && x.image.src; });
+                    if (items.length === 0) {
+                      pastAttendeesSliderContainer.style.display = 'none';
+                      return;
+                    }
+                    const images = [...items, ...items];
+                    pastAttendeesTrack.innerHTML = '';
+                    images.forEach(function(item, idx) {
+                      const card = document.createElement('div');
+                      card.className = 'hero-sponsor-slide-card';
+                      card.innerHTML = '<img src="' + item.image.src + '" alt="' + (item.image.alt || 'Past Attendee ' + (idx + 1)) + '" />';
+                      pastAttendeesTrack.appendChild(card);
+                    });
+                    function startScroll() {
+                      const track = pastAttendeesTrack;
+                      if (!track) return;
+                      const imgs = track.querySelectorAll('img');
+                      var loaded = 0;
+                      var total = imgs.length;
+                      if (total === 0) return;
+                      function checkLoaded() {
+                        imgs.forEach(function(img) {
+                          if (img.complete && img.naturalWidth > 0) {
+                            loaded++;
+                          } else {
+                            img.addEventListener('load', function() { loaded++; if (loaded === total) init(); }, { once: true });
+                            img.addEventListener('error', function() { loaded++; if (loaded === total) init(); }, { once: true });
+                          }
+                        });
+                        if (loaded === total) setTimeout(init, 50);
+                      }
+                      function init() {
+                        track.offsetWidth;
+                        var halfWidth = track.scrollWidth / 2;
+                        if (halfWidth <= 0) { setTimeout(init, 100); return; }
+                        var pos = 0;
+                        var speed = 0.35;
+                        function animate() {
+                          pos -= speed;
+                          if (pos <= -halfWidth) pos = 0;
+                          track.style.transform = 'translateX(' + pos + 'px)';
+                          requestAnimationFrame(animate);
+                        }
+                        animate();
+                      }
+                      checkLoaded();
+                    }
+                    startScroll();
+                  } catch (err) {
+                    console.warn('Error loading past attendees:', err);
+                    pastAttendeesSliderContainer.style.display = 'none';
+                  }
+                }
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', function() { setTimeout(fetchPastAttendees, 100); });
+                } else {
+                  setTimeout(fetchPastAttendees, 100);
+                }
+              }
+            }
+
+            // Fetch and display past sponsors slider (table: 240083829)
+            const showPastSponsors = ${JSON.stringify(showPastSponsors)};
+            if (showPastSponsors) {
+              const pastSponsorsSliderContainer = document.getElementById('hero-past-sponsors-slider-${sectionId}');
+              const pastSponsorsTrack = document.getElementById('hero-past-sponsors-track-${sectionId}');
+              if (pastSponsorsSliderContainer && pastSponsorsTrack) {
+                async function fetchPastSponsors() {
+                  try {
+                    const apiUrl = 'https://api.hubapi.com/cms/v3/hubdb/tables/240083829/rows?portalId=39650877';
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) throw new Error('Failed to fetch past sponsors: ' + response.status);
+                    const data = await response.json();
+                    const items = (data.results || []).map(function(row) {
+                      return {
+                        image: row.values?.image ? {
+                          src: row.values.image.url || '',
+                          alt: row.values.image.altText || 'Past Sponsor'
+                        } : null
+                      };
+                    }).filter(function(x) { return x.image && x.image.src; });
+                    if (items.length === 0) {
+                      pastSponsorsSliderContainer.style.display = 'none';
+                      return;
+                    }
+                    const images = [...items, ...items];
+                    pastSponsorsTrack.innerHTML = '';
+                    images.forEach(function(item, idx) {
+                      const card = document.createElement('div');
+                      card.className = 'hero-sponsor-slide-card';
+                      card.innerHTML = '<img src="' + item.image.src + '" alt="' + (item.image.alt || 'Past Sponsor ' + (idx + 1)) + '" />';
+                      pastSponsorsTrack.appendChild(card);
+                    });
+                    function startScroll() {
+                      const track = pastSponsorsTrack;
+                      if (!track) return;
+                      const imgs = track.querySelectorAll('img');
+                      var loaded = 0;
+                      var total = imgs.length;
+                      if (total === 0) return;
+                      function checkLoaded() {
+                        imgs.forEach(function(img) {
+                          if (img.complete && img.naturalWidth > 0) {
+                            loaded++;
+                          } else {
+                            img.addEventListener('load', function() { loaded++; if (loaded === total) init(); }, { once: true });
+                            img.addEventListener('error', function() { loaded++; if (loaded === total) init(); }, { once: true });
+                          }
+                        });
+                        if (loaded === total) setTimeout(init, 50);
+                      }
+                      function init() {
+                        track.offsetWidth;
+                        var halfWidth = track.scrollWidth / 2;
+                        if (halfWidth <= 0) { setTimeout(init, 100); return; }
+                        var pos = 0;
+                        var speed = 0.35;
+                        function animate() {
+                          pos -= speed;
+                          if (pos <= -halfWidth) pos = 0;
+                          track.style.transform = 'translateX(' + pos + 'px)';
+                          requestAnimationFrame(animate);
+                        }
+                        animate();
+                      }
+                      checkLoaded();
+                    }
+                    startScroll();
+                  } catch (err) {
+                    console.warn('Error loading past sponsors:', err);
+                    pastSponsorsSliderContainer.style.display = 'none';
+                  }
+                }
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', function() { setTimeout(fetchPastSponsors, 100); });
+                } else {
+                  setTimeout(fetchPastSponsors, 100);
+                }
+              }
+            }
             
             // Typewriter animation for multiple subheadings
             const subheadingElement = document.getElementById('hero-subheading-${sectionId}');
@@ -994,6 +1184,18 @@ export const fields = (
       label="Show Attendees"
       default={false}
       helpText="Check this to display unranked sponsors (no sponsor rank assigned in HubDB) sliding in the hero section, using the same slider style as sponsor sliders."
+    />
+    <BooleanField
+      name="showPastAttendees"
+      label="Show Past Attendees"
+      default={false}
+      helpText="Check this to display past attendees sliding in the hero section. Images will be fetched from HubDB table 240083827."
+    />
+    <BooleanField
+      name="showPastSponsors"
+      label="Past Sponsors"
+      default={false}
+      helpText="Check this to display past sponsors sliding in the hero section. Images will be fetched from HubDB table 240083829."
     />
     <TextField
       name="sponsorSliderPreTitle"
