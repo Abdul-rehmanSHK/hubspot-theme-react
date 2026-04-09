@@ -25,6 +25,7 @@ export function Component({ fieldValues }) {
   const socialLinks = fieldValues.socialLinks || [];
   const footerLinks = fieldValues.footerLinks || [];
   const footerLogoLink = getUrl(fieldValues.footerLogoLink);
+  const customRows = fieldValues.customRows || [];
 
   const selectedForm = fieldValues.footerForm || null;
   let formId = '';
@@ -44,11 +45,11 @@ export function Component({ fieldValues }) {
   const formContainerId = `hs-form-footer-${formId ? formId.replace(/[^a-zA-Z0-9]/g, '') : 'empty'}`;
 
   return (
-    <footer className="footer">
+    <footer className="footer" data-deploy-test="update-check-v1">
       <div className="container">
         <div className="footer-div">
           <div className="row g-5">
-            <div className="col-md-6">
+            <div className="col-md-6 test">
               <div className="footer-top">
                 <a href={footerLogoLink} data-footer-logo>
                   <img src={fieldValues.logo?.src} alt={fieldValues.logo?.alt || 'logo'} data-footer-logo-img />
@@ -71,16 +72,16 @@ export function Component({ fieldValues }) {
                 })}
               </div>
             </div>
-            <div className="col-md-6">
+            <div className="col-md-6 test-class">
               <div className="footer-social">
                 <div className="social-icons">
                   <h6>{fieldValues.hashtag || '#GAIWorld'}</h6>
                   {socialLinks.map((item, index) => {
                     const linkUrl = getUrl(item.link);
                     // Handle BooleanField - it can be boolean, string "true"/"false", or undefined
-                    const shouldOpenInNewWindow = item.openInNewWindow === true || 
-                                                  item.openInNewWindow === "true" || 
-                                                  item.openInNewWindow === 1;
+                    const shouldOpenInNewWindow = item.openInNewWindow === true ||
+                      item.openInNewWindow === "true" ||
+                      item.openInNewWindow === 1;
                     return (
                       <a
                         key={index}
@@ -146,6 +147,19 @@ export function Component({ fieldValues }) {
               </div>
             </div>
           </div>
+
+          {/* Dynamic Extra Rows and Columns */}
+          {customRows.length > 0 && customRows.map((row, rowIndex) => (
+            <div key={`d-row-${rowIndex}`} className="row g-5" style={{ marginTop: rowIndex === 0 ? '3rem' : '0' }}>
+              {(row.columns || []).map((col, colIndex) => (
+                <div key={`d-col-${rowIndex}-${colIndex}`} className={col.columnClass || 'col-md-12'}>
+                  {col.content && (
+                    <div className="dynamic-footer-col" dangerouslySetInnerHTML={{ __html: col.content }} />
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
       </div>
       <script
@@ -252,6 +266,31 @@ export const fields = (
           name="link"
           label="Link"
         />,
+      ]}
+    />
+    <RepeatedFieldGroup
+      name="customRows"
+      label="Dynamic Rows"
+      helpText="Add multiple extra rows and columns to the footer. Note: Use bootstrap grid classes like 'col-md-3'."
+      default={[]}
+      children={[
+        <RepeatedFieldGroup
+          name="columns"
+          label="Columns"
+          default={[]}
+          children={[
+            <TextField
+              name="columnClass"
+              label="Column Width Class (e.g., col-md-3, col-sm-6)"
+              default="col-md-12"
+            />,
+            <RichTextField
+              name="content"
+              label="Content"
+              default=""
+            />
+          ]}
+        />
       ]}
     />
   </ModuleFields>

@@ -473,7 +473,7 @@ a.transparent-btn:hover {
   position: relative;
   z-index: 99;
   overflow: hidden;
-  text-align: left;
+  text-align: center;
 }
 
 .heading {
@@ -590,6 +590,87 @@ a.fill-btn:hover {
 .aero-btn:hover{
   color: #fff;
   border-color: #fff;
+}
+
+/* Countdown & Action Area Styles */
+.hero-action-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center !important;
+  text-align: center;
+  margin-top: 40px;
+  width: 100%;
+}
+
+.hero-cta-buttons {
+  justify-content: center !important;
+  margin-top: 0px !important;
+}
+
+.hero-discount-text {
+  color: #FFD700; /* Gold color from screenshot */
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.price-increase-text {
+  background: #001D57;
+  color: #fff;
+  padding: 4px 12px;
+  margin-top: 25px;
+  margin-bottom: 15px;
+  display: inline-block;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.hero-countdown-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 35px;
+}
+
+.countdown-timer {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.countdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 65px;
+}
+
+.countdown-item span {
+  font-size: 38px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+.countdown-item label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  margin-top: 6px;
+  letter-spacing: 1px;
+}
+
+.discount-ended-message {
+  font-size: 28px;
+  font-weight: 700;
+  color: #06C7EE;
+  letter-spacing: 1px;
+  margin-top: 20px;
 }
 
 /* Remove global page padding for full-bleed sections on blank pages */

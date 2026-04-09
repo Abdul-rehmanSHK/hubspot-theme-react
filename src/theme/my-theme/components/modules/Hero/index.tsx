@@ -11,7 +11,7 @@ export function Component({ fieldValues }) {
     }
     return '';
   };
-  
+
   // Separate function for non-video URLs that need '#' fallback
   const getUrlWithHash = (urlField) => {
     if (!urlField) return '#';
@@ -25,17 +25,17 @@ export function Component({ fieldValues }) {
   // Convert video URLs to appropriate format (YouTube, Vimeo, direct video files, or embed URLs)
   const convertToEmbedUrl = (url, autoplay = false) => {
     if (!url || typeof url !== 'string') return '';
-    
+
     const trimmedUrl = url.trim();
     if (!trimmedUrl) return '';
-    
+
     // Check if it's a direct video file (mp4, webm, ogg, mov, etc.)
     const directVideoExtensions = /\.(mp4|webm|ogg|ogv|mov|m4v|avi|wmv|flv)(\?.*)?$/i;
     if (directVideoExtensions.test(trimmedUrl)) {
       // Return as-is for direct video files (will be handled by <video> tag)
       return trimmedUrl;
     }
-    
+
     // YouTube handling
     // If already a YouTube embed URL, clean it up
     if (trimmedUrl.includes('youtube.com/embed/')) {
@@ -57,21 +57,21 @@ export function Component({ fieldValues }) {
       }
       return trimmedUrl;
     }
-    
+
     // Extract video ID from various YouTube URL formats
     let videoId = '';
     const watchMatch = trimmedUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/v\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
     if (watchMatch && watchMatch[1]) {
       videoId = watchMatch[1];
     }
-    
+
     if (!videoId) {
       const shortMatch = trimmedUrl.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
       if (shortMatch && shortMatch[1]) {
         videoId = shortMatch[1];
       }
     }
-    
+
     // If we found a YouTube video ID, convert to embed format
     if (videoId) {
       if (autoplay) {
@@ -79,7 +79,7 @@ export function Component({ fieldValues }) {
       }
       return `https://www.youtube.com/embed/${videoId}`;
     }
-    
+
     // Vimeo handling
     if (trimmedUrl.includes('vimeo.com/')) {
       // Extract Vimeo video ID
@@ -100,16 +100,16 @@ export function Component({ fieldValues }) {
         return trimmedUrl;
       }
     }
-    
+
     // If it looks like an embed URL (contains /embed/ or /player/), return as is
     if (trimmedUrl.includes('/embed/') || trimmedUrl.includes('/player/')) {
       return trimmedUrl;
     }
-    
+
     // For any other URL, return as is (might be a direct video URL or other platform)
     return trimmedUrl;
   };
-  
+
   // Check if URL is a direct video file (needs <video> tag instead of <iframe>)
   const isDirectVideoFile = (url) => {
     if (!url || typeof url !== 'string') return false;
@@ -131,16 +131,16 @@ export function Component({ fieldValues }) {
   const ctaOpenInNewWindow2 = fieldValues.ctaOpenInNewWindow2 || false;
   const rawDownArrowUrl = getUrlWithHash(fieldValues.downArrowUrl);
   const downArrowUrl = (rawDownArrowUrl && rawDownArrowUrl !== '#') ? rawDownArrowUrl : '';
-  
+
   // Handle multiple subheadings - support both old single subheading and new repeated field group
   const subheadings = fieldValues.subheadings || [];
   const legacySubheading = fieldValues.subheading || '';
-  
+
   // Convert legacy single subheading to array format for backward compatibility
-  const allSubheadings = subheadings.length > 0 
+  const allSubheadings = subheadings.length > 0
     ? subheadings.map((item: any) => item.text || item.subheading || '').filter((text: string) => text && text.trim())
     : (legacySubheading ? [legacySubheading] : []);
-  
+
   // Sponsor slider checkbox
   const showSponsorSlider = fieldValues.showSponsorSlider || false;
   const showFeaturedPlusSponsorSlider = fieldValues.showFeaturedPlusSponsorSlider || false;
@@ -148,19 +148,19 @@ export function Component({ fieldValues }) {
   const showPastAttendees = fieldValues.showPastAttendees || false;
   const showPastSponsors = fieldValues.showPastSponsors || false;
   const sponsorSliderPreTitle = fieldValues.sponsorSliderPreTitle || '';
-  
+
   // Handle autoplay setting
   const videoAutoplay = fieldValues.videoAutoplay === true || fieldValues.videoAutoplay === 'true';
-  
+
   // Handle video: Check for URL first, then fall back to file upload
   // Use the same logic as VideoTestimonials component
   const rawVideoUrl = getUrl(fieldValues.videoUrl) || '';
   const processedVideoUrl = rawVideoUrl ? convertToEmbedUrl(rawVideoUrl, videoAutoplay) : '';
-  
+
   // Fall back to file upload if no URL provided
   const videoFile = fieldValues.videoFile;
   let videoFileSrc = '';
-  
+
   if (videoFile && !processedVideoUrl) {
     if (typeof videoFile === 'string') {
       videoFileSrc = videoFile;
@@ -169,19 +169,19 @@ export function Component({ fieldValues }) {
       videoFileSrc = videoFile.src || videoFile.url || videoFile.href || videoFile.path || '';
     }
   }
-  
+
   // Determine which video source to use (prioritize URL over file)
   const hasVideoUrl = !!processedVideoUrl;
   const hasVideoFile = !!videoFileSrc;
   const isDirectVideo = hasVideoUrl && isDirectVideoFile(processedVideoUrl);
   const hasVideo = hasVideoUrl || hasVideoFile;
-  
+
   const videoTitle = fieldValues.videoTitle || '';
-  
+
   // Handle image upload
   const imageFile = fieldValues.imageFile;
   let imageFileSrc = '';
-  
+
   if (imageFile) {
     if (typeof imageFile === 'string') {
       imageFileSrc = imageFile;
@@ -190,7 +190,7 @@ export function Component({ fieldValues }) {
       imageFileSrc = imageFile.src || imageFile.url || imageFile.href || imageFile.path || '';
     }
   }
-  
+
   const hasImage = !!imageFileSrc;
 
   // Get background image from field or use default
@@ -210,7 +210,7 @@ export function Component({ fieldValues }) {
       <div className="container">
         <div className="hero-content">
           <div className="row g-5 align-items-center">
-            <div className="col-md-6">
+            <div className="col-md-12">
               <div className="left-area">
                 {headingOverride ? (
                   <div className="heading heading-override" dangerouslySetInnerHTML={{ __html: headingOverride }} />
@@ -231,31 +231,66 @@ export function Component({ fieldValues }) {
                     )}
                   </>
                 )}
-                {(ctaText || ctaText2) && (
-                  <div className="hero-cta-buttons">
-                    {ctaText && (
-                      <a 
-                        href={ctaUrl} 
-                        className="fill-btn"
-                        {...(ctaOpenInNewWindow ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                      >
-                        {ctaText}
-                      </a>
-                    )}
-                    {ctaText2 && (
-                      <a 
-                        href={ctaUrl2} 
-                        className="fill-btn"
-                        {...(ctaOpenInNewWindow2 ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                      >
-                        {ctaText2}
-                      </a>
-                    )}
-                  </div>
-                )}
+
+                {/* Hero Action Area (Discount, Buttons, Timer) */}
+                <div className="hero-action-area">
+                  {fieldValues.showCountdown && fieldValues.discountText && (
+                    <div className="hero-discount-text">{fieldValues.discountText}</div>
+                  )}
+
+                  {(ctaText || ctaText2) && (
+                    <div className="hero-cta-buttons">
+                      {ctaText && (
+                        <a
+                          href={ctaUrl}
+                          className="fill-btn"
+                          {...(ctaOpenInNewWindow ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        >
+                          {ctaText}
+                        </a>
+                      )}
+                      {ctaText2 && (
+                        <a
+                          href={ctaUrl2}
+                          className="fill-btn"
+                          {...(ctaOpenInNewWindow2 ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        >
+                          {ctaText2}
+                        </a>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Price Increase and Countdown Timer */}
+                  {fieldValues.showCountdown && fieldValues.countdownDate && (
+                    <div className="hero-countdown-container">
+                      {fieldValues.priceIncreaseText && (
+                        <div className="price-increase-text">{fieldValues.priceIncreaseText}</div>
+                      )}
+                      <div className="countdown-timer" id={`countdown-${sectionId}`}>
+                        <div className="countdown-item">
+                          <span className="days">00</span>
+                          <label>Days</label>
+                        </div>
+                        <div className="countdown-item">
+                          <span className="hours">00</span>
+                          <label>Hours</label>
+                        </div>
+                        <div className="countdown-item">
+                          <span className="minutes">00</span>
+                          <label>Minutes</label>
+                        </div>
+                        <div className="countdown-item">
+                          <span className="seconds">00</span>
+                          <label>Seconds</label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="col-md-6">
+            <div className="col-md-6 hide">
               {(hasVideo || hasImage) && (
                 <div className="right-area">
                   <div className="banner-video">
@@ -273,29 +308,29 @@ export function Component({ fieldValues }) {
                         // Use URL (YouTube, Vimeo, or direct video file)
                         isDirectVideo ? (
                           // Direct video file from URL - use <video> tag
-                      <video
-                        width="625"
-                        height="380"
-                        controls
-                        {...(videoAutoplay ? { autoPlay: true, loop: true, muted: true } : {})}
-                        style={{ width: '100%', height: 'auto', maxWidth: '625px' }}
-                      >
+                          <video
+                            width="625"
+                            height="380"
+                            controls
+                            {...(videoAutoplay ? { autoPlay: true, loop: true, muted: true } : {})}
+                            style={{ width: '100%', height: 'auto', maxWidth: '625px' }}
+                          >
                             <source src={processedVideoUrl} type="video/mp4" />
                             <source src={processedVideoUrl} type="video/ogg" />
                             <source src={processedVideoUrl} type="video/webm" />
-                        Your browser does not support the video tag.
-                      </video>
-                    ) : (
+                            Your browser does not support the video tag.
+                          </video>
+                        ) : (
                           // Embed URL (YouTube, Vimeo, etc.) - use <iframe>
-                      <iframe
-                        width="625"
-                        height="380"
+                          <iframe
+                            width="625"
+                            height="380"
                             src={processedVideoUrl}
-                        title={videoTitle || 'Video'}
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                      />
+                            title={videoTitle || 'Video'}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                          />
                         )
                       ) : hasVideoFile ? (
                         // File upload - use <video> tag
@@ -1094,6 +1129,71 @@ export function Component({ fieldValues }) {
                 });
               }
             }
+
+            // Event Countdown Logic
+            if (${fieldValues.showCountdown === true}) {
+                function initCountdown() {
+                    const sectionId = '${sectionId}';
+                    const countdownContainer = document.getElementById('countdown-' + sectionId);
+                    const rawDate = "${fieldValues.countdownDate || ''}";
+                    
+                    if (!rawDate) {
+                        console.warn('Hero Countdown: No date provided');
+                        return;
+                    }
+
+                    const targetDate = new Date(rawDate).getTime();
+                    const discountEndedMsg = "${fieldValues.discountEndedMessage || 'DISCOUNT HAS ENDED'}";
+
+                    if (countdownContainer && !isNaN(targetDate)) {
+                        const daysSpan = countdownContainer.querySelector('.days');
+                        const hoursSpan = countdownContainer.querySelector('.hours');
+                        const minutesSpan = countdownContainer.querySelector('.minutes');
+                        const secondsSpan = countdownContainer.querySelector('.seconds');
+
+                        function updateTimer() {
+                            const now = new Date().getTime();
+                            const distance = targetDate - now;
+
+                            if (distance <= 0) {
+                                // Show the discount ended message
+                                const timerParent = countdownContainer.parentElement;
+                                if (timerParent) {
+                                    timerParent.innerHTML = '<div class="discount-ended-message">' + discountEndedMsg + '</div>';
+                                }
+                                
+                                // Hide the discount text above the button
+                                const discountText = document.querySelector('#' + sectionId + ' .hero-discount-text');
+                                if (discountText) discountText.style.display = 'none';
+
+                                clearInterval(timerInterval);
+                                return;
+                            }
+
+                            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                            if (daysSpan) daysSpan.textContent = days < 10 ? "0" + days : days;
+                            if (hoursSpan) hoursSpan.textContent = hours < 10 ? "0" + hours : hours;
+                            if (minutesSpan) minutesSpan.textContent = minutes < 10 ? "0" + minutes : minutes;
+                            if (secondsSpan) secondsSpan.textContent = seconds < 10 ? "0" + seconds : seconds;
+                        }
+
+                        const timerInterval = setInterval(updateTimer, 1000);
+                        updateTimer();
+                    } else {
+                        console.error('Hero Countdown: Invalid date format: ', rawDate);
+                    }
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initCountdown);
+                } else {
+                    initCountdown();
+                }
+            }
           })();
         `,
         }}
@@ -1196,6 +1296,35 @@ export const fields = (
       label="Past Sponsors"
       default={false}
       helpText="Check this to display past sponsors sliding in the hero section. Images will be fetched from HubDB table 240083829."
+    />
+    <BooleanField
+      name="showCountdown"
+      label="Show Countdown"
+      default={false}
+      helpText="Check this to display a countdown timer for the event."
+    />
+    <TextField
+      name="countdownDate"
+      label="Countdown Date"
+      helpText="Target date for the event (e.g., 'September 28, 2026 09:00:00')."
+    />
+    <TextField
+      name="discountText"
+      label="Discount Text"
+      default="GET $1000 OFF"
+      helpText="Displayed above the CTA button in the hero section."
+    />
+    <TextField
+      name="priceIncreaseText"
+      label="Price Increase Text"
+      default="PRICE INCREASE"
+      helpText="Displayed above the countdown timer."
+    />
+    <TextField
+      name="discountEndedMessage"
+      label="Discount Ended Message"
+      default="DISCOUNT HAS ENDED"
+      helpText="Message shown when the countdown reaches zero."
     />
     <TextField
       name="sponsorSliderPreTitle"
