@@ -17,7 +17,7 @@ export function Component({ fieldValues }) {
   const hasCards = cards.length > 0;
   const hasImage = fieldValues.image?.src;
   const equalColumns = fieldValues.equalColumns === true;
-  const leftColClass = equalColumns ? 'col-md-6 p-0' : 'col-md-4 custom-45 p-0';
+  const leftColClass = equalColumns ? 'col-md-6 p-0' : 'col-md-4 test custom-45 p-0';
   const rightColClass = equalColumns ? 'col-md-6 p-0' : 'col-md-8 custom-md-full p-0';
 
   return (
@@ -52,8 +52,8 @@ export function Component({ fieldValues }) {
             <div className={rightColClass}>
               <div className="benefits-right">
                 {benefitsContent && (
-                  <div 
-                    className="benefits-content-raw" 
+                  <div
+                    className="benefits-content-raw"
                     dangerouslySetInnerHTML={{ __html: benefitsContent }}
                   />
                 )}

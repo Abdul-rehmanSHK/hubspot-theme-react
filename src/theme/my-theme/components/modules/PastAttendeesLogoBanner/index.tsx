@@ -13,7 +13,7 @@ export function Component({ fieldValues }) {
   const sectionId = fieldValues.sectionId || 'past-attendees-banner';
   const showPastAttendees = fieldValues.showPastAttendees !== false;
   const showPastSponsors = fieldValues.showPastSponsors === true;
-  
+
   const ctaText = fieldValues.ctaText || '';
   const ctaUrl = fieldValues.ctaUrl?.url || fieldValues.ctaUrl?.href || '#';
   const ctaOpenInNewWindow = fieldValues.ctaOpenInNewWindow || false;
@@ -57,11 +57,19 @@ export function Component({ fieldValues }) {
             width: 100%;
             margin-bottom: 40px;
           }
-          .past-attendees-logo-banner .hero-sponsor-slider-wrapper:last-child {
-            margin-bottom: 0;
+          .past-attendees-logo-banner .hero-sponsor-slider-wrapper:last-of-type {
+            margin-bottom: 20px;
+          }
+          .past-attendees-logo-banner .hero-sponsor-bottom-title {
+            text-align: center;
+            font-size: 18px;
+            color: #ffffff;
+            margin: 20px auto 30px;
+            max-width: 800px;
+            opacity: 0.8;
           }
           .past-attendees-logo-banner .banner-cta-container {
-            margin-top: 50px;
+            margin-top: 30px;
             display: flex;
             justify-content: center;
             width: 100%;
@@ -97,7 +105,7 @@ export function Component({ fieldValues }) {
                   className="hero-sponsor-slide-track"
                   id={`hero-past-attendees-track-${sectionId}`}
                 >
-                  {/* Past attendees will be inserted here by JavaScript */}
+                  {/* JS Injection */}
                 </div>
               </div>
             </div>
@@ -115,17 +123,24 @@ export function Component({ fieldValues }) {
                   className="hero-sponsor-slide-track"
                   id={`hero-past-sponsors-track-${sectionId}`}
                 >
-                  {/* Past sponsors will be inserted here by JavaScript */}
+                  {/* JS Injection */}
                 </div>
               </div>
             </div>
           </div>
         )}
 
+        {/* Subheading rendered before CTA */}
+        {sponsorsubHeading && (
+          <div className="hero-sponsor-bottom-title">
+            {sponsorsubHeading}
+          </div>
+        )}
+
         {ctaText && (
           <div className="banner-cta-container">
-            <a 
-              href={ctaUrl} 
+            <a
+              href={ctaUrl}
               className="fill-btn"
               {...(ctaOpenInNewWindow ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
             >
@@ -134,6 +149,7 @@ export function Component({ fieldValues }) {
           </div>
         )}
       </div>
+
       <script
         dangerouslySetInnerHTML={{
           __html: `
@@ -166,7 +182,7 @@ export function Component({ fieldValues }) {
                   }).filter(function(x) { return x.image && x.image.src; });
                   
                   if (items.length === 0) {
-                    container.style.display = 'none';
+                    container.closest('.hero-sponsor-slider-wrapper').style.display = 'none';
                     return;
                   }
                   
@@ -200,7 +216,6 @@ export function Component({ fieldValues }) {
                     }
                     
                     function initAnimation() {
-                      track.offsetWidth;
                       const halfWidth = track.scrollWidth / 2;
                       if (halfWidth <= 0) {
                         setTimeout(initAnimation, 100);
@@ -227,14 +242,15 @@ export function Component({ fieldValues }) {
               fetchData();
             }
             
-            if (document.readyState === 'loading') {
-              document.addEventListener('DOMContentLoaded', function() {
-                ${showPastAttendees ? "initSlider('past-attendees', '240083827');" : ""}
-                ${showPastSponsors ? "initSlider('past-sponsors', '240083829');" : ""}
-              });
-            } else {
+            const run = () => {
               ${showPastAttendees ? "initSlider('past-attendees', '240083827');" : ""}
               ${showPastSponsors ? "initSlider('past-sponsors', '240083829');" : ""}
+            };
+
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', run);
+            } else {
+              run();
             }
           })();
           `,
@@ -265,6 +281,11 @@ export const fields = (
       name="showPastSponsors"
       label="Show Past Sponsors"
       default={false}
+    />
+    <TextField
+      name="sponsorsubHeading"
+      label="Past Sponsors sub Heading"
+      default="Backed by sponsors and partners across the AI ecosystem"
     />
     <ColorField
       name="backgroundColor"
