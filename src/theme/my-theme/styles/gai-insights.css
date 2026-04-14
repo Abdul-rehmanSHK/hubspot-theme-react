@@ -5052,6 +5052,303 @@ p.last-text {
 }
 
 /*---------------------------
+    Price plan (cards)
+---------------------------*/
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.card {
+  background: white;
+  border: 1px solid #f5f5f5;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  transition: transform 0.3s ease;
+  position: relative;
+  overflow: visible;
+  height: 100%;
+  border: 3px solid #0000;
+}
+
+.card-header {
+  color: white;
+  background: transparent;
+  border: none;
+}
+
+.card-top h2 {
+  color: #fff;
+  font-weight: bold !important;
+  font-size: 30px !important;
+  margin-bottom: 10px !important;
+}
+
+.card-top {
+  position: relative;
+  background-color: #020e26;
+  ;
+}
+
+.card-badge {
+  position: absolute;
+  top: -41px;
+  right: 117px;
+  background-color: #0e41fb;
+  color: #fff;
+  padding: 5px 15px;
+  border-radius: 0px 0px 10px 10px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.card:nth-child(2) {
+  border: 2px solid #0e41fb;
+  border-radius: 12px;
+}
+
+.designation h4 {
+  font-size: 50px !important;
+  font-weight: bold;
+  color: #fff;
+  margin: 20px 0 20px 0px;
+}
+
+span.price-amount-cut {
+  color: #fff;
+}
+
+span.card-badge-two {
+  position: absolute;
+  top: -48px;
+  right: 20px;
+  background-color: #0099ff;
+  color: #fff;
+  padding: 5px 15px;
+  border: 2px solid #0099ff;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sales-card-title a {
+  color: #fbcc24;
+}
+
+.sales-card-title a:hover {
+  color: #fff;
+}
+
+.card-body .hero-cta-buttons .fill-btn:hover {
+  color: #fbcc24 !important;
+  background: #0e41fb !important;
+}
+
+.hero-center.-buttons a.fill-btn {
+  width: 100%;
+  text-align: center;
+  display: inline-block;
+  margin: 30px 0 25px;
+}
+
+.hero-center.-buttons a.fill-btn:hover {
+  color: #fbcc24 !important;
+  background: #0e41fb !important;
+}
+
+.card-header h2 {
+  margin-bottom: 0 !important;
+  font-size: 30px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: bold !important;
+}
+
+.card-body .hero-cta-buttons a.fill-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 25px;
+  margin-top: 19px;
+}
+
+.card-body {
+  padding: 30px;
+  flex-grow: 1;
+  background: #020e26;
+  border-radius: 10px;
+}
+
+.price-section {
+  margin-bottom: 25px;
+}
+
+.price-label {
+  display: block;
+  font-size: 14px;
+  color: #0099ff;
+  font-weight: 600;
+}
+
+.price-amount {
+  font-size: 20px;
+  font-weight: 300;
+  color: #020e26;
+  font-family: 'Inter', sans-serif !important;
+}
+
+span.price-amount-cut {
+  text-decoration: line-through;
+}
+
+.designation {
+  display: flex;
+  justify-content: start;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.standerd-rate span {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 400;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.cards-eyebrow-text {
+  color: #fff;
+  font-weight: 300;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+span.sub-price {
+  color: #fff;
+  font-size: 16px;
+  margin-top: 0 !important;
+  display: block;
+  margin-bottom: 33px;
+}
+
+.group-stats-box {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  margin-bottom: 10px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-item span.stat-label {
+  color: #fbcc24 !important;
+  margin: 0px 0 5px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.stat-item span.stat-value {
+  color: #fff;
+}
+
+.date-card span {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 400;
+}
+
+.status-sold-out {
+  color: var(--accent-red);
+  font-weight: 700;
+  font-size: 18px;
+  display: block;
+  margin-top: 5px;
+}
+
+.footer-info p {
+  margin-bottom: 10px;
+}
+
+.divider {
+  height: 1px;
+  background: #EEE;
+  margin: 25px 0;
+  border: none;
+}
+
+.feature-title {
+  font-weight: bold;
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 18px;
+  font-size: 18px;
+  color: #fff;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.standerd-rate div {
+  border-radius: 50px !important;
+  font-size: 16px;
+  font-weight: 400 !important;
+  border: 2px solid !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.feature-item::before {
+  content: '✓';
+  color: #fff;
+  font-weight: 900;
+  margin-right: 15px;
+  font-size: 16px;
+  background: #0e41fb;
+  border-radius: 50%;
+  height: 22px;
+  width: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-body,
+.card-body-content,
+.card-top {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  /* Ye saari available jagah le lega */
+}
+
+.hero-center-buttons {
+  margin-top: auto;
+  /* Ye margin button ko niche dhakel dega */
+  padding-top: 20px;
+  /* List aur button ke beech thoda gap */
+}
+
+
+
+/*---------------------------
          responsive
 ---------------------------*/
 @media (max-width: 1199px) {
@@ -7165,11 +7462,41 @@ p.last-text {
    GALLERY SECTION STYLES
    ============================================ */
 
+.gallery-image {
+  height: auto !important;
+  border-radius: 10px !important;
+}
+
+.gallery-item {
+  background: transparent !important;
+  flex: 0 0 215px !important;
+  min-width: 215px !important;
+}
+
+.gallery-nav {
+  border: 0px solid #fff !important;
+  color: #fff !important;
+  font-size: 44px !important;
+}
+
+.marquee-container {
+  background: rgba(6, 199, 238, 0);
+  padding: 0px 0;
+  margin-bottom: 0px;
+}
+
+.marquee-content {
+  gap: 30px !important;
+}
+
 .gallery-section-area {
   position: relative;
   color: #fff;
   overflow: hidden;
   padding: 80px 0;
+  background: url(https://www-gaiworld-com.sandbox.hs-sites.com/hubfs/gallery-section-background.jpg) no-repeat;
+  background-position: center;
+  background-size: cover;
 }
 
 .gallery-heading {
@@ -7245,9 +7572,9 @@ p.last-text {
 }
 
 .marquee-separator {
-  margin: 0 1.5rem;
-  color: #06C7EE;
-  font-size: 1.5rem;
+  color: #0E41FB;
+  font-size: 24px !important;
+  margin: 0 0px 0px 30px !important;
 }
 
 /* Gallery Wrapper */
@@ -7300,16 +7627,12 @@ p.last-text {
 }
 
 /* Gallery Container */
+
 .gallery-container {
-  flex: 1;
-  overflow-x: auto;
-  overflow-y: hidden;
-  border-radius: 10px;
-  position: relative;
-  order: 0;
-  min-height: 250px;
-  background: rgba(0, 0, 0, 0.3);
-  scroll-behavior: smooth;
+  overflow: hidden !important;
+  background: none !important;
+  min-height: auto;
+  border-radius: 0;
 }
 
 .gallery-track {
