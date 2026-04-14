@@ -17,6 +17,8 @@ export function Component({ fieldValues }) {
   const ctaText = fieldValues.ctaText || '';
   const ctaUrl = fieldValues.ctaUrl?.url || fieldValues.ctaUrl?.href || '#';
   const ctaOpenInNewWindow = fieldValues.ctaOpenInNewWindow || false;
+  const sponsorsubHeading = fieldValues.sponsorsubHeading || '';
+
 
   const containerStyle = {
     backgroundColor: bgColor,
