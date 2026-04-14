@@ -1,1 +1,1 @@
-# hubspot-theme-react-
+# hubspot-react-theme
