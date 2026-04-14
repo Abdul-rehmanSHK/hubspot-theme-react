@@ -154,18 +154,20 @@ html {
 }
 
 header.header {
-  position: fixed;
-  z-index: 999;
-  left: 0;
-  right: 0;
-  top: 0;
-  padding: 0 3%;
+  position: relative;
+  background: #fff;
+  padding: 15px 8%;
 }
 
 .header.scrolled {
-  background-color: #050d51;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out;
+  background: #fff !important;
+  background-size: cover !important;
+  transition: all 0s ease-in-out;
+  position: fixed;
+  z-index: 9999999 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
 }
 
 .header.scrolled .header-wrapper {
@@ -181,14 +183,12 @@ header.header {
 }
 
 .header-wrapper {
-  max-width: 1297px;
-  margin: 0 auto;
-  background-color: transparent;
-  padding: 25px 0%;
+  max-width: 1320px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
   transition: all 0.4s ease-in-out;
 }
 
@@ -213,6 +213,28 @@ header.header {
 
 header.header nav.navbar ul.navbar-nav li.nav-item.active a.nav-link {
   color: #06C7EE !important;
+}
+
+
+.nav-item span.nav-link.nav-link-dropdown {
+  color: #020d2e !important;
+  font-weight: 400 !important;
+  font-size: 20px !important;
+}
+
+.nav-dropdown-menu {
+  background: #0e41fb !important;
+}
+
+.nav-item a.nav-link {
+  color: #020d2e !important;
+  font-weight: 400 !important;
+  font-size: 20px !important;
+}
+
+.nav-item a.nav-link:hover,
+.nav-item span.nav-link:hover {
+  color: #0e41fb !important;
 }
 
 /* Ensure single-card viewport and smooth sliding */
@@ -302,16 +324,17 @@ span.nav-link:hover {
   padding: 0;
 }
 
-.header-wrapper .logo-div img {
-  width: 200px;
-  max-width: 100%;
+.header-wrapper .logo-div img,
+.header.scrolled .header-wrapper .logo-div img {
+  max-width: 200px !important;
+  width: 200px !important;
 }
 
 .nav-dropdown-link {
   display: block;
-  padding: 10px 10px;
-  color: #050d51 !important;
-  border-bottom: 1px solid #050d51;
+  padding: 10px 0 !important;
+  color: #fff;
+  border-bottom: 1px solid #fff !important;
   font-size: 16px;
   font-weight: 600;
   text-decoration: none;
@@ -321,9 +344,9 @@ span.nav-link:hover {
 }
 
 .nav-dropdown-link:hover {
-  background-color: #fff;
-  color: #06c7ee !important;
-  border-color: #06c7ee;
+  background-color: #fbcc24 !important;
+  color: #fbcc24 !important;
+  background: transparent !important;
 }
 
 .nav-dropdown-link.active {
@@ -333,20 +356,24 @@ span.nav-link:hover {
 }
 
 a.transparent-btn {
-  display: inline;
-  color: #06C7EE;
-  border: 2px solid #06C7EE;
-  border-radius: 5px;
-  padding: 15px;
-  text-transform: uppercase;
-  font-weight: 600;
-  transition: all 0.3s ease-in-out;
+  background: #fbcc24 !important;
+  border-radius: 50px !important;
+  color: #020e26 !important;
+  display: inline-block !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  padding: 15px 30px !important;
+  text-decoration: none !important;
+  text-transform: capitalize;
+  transition: .3s ease-in-out !important;
+  border: 0 !important;
   line-height: normal;
 }
 
 a.transparent-btn:hover {
-  background: #06C7EE;
-  color: #050d51;
+  background: #0e41fb !important;
+  opacity: 1 !important;
+  color: #fbcc24 !important;
 }
 
 .hero {
@@ -3322,16 +3349,14 @@ form p {
   border-bottom-right-radius: 10px;
 }
 
-footer.footer {
-  position: relative;
-  padding: 100px 0;
-  color: #fff;
-  overflow: hidden;
-}
+/*footer section*/
 
-.footer-div {
-  position: relative;
-  z-index: 1;
+footer.footer {
+  background: url(https://www-gaiworld-com.sandbox.hs-sites.com/hubfs/footer-new-img.jpg) !important;
+  padding: 60px 0;
+  color: #fff;
+  background-position: bottom !important;
+  background-size: cover !important;
 }
 
 footer.footer::after {
@@ -3350,11 +3375,7 @@ footer.footer::after {
 }
 
 .footer-top {
-  display: flex;
-  justify-content: start;
-  gap: 30px;
-  align-items: baseline;
-  margin-bottom: 90px;
+  margin-bottom: 110px;
 }
 
 .footer-btn a {
@@ -3423,23 +3444,12 @@ footer.footer::after {
   text-align: end;
   gap: 1.2rem;
   align-items: baseline;
-  margin-bottom: 70px;
+  margin-bottom: 0;
 }
 
 .social-icons h6 {
-  font-weight: 400;
-  color: #fff;
-  font-size: 1.125rem;
-  margin: 0;
-  letter-spacing: 0.04em;
-  font-synthesis: none;
-  -webkit-text-stroke: 0 !important;
-  text-stroke: 0 !important;
-  text-shadow: none !important;
-  -webkit-text-stroke-width: 0 !important;
-  -webkit-text-stroke-color: transparent !important;
-  -webkit-text-fill-color: #fff !important;
-  outline: none !important;
+  font-size: 28px !important;
+  font-weight: 500 !important;
 }
 
 .social-icons a {
@@ -3449,8 +3459,8 @@ footer.footer::after {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: #06C7EE;
-  color: #050d51;
+  background: #0099ff;
+  color: #fff;
   text-decoration: none;
   font-size: 20px;
   transition: all 0.3s ease;
@@ -3521,6 +3531,99 @@ footer.footer::after {
   font-size: 13px;
   font-weight: 400;
   text-decoration: underline;
+}
+
+.footer-div .row.g-5 {
+  align-items: start;
+  margin-top: 0 !important;
+}
+
+.footer-div .row.g-5 .col-md-6 {
+  padding: 0 20px;
+  margin: 0;
+}
+
+.col-md-6.test-class {
+  margin-top: 24px;
+}
+
+.contact-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 60px;
+}
+
+.bar-icons {
+  margin-bottom: 15px;
+}
+
+.bar-icons a {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 44px;
+  height: 44px;
+  background: #0099ff !important;
+  border-radius: 50%;
+  padding-left: 4px;
+  font-size: 0 !important;
+}
+
+.bar-icons a i {
+  font-size: 20px !important;
+  color: #fff;
+}
+
+a.main-contact-link {
+  color: #fff;
+  transition: all 0.3s ease-in-out;
+}
+
+a.cta-link {
+  color: #0099ff;
+  transition: all 0.3s ease-in-out;
+}
+
+a.main-contact-link:hover {
+  color: #0099ff;
+}
+
+a.cta-link:hover {
+  color: #fff;
+}
+
+.footer-div .col-md-12 {
+  margin-top: 0;
+}
+
+.footer-nav ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 30px;
+  row-gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-nav ul li a {
+  color: #fff;
+  font-weight: 400;
+  transition: all 0.3s ease-in-out;
+}
+
+.footer-nav ul li a:hover {
+  color: #0099ff;
+}
+
+.footer-copy-right {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.footer-copy-right p {
+  margin: 0;
 }
 
 /* FAQ Section Styles */
@@ -3676,6 +3779,7 @@ footer.footer::after {
 
 .footer-top img {
   max-width: 200px !important;
+  filter: brightness(0) invert(1);
 }
 
 .faq-question-text {
