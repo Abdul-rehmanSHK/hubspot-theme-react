@@ -58,6 +58,7 @@ export function Component({ fieldValues }) {
                     src={src}
                     alt={`Gallery image ${idx + 1}`}
                     className="gallery-image"
+                    data-index={idx}
                   />
                 </div>
               ))}
@@ -124,8 +125,12 @@ export function Component({ fieldValues }) {
 
       {/* Image Modal */}
       <div className="image-modal" id={`imageModal-${moduleId}`}>
-        <span className="close-modal">&times;</span>
-        <img id={`modalImg-${moduleId}`} alt="Modal display" />
+        <span className="close-modal" title="Close">&times;</span>
+        <button className="modal-nav modal-prev" id={`modalPrev-${moduleId}`} aria-label="Previous image">‹</button>
+        <div className="modal-img-container">
+          <img id={`modalImg-${moduleId}`} alt="Modal display" />
+        </div>
+        <button className="modal-nav modal-next" id={`modalNext-${moduleId}`} aria-label="Next image">›</button>
       </div>
 
       <script
@@ -140,6 +145,8 @@ export function Component({ fieldValues }) {
             const nextBtn = root.querySelector('#nextBtn-${moduleId}');
             const gallery = root.querySelector('.gallery-container');
             const actualImages = ${galleryImages.length};
+            const allImages = ${JSON.stringify(galleryImages)};
+            let currentModalIndex = 0;
             
             // Scroll amount - adjust based on image width and gap
             const scrollAmount = 250; // Adjust this value to scroll by image count
@@ -162,26 +169,71 @@ export function Component({ fieldValues }) {
             // Image modal functionality
             const modal = root.querySelector('#imageModal-${moduleId}');
             const modalImg = root.querySelector('#modalImg-${moduleId}');
+            const modalPrev = root.querySelector('#modalPrev-${moduleId}');
+            const modalNext = root.querySelector('#modalNext-${moduleId}');
             
+            function updateModalImage(index) {
+              if (index < 0) index = allImages.length - 1;
+              if (index >= allImages.length) index = 0;
+              
+              currentModalIndex = index;
+              
+              // Fade effect
+              modalImg.style.opacity = '0';
+              setTimeout(() => {
+                modalImg.src = allImages[currentModalIndex];
+                modalImg.style.opacity = '1';
+              }, 200);
+            }
+
             if (modal && modalImg) {
               root.addEventListener('click', function(e) {
                 const img = e.target.closest('.gallery-image');
                 if (!img) return;
-                modalImg.src = img.src;
-                modal.style.display = 'flex';
+                
+                const index = parseInt(img.getAttribute('data-index'), 10);
+                if (!isNaN(index)) {
+                  updateModalImage(index);
+                  modal.style.display = 'flex';
+                  document.body.style.overflow = 'hidden'; // Prevent scroll
+                }
+              });
+
+              if (modalPrev) modalPrev.addEventListener('click', (e) => {
+                e.stopPropagation();
+                updateModalImage(currentModalIndex - 1);
+              });
+
+              if (modalNext) modalNext.addEventListener('click', (e) => {
+                e.stopPropagation();
+                updateModalImage(currentModalIndex + 1);
               });
 
               const closeBtn = modal.querySelector('.close-modal');
               if (closeBtn) {
                 closeBtn.addEventListener('click', function() {
                   modal.style.display = 'none';
+                  document.body.style.overflow = ''; // Restore scroll
                 });
               }
 
               // Close on background click
               modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
+                if (e.target === modal || e.target.classList.contains('modal-img-container')) {
                   modal.style.display = 'none';
+                  document.body.style.overflow = '';
+                }
+              });
+
+              // Keyboard navigation
+              document.addEventListener('keydown', function(e) {
+                if (modal.style.display === 'flex') {
+                  if (e.key === 'ArrowLeft') updateModalImage(currentModalIndex - 1);
+                  if (e.key === 'ArrowRight') updateModalImage(currentModalIndex + 1);
+                  if (e.key === 'Escape') {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = '';
+                  }
                 }
               });
             }
