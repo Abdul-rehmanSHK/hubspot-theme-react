@@ -24,6 +24,8 @@ export function Component({ fieldValues }) {
   // Get all gallery images
   const galleryImages = (fieldValues.galleryImages || []).map((item: any) => imagePath(item?.image?.src)).filter(Boolean);
 
+  const isSliderEnabled = galleryImages.length > 9;
+
   // Marquee text items
   const marqueeItems = fieldValues.marqueeItems || [];
 
@@ -36,15 +38,17 @@ export function Component({ fieldValues }) {
         )}
 
         {/* Gallery with Navigation */}
-        <div className="gallery-wrapper" id={`galleryWrapper-${moduleId}`}>
+        <div className={`gallery-wrapper ${!isSliderEnabled ? 'is-static' : ''}`} id={`galleryWrapper-${moduleId}`}>
           {/* Previous Button */}
-          <button
-            className="gallery-nav gallery-nav-prev"
-            id={`prevBtn-${moduleId}`}
-            aria-label="Previous images"
-          >
-            <span className="nav-arrow">‹</span>
-          </button>
+          {isSliderEnabled && (
+            <button
+              className="gallery-nav gallery-nav-prev"
+              id={`prevBtn-${moduleId}`}
+              aria-label="Previous images"
+            >
+              <span className="nav-arrow">‹</span>
+            </button>
+          )}
 
           {/* Gallery Content */}
           <div className="gallery-container">
@@ -66,26 +70,30 @@ export function Component({ fieldValues }) {
           </div>
 
           {/* Next Button */}
-          <button
-            className="gallery-nav gallery-nav-next"
-            id={`nextBtn-${moduleId}`}
-            aria-label="Next images"
-          >
-            <span className="nav-arrow">›</span>
-          </button>
+          {isSliderEnabled && (
+            <button
+              className="gallery-nav gallery-nav-next"
+              id={`nextBtn-${moduleId}`}
+              aria-label="Next images"
+            >
+              <span className="nav-arrow">›</span>
+            </button>
+          )}
         </div>
 
         {/* Gallery Controls - Dots Indicator */}
-        <div className="gallery-dots" id={`galleryDots-${moduleId}`}>
-          {Array.from({ length: 1 }).map((_, idx) => (
-            <button
-              key={`dot-${idx}`}
-              className={`dot active`}
-              id={`dot-${moduleId}-${idx}`}
-              aria-label={`Gallery`}
-            />
-          ))}
-        </div>
+        {isSliderEnabled && (
+          <div className="gallery-dots" id={`galleryDots-${moduleId}`}>
+            {Array.from({ length: 1 }).map((_, idx) => (
+              <button
+                key={`dot-${idx}`}
+                className={`dot active`}
+                id={`dot-${moduleId}-${idx}`}
+                aria-label={`Gallery`}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Marquee Text Section */}
         {marqueeItems && marqueeItems.length > 0 && (
@@ -146,6 +154,7 @@ export function Component({ fieldValues }) {
             const gallery = root.querySelector('.gallery-container');
             const actualImages = ${galleryImages.length};
             const allImages = ${JSON.stringify(galleryImages)};
+            const isSliderEnabled = ${isSliderEnabled};
             let currentModalIndex = 0;
             
             // Scroll amount - adjust based on image width and gap
@@ -163,8 +172,8 @@ export function Component({ fieldValues }) {
               });
             }
 
-            if (nextBtn) nextBtn.addEventListener('click', () => scrollGallery('next'));
-            if (prevBtn) prevBtn.addEventListener('click', () => scrollGallery('prev'));
+            if (isSliderEnabled && nextBtn) nextBtn.addEventListener('click', () => scrollGallery('next'));
+            if (isSliderEnabled && prevBtn) prevBtn.addEventListener('click', () => scrollGallery('prev'));
 
             // Image modal functionality
             const modal = root.querySelector('#imageModal-${moduleId}');
@@ -255,31 +264,33 @@ export function Component({ fieldValues }) {
             }
 
             // Autoplay gallery slider
-            let autoplayInterval;
-            const autoplayDelay = 5000; // 5 seconds
-            
-            function startAutoplay() {
-              autoplayInterval = setInterval(() => {
-                scrollGallery('next');
-              }, autoplayDelay);
-            }
-            
-            function resetAutoplay() {
-              clearInterval(autoplayInterval);
+            if (isSliderEnabled) {
+              let autoplayInterval;
+              const autoplayDelay = 5000; // 5 seconds
+              
+              function startAutoplay() {
+                autoplayInterval = setInterval(() => {
+                  scrollGallery('next');
+                }, autoplayDelay);
+              }
+              
+              function resetAutoplay() {
+                clearInterval(autoplayInterval);
+                startAutoplay();
+              }
+              
+              // Start autoplay
               startAutoplay();
-            }
-            
-            // Start autoplay
-            startAutoplay();
-            
-            // Pause autoplay on manual navigation
-            if (nextBtn) nextBtn.addEventListener('click', resetAutoplay);
-            if (prevBtn) prevBtn.addEventListener('click', resetAutoplay);
-            
-            // Pause on hover
-            if (gallery) {
-              gallery.addEventListener('mouseenter', () => clearInterval(autoplayInterval));
-              gallery.addEventListener('mouseleave', startAutoplay);
+              
+              // Pause autoplay on manual navigation
+              if (nextBtn) nextBtn.addEventListener('click', resetAutoplay);
+              if (prevBtn) prevBtn.addEventListener('click', resetAutoplay);
+              
+              // Pause on hover
+              if (gallery) {
+                gallery.addEventListener('mouseenter', () => clearInterval(autoplayInterval));
+                gallery.addEventListener('mouseleave', startAutoplay);
+              }
             }
           })();
         `,

@@ -3365,7 +3365,7 @@ footer.footer::after {
 }
 
 .footer-top {
-  margin-bottom: 110px;
+  margin-bottom: 60px;
 }
 
 .footer-btn a {
@@ -3576,7 +3576,7 @@ a.cta-link {
 }
 
 a.main-contact-link:hover {
-  color: #0099ff;
+  color: #0e41fb;
 }
 
 a.cta-link:hover {
@@ -7632,6 +7632,20 @@ span.sub-price {
   box-sizing: border-box;
   width: fit-content;
   flex-wrap: nowrap;
+}
+
+.gallery-wrapper.is-static {
+  justify-content: center;
+}
+
+.gallery-wrapper.is-static .gallery-track {
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.gallery-wrapper.is-static .gallery-container {
+  overflow: visible !important;
 }
 
 .gallery-item {
