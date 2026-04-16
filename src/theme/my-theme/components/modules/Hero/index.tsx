@@ -1,4 +1,4 @@
-import { ModuleFields, ImageField, TextField, UrlField, FileField, RepeatedFieldGroup, BooleanField, RichTextField } from '@hubspot/cms-components/fields';
+import { ModuleFields, ImageField, TextField, UrlField, FileField, RepeatedFieldGroup, BooleanField, RichTextField, FormField } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
   // Handle UrlField structure - it can be a string or an object with url/href property
@@ -205,6 +205,39 @@ export function Component({ fieldValues }) {
   const sectionId = fieldValues.sectionId || '2025';
   const sectionClass = fieldValues.sectionClass || 'hero';
 
+  // Form logic
+  const selectedForm = fieldValues.selectedForm || null;
+  let formId = '';
+  let portalId = '39650877'; // Default portal ID
+  let region = 'na1'; // Default region
+  
+  if (selectedForm) {
+    if (typeof selectedForm === 'string') {
+      formId = selectedForm.trim();
+    } else if (typeof selectedForm === 'object' && selectedForm !== null) {
+      formId = selectedForm.guid || 
+               selectedForm.formId || 
+               selectedForm.id || 
+               selectedForm.value || 
+               selectedForm.form_id ||
+               (selectedForm.form && (selectedForm.form.guid || selectedForm.form.formId || selectedForm.form.id)) ||
+               '';
+      
+      portalId = selectedForm.portalId || 
+                 selectedForm.portal_id || 
+                 (selectedForm.form && selectedForm.form.portalId) ||
+                 '39650877';
+      
+      region = selectedForm.region || 
+               (selectedForm.form && selectedForm.form.region) ||
+               'na1';
+      
+      if (formId) formId = String(formId).trim();
+    }
+  }
+  
+  const formContainerId = `hs-form-container-${sectionId}-${formId ? formId.replace(/[^a-zA-Z0-9]/g, '') : 'empty'}`;
+
   return (
     <div className={sectionClass} id={sectionId} style={heroStyle}>
       <div className="container">
@@ -285,6 +318,65 @@ export function Component({ fieldValues }) {
                           <label>Seconds</label>
                         </div>
                       </div>
+                    </div>
+                  )}
+
+                  {/* HubSpot Form Rendering */}
+                  {formId && (
+                    <div className="hero-form-wrapper" style={{ marginTop: '30px' }}>
+                      <div id={formContainerId}></div>
+                      <script
+                        dangerouslySetInnerHTML={{
+                          __html: `
+                          (function() {
+                            const containerId = '${formContainerId}';
+                            const fId = '${formId}';
+                            const pId = '${portalId}';
+                            const reg = '${region}';
+                            let retryCount = 0;
+                            const maxRetries = 50;
+                            
+                            function initializeForm() {
+                              const container = document.getElementById(containerId);
+                              if (!container) {
+                                retryCount++;
+                                if (retryCount < maxRetries) {
+                                  setTimeout(initializeForm, 100);
+                                }
+                                return;
+                              }
+                              
+                              if (container.querySelector('iframe') || container.querySelector('.hs-form') || container.querySelector('form')) {
+                                return;
+                              }
+                              
+                              if (typeof hbspt !== 'undefined' && hbspt.forms && typeof hbspt.forms.create === 'function') {
+                                try {
+                                  hbspt.forms.create({
+                                    portalId: pId,
+                                    formId: fId,
+                                    region: reg,
+                                    target: '#' + containerId
+                                  });
+                                } catch (e) {
+                                  console.error('Error creating HubSpot form in Hero:', e);
+                                  container.innerHTML = '<div style="padding: 20px; text-align: center; color: #d32f2f; border: 2px dashed #ccc; border-radius: 5px;">Error loading form.</div>';
+                                }
+                              } else {
+                                retryCount++;
+                                if (retryCount < maxRetries) {
+                                  setTimeout(initializeForm, 100);
+                                } else {
+                                  container.innerHTML = '<div style="padding: 20px; text-align: center; color: #d32f2f; border: 2px dashed #ccc; border-radius: 5px;">HubSpot forms script failed to load.</div>';
+                                }
+                              }
+                            }
+                            
+                            setTimeout(initializeForm, 200);
+                          })();
+                        `,
+                        }}
+                      />
                     </div>
                   )}
                 </div>
@@ -1464,6 +1556,11 @@ export const fields = (
       label="Section CSS Class"
       default="hero"
       helpText="Custom CSS class for this section. Default: hero"
+    />
+    <FormField
+      name="selectedForm"
+      label="Select HubSpot Form"
+      helpText="Choose a form from your HubSpot account. The form will be displayed in the hero content area."
     />
   </ModuleFields>
 );
