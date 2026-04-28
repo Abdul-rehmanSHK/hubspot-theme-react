@@ -8,7 +8,9 @@ import {
 
 export function Component({ fieldValues }) {
   const heading = fieldValues.heading || 'PAST ATTENDEES';
+  const subHeading = fieldValues.subHeading || '';
   const sponsorHeading = fieldValues.sponsorHeading || 'PAST SPONSORS';
+  const sponsorSubHeading = fieldValues.sponsorSubHeading || '';
   const bgColor = fieldValues.backgroundColor?.color || 'transparent';
   const sectionId = fieldValues.sectionId || 'past-attendees-banner';
   const showPastAttendees = fieldValues.showPastAttendees !== false;
@@ -18,6 +20,7 @@ export function Component({ fieldValues }) {
   const ctaUrl = fieldValues.ctaUrl?.url || fieldValues.ctaUrl?.href || '#';
   const ctaOpenInNewWindow = fieldValues.ctaOpenInNewWindow || false;
   const sponsorsubHeading = fieldValues.sponsorsubHeading || '';
+  const sponsorBottomHeading = fieldValues.sponsorBottomHeading || '';
 
 
   const containerStyle = {
@@ -55,6 +58,16 @@ export function Component({ fieldValues }) {
             text-align: center;
             color: #06C7EE;
           }
+          .module-sub-heading {
+            text-align: center;
+            font-size: 16px;
+            color: #06C7EE;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+          }
           .past-attendees-logo-banner .hero-sponsor-slider-wrapper {
             width: 100%;
             margin-bottom: 40px;
@@ -66,9 +79,17 @@ export function Component({ fieldValues }) {
             text-align: center;
             font-size: 18px;
             color: #ffffff;
-            margin: 20px auto 30px;
+            margin: 0px auto 30px;
             max-width: 800px;
             opacity: 0.8;
+          }
+          .sponsor-bottom-heading {
+            text-align: center;
+            font-size: 28px;
+            color: #ffffff;
+            margin: 20px auto 10px;
+            font-weight: bold;
+            max-width: 800px;
           }
           .past-attendees-logo-banner .banner-cta-container {
             margin-top: 30px;
@@ -98,6 +119,9 @@ export function Component({ fieldValues }) {
       <div className="container">
         {showPastAttendees && (
           <div className="hero-sponsor-slider-wrapper">
+            {subHeading && (
+              <div className="module-sub-heading">{subHeading}</div>
+            )}
             {heading && (
               <div className="hero-sponsor-slider-pre-title">{heading}</div>
             )}
@@ -116,6 +140,9 @@ export function Component({ fieldValues }) {
 
         {showPastSponsors && (
           <div className="hero-sponsor-slider-wrapper">
+            {sponsorSubHeading && (
+              <div className="module-sub-heading">{sponsorSubHeading}</div>
+            )}
             {sponsorHeading && (
               <div className="hero-sponsor-slider-pre-title">{sponsorHeading}</div>
             )}
@@ -132,10 +159,17 @@ export function Component({ fieldValues }) {
           </div>
         )}
 
-        {/* Subheading rendered before CTA */}
-        {sponsorsubHeading && (
-          <div className="hero-sponsor-bottom-title">
-            {sponsorsubHeading}
+        {/* Subheading section with title */}
+        {(sponsorBottomHeading || sponsorsubHeading) && (
+          <div className="sponsor-bottom-content">
+            {sponsorBottomHeading && (
+              <h3 className="sponsor-bottom-heading">{sponsorBottomHeading}</h3>
+            )}
+            {sponsorsubHeading && (
+              <div className="hero-sponsor-bottom-title">
+                {sponsorsubHeading}
+              </div>
+            )}
           </div>
         )}
 
@@ -265,9 +299,19 @@ export function Component({ fieldValues }) {
 export const fields = (
   <ModuleFields>
     <TextField
+      name="subHeading"
+      label="Past Attendees Sub Heading"
+      placeholder="Enter sub heading"
+    />
+    <TextField
       name="heading"
       label="Past Attendees Heading"
       default="PAST ATTENDEES"
+    />
+    <TextField
+      name="sponsorSubHeading"
+      label="Past Sponsors Sub Heading"
+      placeholder="Enter sub heading for sponsors"
     />
     <TextField
       name="sponsorHeading"
@@ -283,6 +327,11 @@ export const fields = (
       name="showPastSponsors"
       label="Show Past Sponsors"
       default={false}
+    />
+    <TextField
+      name="sponsorBottomHeading"
+      label="Past Sponsors Bottom Heading"
+      placeholder="Enter heading for the bottom section"
     />
     <TextField
       name="sponsorsubHeading"

@@ -471,4 +471,3 @@ export const fields = (
 export const meta = {
   label: 'Sponsors',
 };
-

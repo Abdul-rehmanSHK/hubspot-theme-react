@@ -1,16 +1,25 @@
 import { ModuleFields, RepeatedFieldGroup, ImageField, TextField, UrlField, BooleanField, RichTextField } from '@hubspot/cms-components/fields';
 
+const sanitizeUrl = (url?: string) => {
+  if (!url || typeof url !== 'string') return url;
+  if (url.includes('gaiinsights.com/hubfs/')) {
+    return url.replace(/^https?:\/\/[^\/]+\/(hubfs\/.*)/, '/$1');
+  }
+  return url;
+};
+
 const imagePath = (src?: string) =>
-  src ? src : '';
+  src ? sanitizeUrl(src) : '';
 
 // Helper function to extract URL from UrlField
 const getUrl = (urlField: any): string => {
   if (!urlField) return '#';
-  if (typeof urlField === 'string') return urlField;
-  if (typeof urlField === 'object') {
-    return urlField.url || urlField.href || urlField.value || '#';
+  let url = '#';
+  if (typeof urlField === 'string') url = urlField;
+  else if (typeof urlField === 'object') {
+    url = urlField.url || urlField.href || urlField.value || '#';
   }
-  return '#';
+  return url === '#' ? '#' : (sanitizeUrl(url) || '#');
 };
 
 export function Component({ fieldValues }) {

@@ -21,11 +21,11 @@ export function Component({ fieldValues }) {
   const linkUrl = getUrl(fieldValues.linkUrl) || '#';
   const ctaText = fieldValues.ctaText || '';
   const ctaUrl = getUrl(fieldValues.ctaUrl) || '#';
-  
+
   // HubDB API configuration
   const portalId = '39650877';
   const tableId = '146265866'; // past_speakers table ID
-  
+
   // Filter options - handle BooleanField values (can be boolean, string "true"/"false", or undefined)
   const showFeaturedFemales = fieldValues.showFeaturedFemales === true || fieldValues.showFeaturedFemales === 'true';
   const showRoundtableLeaders = fieldValues.showRoundtableLeaders === true || fieldValues.showRoundtableLeaders === 'true';
@@ -242,7 +242,8 @@ export function Component({ fieldValues }) {
                 spaceBetween: 30,
                 centeredSlides: false,
                 loop: true,
-                loopAdditionalSlides: 0,
+                loopAdditionalSlides: 5,
+                loopedSlides: 5,
                 grabCursor: true,
                 watchSlidesProgress: true,
                 speed: 600,
@@ -391,4 +392,3 @@ export const fields = (
 export const meta = {
   label: 'Past Speakers',
 };
-

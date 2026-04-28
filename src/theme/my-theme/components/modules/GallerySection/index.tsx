@@ -24,7 +24,7 @@ export function Component({ fieldValues }) {
   // Get all gallery images
   const galleryImages = (fieldValues.galleryImages || []).map((item: any) => imagePath(item?.image?.src)).filter(Boolean);
 
-  const isSliderEnabled = galleryImages.length > 9;
+  const isSliderEnabled = galleryImages.length > 0;
 
   // Marquee text items
   const marqueeItems = fieldValues.marqueeItems || [];
@@ -37,63 +37,30 @@ export function Component({ fieldValues }) {
           <h2 className="gallery-heading">{fieldValues.heading}</h2>
         )}
 
-        {/* Gallery with Navigation */}
-        <div className={`gallery-wrapper ${!isSliderEnabled ? 'is-static' : ''}`} id={`galleryWrapper-${moduleId}`}>
-          {/* Previous Button */}
-          {isSliderEnabled && (
-            <button
-              className="gallery-nav gallery-nav-prev"
-              id={`prevBtn-${moduleId}`}
-              aria-label="Previous images"
-            >
-              <span className="nav-arrow">‹</span>
-            </button>
-          )}
-
-          {/* Gallery Content */}
-          <div className="gallery-container">
-            <div className="gallery-track" id={`galleryTrack-${moduleId}`}>
-              {galleryImages.map((src, idx) => (
-                <div
-                  className="gallery-item"
-                  key={`gallery-img-${idx}`}
-                >
-                  <img
-                    src={src}
-                    alt={`Gallery image ${idx + 1}`}
-                    className="gallery-image"
-                    data-index={idx}
-                  />
-                </div>
-              ))}
-            </div>
+        {/* Gallery with Swiper */}
+        <div className={`gallery-wrapper swiper ${!isSliderEnabled ? 'is-static' : ''}`} id={`galleryWrapper-${moduleId}`}>
+          <div className="swiper-wrapper">
+            {galleryImages.map((src, idx) => (
+              <div
+                className="gallery-item swiper-slide"
+                key={`gallery-img-${idx}`}
+              >
+                <img
+                  src={src}
+                  alt={`Gallery image ${idx + 1}`}
+                  className="gallery-image"
+                  data-index={idx}
+                />
+              </div>
+            ))}
           </div>
 
-          {/* Next Button */}
+          {/* Swiper Pagination (Dots) */}
           {isSliderEnabled && (
-            <button
-              className="gallery-nav gallery-nav-next"
-              id={`nextBtn-${moduleId}`}
-              aria-label="Next images"
-            >
-              <span className="nav-arrow">›</span>
-            </button>
+            <div className="swiper-pagination"></div>
           )}
         </div>
 
-        {/* Gallery Controls - Dots Indicator */}
-        {isSliderEnabled && (
-          <div className="gallery-dots" id={`galleryDots-${moduleId}`}>
-            {Array.from({ length: 1 }).map((_, idx) => (
-              <button
-                key={`dot-${idx}`}
-                className={`dot active`}
-                id={`dot-${moduleId}-${idx}`}
-                aria-label={`Gallery`}
-              />
-            ))}
-          </div>
-        )}
 
         {/* Marquee Text Section */}
         {marqueeItems && marqueeItems.length > 0 && (
@@ -156,24 +123,58 @@ export function Component({ fieldValues }) {
             const allImages = ${JSON.stringify(galleryImages)};
             const isSliderEnabled = ${isSliderEnabled};
             let currentModalIndex = 0;
-            
-            // Scroll amount - adjust based on image width and gap
-            const scrollAmount = 250; // Adjust this value to scroll by image count
+            let swiperInstance = null;
 
-            function scrollGallery(direction) {
-              const currentScroll = gallery.scrollLeft;
-              const newScroll = direction === 'next' 
-                ? currentScroll + scrollAmount 
-                : currentScroll - scrollAmount;
-              
-              gallery.scrollTo({
-                left: newScroll,
-                behavior: 'smooth'
-              });
+            // Initialize Swiper
+            if (isSliderEnabled) {
+              function initGallerySwiper() {
+                const sliderEl = root.querySelector('.gallery-wrapper');
+                if (!sliderEl) return;
+                
+                // Wait for Swiper library to be ready
+                if (typeof Swiper === 'undefined') {
+                  setTimeout(initGallerySwiper, 100);
+                  return;
+                }
+
+                swiperInstance = new Swiper(sliderEl, {
+                  slidesPerView: 1,
+                  spaceBetween: 20,
+                  loop: true,
+                  centeredSlides: false,
+                  speed: 800,
+                  watchSlidesProgress: true,
+                  autoplay: {
+                    delay: 4000,
+                    disableOnInteraction: false,
+                  },
+                  pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                  },
+                  breakpoints: {
+                    480: {
+                      slidesPerView: 1,
+                      spaceBetween: 20,
+                    },
+                    768: {
+                      slidesPerView: 2,
+                      spaceBetween: 20,
+                    },
+                    1024: {
+                      slidesPerView: 3,
+                      spaceBetween: 30,
+                    }
+                  }
+                });
+              }
+
+              if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initGallerySwiper);
+              } else {
+                initGallerySwiper();
+              }
             }
-
-            if (isSliderEnabled && nextBtn) nextBtn.addEventListener('click', () => scrollGallery('next'));
-            if (isSliderEnabled && prevBtn) prevBtn.addEventListener('click', () => scrollGallery('prev'));
 
             // Image modal functionality
             const modal = root.querySelector('#imageModal-${moduleId}');
@@ -263,41 +264,18 @@ export function Component({ fieldValues }) {
               }, 100);
             }
 
-            // Autoplay gallery slider
-            if (isSliderEnabled) {
-              let autoplayInterval;
-              const autoplayDelay = 5000; // 5 seconds
-              
-              function startAutoplay() {
-                autoplayInterval = setInterval(() => {
-                  scrollGallery('next');
-                }, autoplayDelay);
-              }
-              
-              function resetAutoplay() {
-                clearInterval(autoplayInterval);
-                startAutoplay();
-              }
-              
-              // Start autoplay
-              startAutoplay();
-              
-              // Pause autoplay on manual navigation
-              if (nextBtn) nextBtn.addEventListener('click', resetAutoplay);
-              if (prevBtn) prevBtn.addEventListener('click', resetAutoplay);
-              
-              // Pause on hover
-              if (gallery) {
-                gallery.addEventListener('mouseenter', () => clearInterval(autoplayInterval));
-                gallery.addEventListener('mouseleave', startAutoplay);
-              }
-            }
           })();
         `,
         }}
       />
 
       <style>{`
+        .gallery-wrapper {
+          overflow: hidden !important;
+        }
+        .swiper-slide {
+          height: auto !important;
+        }
         @keyframes marquee {
           0% {
             transform: translateX(0);

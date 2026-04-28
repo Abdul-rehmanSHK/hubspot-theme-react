@@ -15,13 +15,22 @@ export function Component({ fieldValues }) {
     sectionClass = 'team-area',
   } = fieldValues;
 
+  const sanitizeUrl = (url) => {
+    if (!url || typeof url !== 'string') return url;
+    if (url.includes('gaiinsights.com/hubfs/')) {
+      return url.replace(/^https?:\/\/[^\/]+\/(hubfs\/.*)/, '/$1');
+    }
+    return url;
+  };
+
   const getUrl = (urlField) => {
     if (!urlField) return '';
-    if (typeof urlField === 'string') return urlField;
-    if (typeof urlField === 'object') {
-      return urlField.url || urlField.href || urlField.link || '';
+    let url = '';
+    if (typeof urlField === 'string') url = urlField;
+    else if (typeof urlField === 'object') {
+      url = urlField.url || urlField.href || urlField.link || '';
     }
-    return '';
+    return sanitizeUrl(url);
   };
 
   return (
@@ -44,7 +53,7 @@ export function Component({ fieldValues }) {
         <div className="team-grid">
           {teamMembers.map((member, index) => {
             const profileLink = getUrl(member.profileLink);
-            const imageUrl = member.image?.src || '';
+            const imageUrl = sanitizeUrl(member.image?.src || '');
             const imageAlt = member.image?.alt || member.memberName || 'Team Member';
             
             return (

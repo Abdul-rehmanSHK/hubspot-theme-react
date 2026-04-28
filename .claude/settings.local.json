@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const f = require\\('@hubspot/cms-components/fields'\\); console.log\\(Object.keys\\(f\\).join\\('\\\\n'\\)\\);\")"
+    ]
+  }
+}

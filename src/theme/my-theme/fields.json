@@ -16,6 +16,13 @@
     "help_text": "Set to your HubSpot menu ID to show that menu in the global header. Leave 0 to use the header's manual Navigation links."
   },
   {
+    "type": "number",
+    "name": "footer_menu_id",
+    "label": "Footer menu (HubSpot nav)",
+    "default": 0,
+    "help_text": "Set to your HubSpot menu ID to show that menu in the global footer. Find the ID in Content > Navigation — it is the number in the URL when you edit the menu."
+  },
+  {
     "name": "header_logo",
     "label": "Header logo",
     "type": "image",

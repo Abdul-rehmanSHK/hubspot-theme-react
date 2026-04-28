@@ -22,17 +22,17 @@ export function Component({ fieldValues }) {
   // Convert video URLs to appropriate format (YouTube, Vimeo, direct video files, or embed URLs)
   const convertToEmbedUrl = (url) => {
     if (!url || typeof url !== 'string') return '';
-    
+
     const trimmedUrl = url.trim();
     if (!trimmedUrl) return '';
-    
+
     // Check if it's a direct video file (mp4, webm, ogg, mov, etc.)
     const directVideoExtensions = /\.(mp4|webm|ogg|ogv|mov|m4v|avi|wmv|flv)(\?.*)?$/i;
     if (directVideoExtensions.test(trimmedUrl)) {
       // Return as-is for direct video files (will be handled by <video> tag)
       return trimmedUrl;
     }
-    
+
     // YouTube handling
     // If already a YouTube embed URL, clean it up
     if (trimmedUrl.includes('youtube.com/embed/')) {
@@ -42,26 +42,26 @@ export function Component({ fieldValues }) {
       }
       return trimmedUrl;
     }
-    
+
     // Extract video ID from various YouTube URL formats
     let videoId = '';
     const watchMatch = trimmedUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/v\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
     if (watchMatch && watchMatch[1]) {
       videoId = watchMatch[1];
     }
-    
+
     if (!videoId) {
       const shortMatch = trimmedUrl.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
       if (shortMatch && shortMatch[1]) {
         videoId = shortMatch[1];
       }
     }
-    
+
     // If we found a YouTube video ID, convert to embed format
     if (videoId) {
       return `https://www.youtube.com/embed/${videoId}`;
     }
-    
+
     // Vimeo handling
     if (trimmedUrl.includes('vimeo.com/')) {
       // Extract Vimeo video ID
@@ -74,16 +74,16 @@ export function Component({ fieldValues }) {
         return trimmedUrl;
       }
     }
-    
+
     // If it looks like an embed URL (contains /embed/ or /player/), return as is
     if (trimmedUrl.includes('/embed/') || trimmedUrl.includes('/player/')) {
       return trimmedUrl;
     }
-    
+
     // For any other URL, return as is (might be a direct video URL or other platform)
     return trimmedUrl;
   };
-  
+
   // Check if URL is a direct video file (needs <video> tag instead of <iframe>)
   const isDirectVideoFile = (url) => {
     if (!url || typeof url !== 'string') return false;
@@ -113,11 +113,11 @@ export function Component({ fieldValues }) {
                     // Check for video URL first (YouTube, Vimeo, direct video links, etc.)
                     const rawVideoUrl = getUrl(video.videoUrl) || '';
                     const processedVideoUrl = rawVideoUrl ? convertToEmbedUrl(rawVideoUrl) : '';
-                    
+
                     // Fall back to file upload if no URL provided
                     const videoFile = video.videoFile;
                     let videoFileSrc = '';
-                    
+
                     if (videoFile && !processedVideoUrl) {
                       if (typeof videoFile === 'string') {
                         videoFileSrc = videoFile;
@@ -126,7 +126,7 @@ export function Component({ fieldValues }) {
                         videoFileSrc = videoFile.src || videoFile.url || videoFile.href || videoFile.path || '';
                       }
                     }
-                    
+
                     // Handle thumbnail image
                     const thumbnailImage = video.thumbnailImage;
                     let thumbnailSrc = '';
@@ -138,16 +138,16 @@ export function Component({ fieldValues }) {
                       }
                     }
                     const hasThumbnail = !!thumbnailSrc;
-                    
+
                     // Determine which video source to use
                     const hasVideoUrl = !!processedVideoUrl;
                     const hasVideoFile = !!videoFileSrc;
                     const isDirectVideo = hasVideoUrl && isDirectVideoFile(processedVideoUrl);
                     const hasVideo = hasVideoUrl || hasVideoFile;
-                    
+
                     // Unique ID for this video item
                     const videoItemId = `video-item-${moduleId}-${idx}`;
-                    
+
                     return (
                       <div
                         key={idx}
@@ -158,8 +158,8 @@ export function Component({ fieldValues }) {
                             <>
                               {/* Show thumbnail with play button overlay */}
                               <div className="video-thumbnail-wrapper" style={{ position: 'relative', width: '350px', height: '250px', borderRadius: '10px 10px 0 0', overflow: 'hidden', cursor: 'pointer' }}>
-                                <img 
-                                  src={thumbnailSrc} 
+                                <img
+                                  src={thumbnailSrc}
                                   alt={video.thumbnailAlt || 'Video thumbnail'}
                                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                                   className="video-thumbnail-image"
@@ -172,12 +172,10 @@ export function Component({ fieldValues }) {
                               </div>
                               {/* Hidden video player - will be shown when thumbnail is clicked */}
                               <div className="video-player-container" style={{ display: 'none', width: '350px', height: '250px', borderRadius: '10px 10px 0 0', overflow: 'hidden' }}>
-                          {hasVideoUrl ? (
+                                {hasVideoUrl ? (
                                   isDirectVideo ? (
-                                    <video width="350" height="250" controls style={{ width: '100%', height: '100%', display: 'block' }}>
+                                    <video preload="none" width="350" height="250" controls style={{ width: '100%', height: '100%', display: 'block' }}>
                                       <source src={processedVideoUrl} type="video/mp4" />
-                                      <source src={processedVideoUrl} type="video/ogg" />
-                                      <source src={processedVideoUrl} type="video/webm" />
                                       Your browser does not support the video tag.
                                     </video>
                                   ) : (
@@ -194,8 +192,7 @@ export function Component({ fieldValues }) {
                                 ) : hasVideoFile ? (
                                   <video width="350" height="250" controls style={{ width: '100%', height: '100%', display: 'block' }}>
                                     <source src={videoFileSrc} type="video/mp4" />
-                                    <source src={videoFileSrc} type="video/ogg" />
-                                    <source src={videoFileSrc} type="video/webm" />
+
                                     Your browser does not support the video tag.
                                   </video>
                                 ) : null}
@@ -207,8 +204,6 @@ export function Component({ fieldValues }) {
                               // Direct video file - use <video> tag
                               <video width="350" height="250" controls>
                                 <source src={processedVideoUrl} type="video/mp4" />
-                                <source src={processedVideoUrl} type="video/ogg" />
-                                <source src={processedVideoUrl} type="video/webm" />
                                 Your browser does not support the video tag.
                               </video>
                             ) : (
@@ -219,16 +214,15 @@ export function Component({ fieldValues }) {
                                 src={processedVideoUrl}
                                 frameBorder="0"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                loading="lazy"
                                 allowFullScreen
                                 style={{ borderRadius: '10px 10px 0 0', display: 'block' }}
                               ></iframe>
                             )
                           ) : hasVideoFile ? (
                             // File upload - use <video> tag
-                            <video width="350" height="250" controls>
+                            <video preload="none" width="350" height="250" controls>
                               <source src={videoFileSrc} type="video/mp4" />
-                              <source src={videoFileSrc} type="video/ogg" />
-                              <source src={videoFileSrc} type="video/webm" />
                               Your browser does not support the video tag.
                             </video>
                           ) : (

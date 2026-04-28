@@ -326,8 +326,8 @@ span.nav-link:hover {
 
 .header-wrapper .logo-div img,
 .header.scrolled .header-wrapper .logo-div img {
-  max-width: 200px !important;
-  width: 200px !important;
+  max-width: 280px !important;
+  width: 280px !important;
 }
 
 .nav-dropdown-link {
@@ -714,11 +714,12 @@ a.fill-btn:hover {
 }
 
 .countdown-item label {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  color: #fff;
   text-transform: uppercase;
-  margin-top: 6px;
   letter-spacing: 1px;
+  margin-top: 8px;
+  font-weight: 500;
 }
 
 .discount-ended-message {
@@ -2508,10 +2509,9 @@ button#toggleAutoplay {
 .speaker-slider {
   width: 100%;
   margin: auto;
-  padding-left: 25px !important;
   margin-top: 30px;
-  overflow: visible !important;
-  height: 400px;
+  overflow: hidden;
+  height: 440px;
 }
 
 /* .swiper-slide {
@@ -2544,7 +2544,6 @@ button#toggleAutoplay {
 
 .swiper-slide:not(.swiper-slide-active) {
   transform: scale(1) !important;
-  overflow: hidden;
 }
 
 /* Override zoom for video carousel - no zoom needed */
@@ -2557,7 +2556,6 @@ button#toggleAutoplay {
   opacity: 1;
   transform: scale(1) !important;
   z-index: 2;
-  overflow: hidden;
 }
 
 /* Override zoom for video carousel active slide - no zoom needed */
@@ -2848,7 +2846,7 @@ button#toggleAutoplay {
   gap: 1.5rem;
   left: 0;
   right: 0;
-  bottom: -35px;
+  bottom: 5px;
   position: absolute;
 }
 
@@ -3391,7 +3389,7 @@ footer.footer::after {
   font-size: 14px;
   font-weight: 300;
   max-width: 600px;
-  margin-top: -50px;
+  margin-top: 0;
 }
 
 .footer-text h4 {
@@ -3434,7 +3432,7 @@ footer.footer::after {
   text-align: end;
   gap: 1.2rem;
   align-items: baseline;
-  margin-bottom: 0;
+  margin-top: 20px;
 }
 
 .social-icons h6 {
@@ -3539,7 +3537,7 @@ footer.footer::after {
 
 .contact-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
   width: 100%;
   margin-bottom: 60px;
 }
@@ -5336,7 +5334,9 @@ span.sub-price {
   /* List aur button ke beech thoda gap */
 }
 
-
+div#past-attendees-banner .container {
+  max-width: 1440px !important;
+}
 
 /*---------------------------
          responsive
@@ -7459,8 +7459,6 @@ span.sub-price {
 
 .gallery-item {
   background: transparent !important;
-  flex: 0 0 215px !important;
-  min-width: 215px !important;
 }
 
 .gallery-nav {
@@ -7555,7 +7553,7 @@ span.sub-price {
 }
 
 .marquee-text {
-  font-size: 1.125rem;
+  font-size: 22px;
   color: #fff;
   font-weight: 500;
   display: inline-block;
@@ -7567,102 +7565,33 @@ span.sub-price {
   margin: 0 0px 0px 30px !important;
 }
 
-/* Gallery Wrapper */
+/* Gallery Swiper Wrapper */
 .gallery-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
   position: relative;
   z-index: 1;
   margin-bottom: 2rem;
-}
-
-/* Navigation Buttons */
-.gallery-nav {
-  position: relative;
-  width: 50px;
-  height: 50px;
-  border: 2px solid #06C7EE;
-  background: transparent;
-  color: #06C7EE;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-  z-index: 10;
-}
-
-.gallery-nav:hover {
-  background: #06C7EE;
-  color: #050d51;
-  box-shadow: 0 0 15px rgba(6, 199, 238, 0.5);
-}
-
-.gallery-nav-prev {
-  order: -1;
-}
-
-.gallery-nav-next {
-  order: 3;
-}
-
-.nav-arrow {
-  display: inline-block;
-  line-height: 1;
-}
-
-/* Gallery Container */
-
-.gallery-container {
-  overflow: hidden !important;
-  background: none !important;
-  min-height: auto;
-  border-radius: 0;
-}
-
-.gallery-track {
-  display: flex;
-  gap: 1rem;
-  padding: 1rem;
-  box-sizing: border-box;
-  width: fit-content;
-  flex-wrap: nowrap;
-}
-
-.gallery-wrapper.is-static {
-  justify-content: center;
-}
-
-.gallery-wrapper.is-static .gallery-track {
-  flex-wrap: wrap;
-  justify-content: center;
-  width: 100%;
-}
-
-.gallery-wrapper.is-static .gallery-container {
-  overflow: visible !important;
+  padding: 10px 0 50px 0;
+  /* Space for dots at bottom */
 }
 
 .gallery-item {
-  flex: 0 0 200px;
-  aspect-ratio: 1;
+  aspect-ratio: 16/9;
+  /* Use a standard aspect ratio for gallery items */
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 12px;
   background: rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease;
-  min-width: 200px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .gallery-item:hover {
-  transform: scale(1.05);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(6, 199, 238, 0.3);
+  border-color: rgba(6, 199, 238, 0.5);
 }
 
 .gallery-image {
@@ -7673,33 +7602,31 @@ span.sub-price {
   display: block;
 }
 
-/* Gallery Dots Indicator */
-.gallery-dots {
-  text-align: center;
-  margin: 2rem 0;
-  position: relative;
-  z-index: 1;
+/* Swiper Pagination (Dots) */
+.gallery-wrapper .swiper-pagination {
+  bottom: 0px !important;
 }
 
-.dot {
+.gallery-wrapper .swiper-pagination-bullet {
   width: 12px;
   height: 12px;
-  border-radius: 50%;
-  border: 2px solid #06C7EE;
   background: transparent;
-  margin: 0 8px;
-  cursor: pointer;
-  display: inline-block;
+  border: 2px solid #06C7EE;
+  opacity: 1;
+  margin: 0 8px !important;
   transition: all 0.3s ease;
 }
 
-.dot.active {
+.gallery-wrapper .swiper-pagination-bullet-active {
   background: #06C7EE;
-  box-shadow: 0 0 8px rgba(6, 199, 238, 0.6);
+  width: 28px;
+  /* Elongated active dot for modern look */
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(6, 199, 238, 0.6);
 }
 
-.dot:hover {
-  box-shadow: 0 0 8px rgba(6, 199, 238, 0.6);
+.gallery-wrapper .swiper-pagination-bullet:hover {
+  box-shadow: 0 0 8px rgba(6, 199, 238, 0.5);
 }
 
 /* Gallery Button */
@@ -7828,8 +7755,8 @@ span.sub-price {
   }
 
   .gallery-wrapper {
-    flex-wrap: wrap;
-    gap: 1rem;
+    flex-wrap: nowrap;
+    gap: 0;
   }
 
   .gallery-nav {
@@ -7918,7 +7845,7 @@ span.sub-price {
   }
 
   .gallery-item {
-    min-width: calc(50% - 0.25rem);
+    min-width: 0;
   }
 
   .marquee-content {
@@ -7990,99 +7917,203 @@ span.sub-price {
   }
 }
 
-/* OurTeams Module Styles */
-.team-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+/* =============================================
+   COUNTDOWN TIMER MODULE
+   ============================================= */
+
+.countdown-section-area {
+  background: linear-gradient(135deg, #001D57 0%, #00112E 60%, #000d24 100%);
+  padding: 80px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.team-card {
-    background: linear-gradient(19deg, rgba(2, 14, 38, 1) 60%, rgba(14, 65, 251, 1) 100%) !important;
-    border-radius: 10px;
-    padding: 20px;
-    color: #fff;
-    transition: 0.3s;
-    height: 100%;
+.countdown-section-area::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(6, 199, 238, 0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
-.team-card:hover {
-    transform: translateY(-5px);
+.countdown-section-area::after {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  left: -80px;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
-.team-card img {
-    width: 100%;
-    border-radius: 10px;
-    margin-bottom: 15px;
-    height: auto;
+.countdown-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-.team-card h3 {
-    color: #fff;
-    font-size: 27px !important;
-    margin-bottom: 5px;
-    font-weight: bold !important;
-    font-family: 'Inter', sans-serif !important;
-    letter-spacing: 0px;
+.countdown-heading-wrap {
+  margin-bottom: 40px;
 }
 
-.designation {
-    font-size: 18px;
-    margin-bottom: 10px;
-    color: #fbcc24;
+.countdown-heading {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+  line-height: 1.2;
 }
 
-.desc {
-    font-size: 18px;
-    line-height: 25px;
+.countdown-heading span {
+  color: #06C7EE;
 }
 
-.social {
-    margin-top: 15px;
-    display: flex;
-    gap: 10px;
+.countdown-subheading {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0;
+  letter-spacing: 1px;
 }
 
-.social a {
-    width: 38px;
-    height: 38px;
-    background: #0e41fb;
-    color: #fff;
-    text-align: center;
-    line-height: 30px;
-    border-radius: 50%;
-    margin-right: 8px;
-    font-size: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: row;
-    transition: all 0.3s ease-in-out;
-}
-.social a:hover {
-    background: #fff !important;
-    color: #0e41fb !important;
-    transform: translateY(-3px)
-}
-.desc a {
-    color: #0e41fb;
-}
-.desc a:hover {
-    text-decoration: underline;
-}
-.team-area {
-    background: #f5f5f5 !important;
-    padding: 100px 0;
+.countdown-blocks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
 }
 
-@media (max-width: 991px) {
-    .team-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+.countdown-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(6, 199, 238, 0.25);
+  border-radius: 12px;
+  padding: 20px 30px;
+  min-width: 110px;
+  backdrop-filter: blur(4px);
+  transition: border-color 0.3s ease, background 0.3s ease;
 }
 
-@media (max-width: 767px) {
-    .team-grid {
-        grid-template-columns: 1fr;
-    }
-}
+.countdown-block:hover {
+  border-color: rgba(6, 199, 238, 0.55);
+  background: rgba(6, 199, 238, 0.08);
+}
+
+.countdown-number {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  letter-spacing: -1px;
+}
+
+.countdown-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+.countdown-colon {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #06C7EE;
+  margin: 0 10px;
+  line-height: 1;
+  padding-bottom: 20px;
+  opacity: 0.75;
+}
+
+.countdown-expired {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #06C7EE;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 30px 0;
+}
+
+.countdown-date-display {
+  margin-top: 28px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .countdown-section-area {
+    padding: 60px 16px;
+  }
+
+  .countdown-heading {
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+  }
+
+  .countdown-blocks {
+    gap: 0;
+  }
+
+  .countdown-block {
+    min-width: 72px;
+    padding: 14px 16px;
+  }
+
+  .countdown-number {
+    font-size: 2.4rem;
+  }
+
+  .countdown-colon {
+    font-size: 2rem;
+    margin: 0 6px;
+    padding-bottom: 18px;
+  }
+
+  .countdown-label {
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .countdown-heading {
+    font-size: 1.3rem;
+  }
+
+  .countdown-block {
+    min-width: 62px;
+    padding: 12px 12px;
+    border-radius: 8px;
+  }
+
+  .countdown-number {
+    font-size: 2rem;
+  }
+
+  .countdown-colon {
+    font-size: 1.6rem;
+    margin: 0 4px;
+    padding-bottom: 14px;
+  }
+
+  .countdown-date-display {
+    font-size: 0.8rem;
+  }
+}
+}

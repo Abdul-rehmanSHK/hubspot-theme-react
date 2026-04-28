@@ -210,32 +210,32 @@ export function Component({ fieldValues }) {
   let formId = '';
   let portalId = '39650877'; // Default portal ID
   let region = 'na1'; // Default region
-  
+
   if (selectedForm) {
     if (typeof selectedForm === 'string') {
       formId = selectedForm.trim();
     } else if (typeof selectedForm === 'object' && selectedForm !== null) {
-      formId = selectedForm.guid || 
-               selectedForm.formId || 
-               selectedForm.id || 
-               selectedForm.value || 
-               selectedForm.form_id ||
-               (selectedForm.form && (selectedForm.form.guid || selectedForm.form.formId || selectedForm.form.id)) ||
-               '';
-      
-      portalId = selectedForm.portalId || 
-                 selectedForm.portal_id || 
-                 (selectedForm.form && selectedForm.form.portalId) ||
-                 '39650877';
-      
-      region = selectedForm.region || 
-               (selectedForm.form && selectedForm.form.region) ||
-               'na1';
-      
+      formId = selectedForm.guid ||
+        selectedForm.formId ||
+        selectedForm.id ||
+        selectedForm.value ||
+        selectedForm.form_id ||
+        (selectedForm.form && (selectedForm.form.guid || selectedForm.form.formId || selectedForm.form.id)) ||
+        '';
+
+      portalId = selectedForm.portalId ||
+        selectedForm.portal_id ||
+        (selectedForm.form && selectedForm.form.portalId) ||
+        '39650877';
+
+      region = selectedForm.region ||
+        (selectedForm.form && selectedForm.form.region) ||
+        'na1';
+
       if (formId) formId = String(formId).trim();
     }
   }
-  
+
   const formContainerId = `hs-form-container-${sectionId}-${formId ? formId.replace(/[^a-zA-Z0-9]/g, '') : 'empty'}`;
 
   return (
@@ -408,8 +408,6 @@ export function Component({ fieldValues }) {
                             style={{ width: '100%', height: 'auto', maxWidth: '625px' }}
                           >
                             <source src={processedVideoUrl} type="video/mp4" />
-                            <source src={processedVideoUrl} type="video/ogg" />
-                            <source src={processedVideoUrl} type="video/webm" />
                             Your browser does not support the video tag.
                           </video>
                         ) : (
@@ -434,8 +432,6 @@ export function Component({ fieldValues }) {
                           style={{ width: '100%', height: 'auto', maxWidth: '625px' }}
                         >
                           <source src={videoFileSrc} type="video/mp4" />
-                          <source src={videoFileSrc} type="video/ogg" />
-                          <source src={videoFileSrc} type="video/webm" />
                           Your browser does not support the video tag.
                         </video>
                       ) : null

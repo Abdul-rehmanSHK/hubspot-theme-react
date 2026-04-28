@@ -7,3 +7,11 @@ declare module '*.svg';
 
 declare module '@hubspot/cms-components';
 declare module '@hubspot/cms-components/fields';
+declare module 'react';
+declare module 'react/jsx-runtime';
+
+declare namespace JSX {
+    interface IntrinsicElements {
+        [elemName: string]: any;
+    }
+}
