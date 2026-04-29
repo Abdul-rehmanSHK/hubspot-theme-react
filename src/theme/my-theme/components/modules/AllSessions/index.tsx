@@ -96,6 +96,7 @@ export function Component({ fieldValues }) {
             const portalId = '39650877';
             const tableId = '148056649'; // sessions table ID
             const speakersTableId = '146265866'; // speakers table ID
+            const venueTableId = '147324261'; // venue table ID
             const loadingDiv = root.querySelector('#sessions-loading-' + moduleId);
             const errorDiv = root.querySelector('#sessions-error-' + moduleId);
             const tableWrapper = root.querySelector('#sessions-table-wrapper-' + moduleId);
@@ -128,6 +129,8 @@ export function Component({ fieldValues }) {
             let isInitialLoad = true; // Track if this is the first load
             let selectedDateToPreserve = null; // Store selected date to preserve on re-render
             let allSpeakersData = {}; // Store speakers by ID for quick lookup
+            let allVenuesData = {}; // Store venues by ID for quick lookup
+            let roomNameToVenueId = {}; // Map room name -> venue row id (from HubDB foreign ID)
             let allSessionsData = []; // Store all sessions for search functionality
             let selectedTopic = 'all'; // Store selected topic filter
             let searchQuery = ''; // Store search query
@@ -209,6 +212,49 @@ export function Component({ fieldValues }) {
                 console.warn('Error fetching speakers:', err);
                 return {}; // Return empty object on error
               }
+            }
+
+            // Fetch venue data (room -> topics)
+            async function fetchVenues() {
+              try {
+                const apiUrl = 'https://api.hubapi.com/cms/v3/hubdb/tables/' + venueTableId + '/rows?portalId=' + portalId;
+                const response = await fetch(apiUrl);
+
+                if (!response.ok) {
+                  console.warn('Failed to fetch venues:', response.status);
+                  return {};
+                }
+
+                const data = await response.json();
+                const venuesMap = {};
+
+                (data.results || []).forEach(function(row) {
+                  const venueId = row.id;
+                  const topics = (row.values?.topic || []).map(function(topicObj) {
+                    return topicObj.name || '';
+                  }).filter(function(name) {
+                    return name && name.trim() !== '';
+                  });
+
+                  venuesMap[venueId] = {
+                    id: venueId,
+                    name: row.values?.name || '',
+                    topics: topics
+                  };
+                });
+
+                return venuesMap;
+              } catch (err) {
+                console.warn('Error fetching venues:', err);
+                return {};
+              }
+            }
+
+            function getVenueTopicLabelById(venueId) {
+              if (!venueId) return '';
+              const venue = allVenuesData[venueId];
+              if (!venue || !venue.topics || venue.topics.length === 0) return '';
+              return venue.topics.join(', ');
             }
             
             // Helper function to format date from timestamp (UTC)
@@ -715,7 +761,17 @@ export function Component({ fieldValues }) {
                 dateTimeDiv.className = 'sessions-card-datetime';
                 // Get date timestamp from date.name (not from start_time)
                 const sessionDateTs = getDateTimestamp(session);
-                dateTimeDiv.textContent = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
+                let dateTimeText = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
+                if (!isBreak && session.room && session.room !== 'Unknown Room') {
+                  const venueId = session.roomId || roomNameToVenueId[session.room] || '';
+                  const venueTopicLabel = getVenueTopicLabelById(venueId);
+                  if (venueTopicLabel) {
+                    dateTimeText += ' • ' + session.room + ' • ' + venueTopicLabel;
+                  } else {
+                    dateTimeText += ' • ' + session.room;
+                  }
+                }
+                dateTimeDiv.textContent = dateTimeText;
                 card.appendChild(dateTimeDiv);
                 
                 // Session title
@@ -805,6 +861,8 @@ export function Component({ fieldValues }) {
               try {
                 // Fetch speakers first
                 allSpeakersData = await fetchSpeakers();
+                // Fetch venues (rooms) next
+                allVenuesData = await fetchVenues();
                 
                 const apiUrl = 'https://api.hubapi.com/cms/v3/hubdb/tables/' + tableId + '/rows?portalId=' + portalId;
                 const response = await fetch(apiUrl);
@@ -824,9 +882,9 @@ export function Component({ fieldValues }) {
                 
                 // Extract and process sessions
                 const processedSessions = sessions.map(function(row) {
-                  const room = row.values?.room && row.values.room.length > 0 
-                    ? row.values.room[0].name 
-                    : 'Unknown Room';
+                  const roomObj = row.values?.room && row.values.room.length > 0 ? row.values.room[0] : null;
+                  const room = roomObj && roomObj.name ? roomObj.name : 'Unknown Room';
+                  const roomId = roomObj && roomObj.id ? roomObj.id : '';
                   
                   // Extract speaker IDs and names
                   const speakerIds = (row.values?.speaker || []).map(function(s) {
@@ -865,6 +923,7 @@ export function Component({ fieldValues }) {
                     start_time: row.values?.start_time || 0,
                     end_time: row.values?.end_time || 0,
                     room: room,
+                    roomId: roomId,
                     speakerIds: speakerIds,
                     speakers: speakers,
                     moderatorSpeakerIds: moderatorSpeakerIds,
@@ -874,6 +933,16 @@ export function Component({ fieldValues }) {
                   };
                 }).filter(function(session) {
                   return session.start_time > 0 && session.end_time > 0;
+                });
+
+                // Build a stable mapping of room name -> venue id (for header rendering)
+                roomNameToVenueId = {};
+                processedSessions.forEach(function(session) {
+                  if (session && session.room && session.room !== 'Unknown Room' && session.roomId) {
+                    if (!roomNameToVenueId[session.room]) {
+                      roomNameToVenueId[session.room] = session.roomId;
+                    }
+                  }
                 });
                 
                 // Store all sessions
@@ -1122,6 +1191,17 @@ export function Component({ fieldValues }) {
                     roomName.className = 'sessions-room-name';
                     roomName.textContent = room;
                     th.appendChild(roomName);
+
+                    // Venue topic (if any) - derived from venue table via foreign id
+                    const venueId = roomNameToVenueId[room] || '';
+                    const venueTopicLabel = getVenueTopicLabelById(venueId);
+                    if (venueTopicLabel) {
+                      const topicDiv = document.createElement('div');
+                      topicDiv.className = 'sessions-room-topic';
+                      topicDiv.textContent = venueTopicLabel;
+                      th.appendChild(topicDiv);
+                    }
+
                     headerRow.appendChild(th);
                   });
                   
@@ -2634,7 +2714,13 @@ export function Component({ fieldValues }) {
               let dateTimeText = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
               // Add venue name if session has a room (and it's not 'Unknown Room')
               if (session.room && session.room !== 'Unknown Room') {
-                dateTimeText += ' • ' + session.room;
+                const venueId = session.roomId || roomNameToVenueId[session.room] || '';
+                const venueTopicLabel = getVenueTopicLabelById(venueId);
+                if (venueTopicLabel) {
+                  dateTimeText += ' • ' + session.room + ' • ' + venueTopicLabel;
+                } else {
+                  dateTimeText += ' • ' + session.room;
+                }
               }
               dateTimeDiv.textContent = dateTimeText;
               body.appendChild(dateTimeDiv);
