@@ -84,7 +84,7 @@ export function Component({ fieldValues }) {
           </div>
         </div>
       </div>
-      
+
       <script
         dangerouslySetInnerHTML={{
           __html: `
@@ -780,6 +780,19 @@ export function Component({ fieldValues }) {
                 titleDiv.textContent = session.title;
                 card.appendChild(titleDiv);
                 
+                // Session types (if any)
+                if (session.sessionTypes && session.sessionTypes.length > 0) {
+                  const typesWrapper = document.createElement('div');
+                  typesWrapper.className = 'sessions-card-types-wrapper';
+                  session.sessionTypes.forEach(function(type) {
+                    const typeDiv = document.createElement('div');
+                    typeDiv.className = 'sessions-card-types';
+                    typeDiv.textContent = type;
+                    typesWrapper.appendChild(typeDiv);
+                  });
+                  card.appendChild(typesWrapper);
+                }
+                
                 // Speaker images and names (only for non-break sessions)
                 if (!isBreak && session.speakerIds && session.speakerIds.length > 0) {
                   const speakersDiv = document.createElement('div');
@@ -917,6 +930,14 @@ export function Component({ fieldValues }) {
                     ? row.values.date[0].name || row.values.date[0]
                     : null;
                   
+                  // Extract session type (checking both singular and plural just in case)
+                  const sessionTypeData = row.values?.session_type || row.values?.session_types || [];
+                  const sessionTypes = (Array.isArray(sessionTypeData) ? sessionTypeData : [sessionTypeData]).map(function(typeObj) {
+                    return typeObj.label || typeObj.name || (typeof typeObj === 'string' ? typeObj : '');
+                  }).filter(function(name) {
+                    return name && name.trim() !== '';
+                  });
+                  
                   return {
                     id: row.id,
                     title: row.values?.session_title || 'Untitled Session',
@@ -929,7 +950,8 @@ export function Component({ fieldValues }) {
                     moderatorSpeakerIds: moderatorSpeakerIds,
                     moderators: moderators,
                     description: row.values?.description || '',
-                    date: dateValue ? [dateValue] : null
+                    date: dateValue ? [dateValue] : null,
+                    sessionTypes: sessionTypes
                   };
                 }).filter(function(session) {
                   return session.start_time > 0 && session.end_time > 0;
@@ -970,14 +992,6 @@ export function Component({ fieldValues }) {
                 if (uniqueDates.length > 0) {
                   dateSelect.innerHTML = '';
                   
-                  // Only add "All Days" option if in grid view (not available in calendar view)
-                  if (currentView === 'grid') {
-                    const allDaysOption = document.createElement('option');
-                    allDaysOption.value = ALL_DAYS_VALUE;
-                    allDaysOption.textContent = 'All Days';
-                    dateSelect.appendChild(allDaysOption);
-                  }
-                  
                   // Add date options
                   uniqueDates.forEach(function(dateTs) {
                     const option = document.createElement('option');
@@ -987,33 +1001,47 @@ export function Component({ fieldValues }) {
                     dateSelect.appendChild(option);
                   });
                   
-                  // Set selected date: use preserved selection if available, otherwise use minimum date (only on initial load)
+                  // Set selected date: use preserved selection if available, otherwise use Monday (or minimum date) as default
                   if (isInitialLoad) {
-                    // On initial load, use minimum date (not "All Days")
-                    dateSelect.value = uniqueDates[0];
-                    normalizedSelectedDate = uniqueDates[0];
-                    selectedDateToPreserve = uniqueDates[0]; // Store for future use
+                    // On initial load, try to find Monday as default, otherwise use minimum date
+                    const mondayDate = uniqueDates.find(function(ts) {
+                      return new Date(ts).getUTCDay() === 1; // 1 = Monday
+                    });
+                    const defaultDate = mondayDate || uniqueDates[0];
+                    
+                    dateSelect.value = defaultDate;
+                    normalizedSelectedDate = defaultDate;
+                    selectedDateToPreserve = defaultDate; // Store for future use
                     isInitialLoad = false; // Mark that initial load is complete
                   } else if (selectedDateToPreserve === ALL_DAYS_VALUE) {
-                    // User selected "All Days" - but if in calendar view, switch to minimum date
+                    // User selected "All Days" - but if in calendar view, switch to default date
                     if (currentView === 'calendar') {
-                      dateSelect.value = uniqueDates[0];
-                      normalizedSelectedDate = uniqueDates[0];
-                      selectedDateToPreserve = uniqueDates[0]; // Update preserved selection
+                      const mondayDate = uniqueDates.find(function(ts) {
+                        return new Date(ts).getUTCDay() === 1;
+                      });
+                      const defaultDate = mondayDate || uniqueDates[0];
+                      dateSelect.value = defaultDate;
+                      normalizedSelectedDate = defaultDate;
+                      selectedDateToPreserve = defaultDate; // Update preserved selection
                     } else {
                       // Grid view - allow "All Days"
                       dateSelect.value = ALL_DAYS_VALUE;
-                      normalizedSelectedDate = ALL_DAYS_VALUE;
+                      normalizedSelectedDate = null;
                     }
                   } else if (selectedDateToPreserve && typeof selectedDateToPreserve === 'number' && uniqueDates.includes(selectedDateToPreserve)) {
                     // On subsequent loads (date change), use the preserved selection (must be a valid date)
                     dateSelect.value = selectedDateToPreserve;
                     normalizedSelectedDate = selectedDateToPreserve;
                   } else {
-                    // Fallback: use minimum date if preserved selection is invalid
-                    dateSelect.value = uniqueDates[0];
-                    normalizedSelectedDate = uniqueDates[0];
-                    selectedDateToPreserve = uniqueDates[0];
+                    // Fallback: use Monday (or minimum date) if preserved selection is invalid
+                    const mondayDate = uniqueDates.find(function(ts) {
+                      return new Date(ts).getUTCDay() === 1;
+                    });
+                    const defaultDate = mondayDate || uniqueDates[0];
+                    
+                    dateSelect.value = defaultDate;
+                    normalizedSelectedDate = defaultDate;
+                    selectedDateToPreserve = defaultDate;
                   }
                   
                   if (filtersRowDiv) {
@@ -1349,6 +1377,19 @@ export function Component({ fieldValues }) {
                     sessionTime.textContent = formatTime(session.start_time) + ' - ' + formatTime(session.end_time);
                     sessionBox.appendChild(sessionTime);
                     
+                    // Session types (if any)
+                    if (session.sessionTypes && session.sessionTypes.length > 0) {
+                      const typesWrapper = document.createElement('div');
+                      typesWrapper.className = 'sessions-session-types-wrapper';
+                      session.sessionTypes.forEach(function(type) {
+                        const sessionTypesDiv = document.createElement('div');
+                        sessionTypesDiv.className = 'sessions-session-types';
+                        sessionTypesDiv.textContent = type;
+                        typesWrapper.appendChild(sessionTypesDiv);
+                      });
+                      sessionBox.appendChild(typesWrapper);
+                    }
+                    
                     // Add click event to open session detail modal
                     sessionBox.style.cursor = 'pointer';
                     sessionBox.setAttribute('data-session-id', session.id);
@@ -1414,11 +1455,21 @@ export function Component({ fieldValues }) {
                     sessionBox.style.cursor = 'default';
                     sessionBox.style.pointerEvents = 'none';
                     
-                    // Add session title only (no time in the box, time will be shown in time column)
-                    const sessionTitle = document.createElement('div');
-                    sessionTitle.className = 'sessions-session-title';
                     sessionTitle.textContent = session.title;
                     sessionBox.appendChild(sessionTitle);
+                    
+                    // Session types (if any)
+                    if (session.sessionTypes && session.sessionTypes.length > 0) {
+                      const typesWrapper = document.createElement('div');
+                      typesWrapper.className = 'sessions-session-types-wrapper';
+                      session.sessionTypes.forEach(function(type) {
+                        const sessionTypesDiv = document.createElement('div');
+                        sessionTypesDiv.className = 'sessions-session-types';
+                        sessionTypesDiv.textContent = type;
+                        typesWrapper.appendChild(sessionTypesDiv);
+                      });
+                      sessionBox.appendChild(typesWrapper);
+                    }
                     
                     // Append to table wrapper so it can span across all columns
                     tableWrapper.appendChild(sessionBox);
@@ -1794,6 +1845,19 @@ export function Component({ fieldValues }) {
                 titleDiv.className = 'sessions-card-title';
                 titleDiv.textContent = session.title;
                 card.appendChild(titleDiv);
+                
+                // Session types (if any)
+                if (session.sessionTypes && session.sessionTypes.length > 0) {
+                  const typesWrapper = document.createElement('div');
+                  typesWrapper.className = 'sessions-card-types-wrapper';
+                  session.sessionTypes.forEach(function(type) {
+                    const typeDiv = document.createElement('div');
+                    typeDiv.className = 'sessions-card-types';
+                    typeDiv.textContent = type;
+                    typesWrapper.appendChild(typeDiv);
+                  });
+                  card.appendChild(typesWrapper);
+                }
                 
                 // Speaker images and names (only for non-break sessions)
                 if (!isBreak && session.speakerIds && session.speakerIds.length > 0) {
@@ -2734,6 +2798,19 @@ export function Component({ fieldValues }) {
               // Clear previous content
               body.innerHTML = '';
               
+              // Session types (displayed after heading/title)
+              if (session.sessionTypes && session.sessionTypes.length > 0) {
+                const typesWrapper = document.createElement('div');
+                typesWrapper.className = 'sessions-session-types-wrapper';
+                session.sessionTypes.forEach(function(type) {
+                  const typeTag = document.createElement('div');
+                  typeTag.className = 'sessions-session-types';
+                  typeTag.textContent = type;
+                  typesWrapper.appendChild(typeTag);
+                });
+                body.appendChild(typesWrapper);
+              }
+              
               // Date and time (formatted like grid view)
               // Get date timestamp from date.name (not from start_time)
               const sessionDateTs = getDateTimestamp(session);
@@ -2980,9 +3057,9 @@ export function Component({ fieldValues }) {
             </button>
           </div>
           <div className="speaker-search-input-wrapper">
-            <input 
-              type="text" 
-              className="speaker-search-input" 
+            <input
+              type="text"
+              className="speaker-search-input"
               id={`session-search-input-${moduleId}`}
               placeholder="Search by session or speaker name..."
               autoComplete="off"
