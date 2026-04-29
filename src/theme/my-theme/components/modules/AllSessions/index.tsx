@@ -1056,16 +1056,26 @@ export function Component({ fieldValues }) {
                 // Filter by topic if topic filter is active
                 if (selectedTopic !== 'all') {
                   filteredSessions = filteredSessions.filter(function(session) {
-                    // Check if any speaker in this session has the selected topic
+                    // Match topic against speaker topics OR venue topics
+                    let matches = false;
+
+                    // Speakers
                     if (session.speakerIds && session.speakerIds.length > 0) {
-                      return session.speakerIds.some(function(speakerId) {
+                      matches = session.speakerIds.some(function(speakerId) {
                         const speaker = allSpeakersData[speakerId];
-                        if (speaker && speaker.topics) {
-                          return speaker.topics.includes(selectedTopic);
-                        }
-                        return false;
+                        return !!(speaker && speaker.topics && speaker.topics.includes(selectedTopic));
                       });
                     }
+
+                    if (matches) return true;
+
+                    // Venue (room)
+                    const venueId = session.roomId || (session.room ? roomNameToVenueId[session.room] : '') || '';
+                    const venue = venueId ? allVenuesData[venueId] : null;
+                    if (venue && venue.topics && Array.isArray(venue.topics)) {
+                      return venue.topics.includes(selectedTopic);
+                    }
+
                     return false;
                   });
                 }
@@ -1995,20 +2005,39 @@ export function Component({ fieldValues }) {
                 const topicCountMap = {};
                 
                 allSessionsData.forEach(function(session) {
+                  const sessionTopics = new Set();
+
+                  // Topics from speakers
                   if (session.speakerIds && session.speakerIds.length > 0) {
                     session.speakerIds.forEach(function(speakerId) {
                       const speaker = allSpeakersData[speakerId];
                       if (speaker && speaker.topics && speaker.topics.length > 0) {
                         speaker.topics.forEach(function(topic) {
-                          topicSet.add(topic);
-                          if (!topicCountMap[topic]) {
-                            topicCountMap[topic] = 0;
+                          if (topic && String(topic).trim()) {
+                            sessionTopics.add(String(topic).trim());
                           }
-                          topicCountMap[topic]++;
                         });
                       }
                     });
                   }
+
+                  // Topics from venue (room) table
+                  const venueId = session.roomId || (session.room ? roomNameToVenueId[session.room] : '') || '';
+                  const venue = venueId ? allVenuesData[venueId] : null;
+                  if (venue && venue.topics && venue.topics.length > 0) {
+                    venue.topics.forEach(function(topic) {
+                      if (topic && String(topic).trim()) {
+                        sessionTopics.add(String(topic).trim());
+                      }
+                    });
+                  }
+
+                  // Update global set + counts (count sessions, not speaker occurrences)
+                  sessionTopics.forEach(function(topic) {
+                    topicSet.add(topic);
+                    if (!topicCountMap[topic]) topicCountMap[topic] = 0;
+                    topicCountMap[topic] += 1;
+                  });
                 });
                 
                 const sortedTopics = Array.from(topicSet).sort();
