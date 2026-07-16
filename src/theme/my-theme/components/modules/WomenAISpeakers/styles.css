@@ -11,24 +11,20 @@
   padding: 0;
   width: 100%;
 }
-
-.women-speaker-card:before {
-  display: none;
+.women-speaker-card:before{
+    display: none;
 }
-
 .women-speakers-header {
   text-align: center;
   margin-bottom: 50px;
 }
-
 .women-speakers-heading h2 {
-  margin-bottom: 40px;
-  text-align: left;
-  font-weight: bold;
-  font-size: 45px;
-  color: #020e26;
+    margin-bottom: 40px !important;
+    text-align: left;
+    font-weight: bold !important;
+    font-size: 45px !important;
+    color: #020e26 !important;
 }
-
 /* Swiper Slider Wrapper */
 .women-speakers-slider-container {
   position: relative;
@@ -37,7 +33,7 @@
 
 .women-speakers-slider {
   overflow: hidden;
-  padding: 60px 0;
+  padding: 60px 0 !important;
 }
 
 /* Match height: stretch every slide in a row to the tallest one */
@@ -120,8 +116,7 @@
 }
 
 .women-speaker-meta {
-  border-left: 2.5px solid #ff2e93;
-  /* The pink vertical line */
+  border-left: 2.5px solid #ff2e93; /* The pink vertical line */
   padding-left: 14px;
   margin-left: 2px;
   display: flex;
@@ -130,19 +125,17 @@
 }
 
 .women-speaker-designation {
-  color: #ff66c4;
-  font-weight: 500;
-  margin-bottom: 5px;
-  font-size: 19px;
-  line-height: 23px;
-  position: relative;
-  margin-top: 10px;
-  text-align: left;
+    color: #ff66c4;
+    font-weight: 500;
+    margin-bottom: 5px;
+    font-size: 19px;
+    line-height: 23px;
+    position: relative;
+    margin-top: 10px;
+    text-align: left;
 }
-
 .women-speaker-company {
-  color: #93c5fd;
-  /* Soft blue text */
+  color: #93c5fd; /* Soft blue text */
   font-size: 13px;
   font-weight: 500;
   text-align: left;
@@ -176,11 +169,11 @@
 }
 
 .women-speaker-description {
-  color: #fff;
-  line-height: normal;
-  margin-bottom: 0;
-  overflow: hidden;
-  text-align: left;
+   color: #fff;
+    line-height: normal;
+    margin-bottom: 0;
+    overflow: hidden;
+    text-align: left;
 }
 
 /* Circular avatar styling */
@@ -207,7 +200,7 @@
 
 /* Swiper Pagination (Dots) styling */
 .women-speakers-slider-container .swiper-pagination {
-  bottom: 10px;
+  bottom: 10px !important;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -221,13 +214,12 @@
   opacity: 0.6;
   border-radius: 50%;
   transition: all 0.3s ease;
-  margin: 0;
+  margin: 0 !important;
   cursor: pointer;
 }
 
 .women-speakers-slider-container .swiper-pagination-bullet-active {
-  background-color: #ff2e93;
-  /* Active pink dot */
+  background-color: #ff2e93; /* Active pink dot */
   opacity: 1;
   transform: scale(1.25);
   width: 10px;
@@ -249,8 +241,8 @@
 }
 
 .women-speakers-arrow {
-  position: static;
-  margin: 0;
+  position: static !important;
+  margin: 0 !important;
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -303,29 +295,23 @@
   .women-speakers-heading {
     font-size: 32px;
   }
-
   .women-speaker-card {
     padding: 24px 20px;
     min-height: 200px;
   }
-
   .women-speakers-slider-container {
     padding-left: 50px;
     padding-right: 50px;
   }
-
   .women-speaker-card-content {
     max-width: calc(100% - 108px);
   }
-
   .women-speaker-card-image-wrap {
     flex-basis: 92px;
   }
-
   .women-speaker-logo-panel {
     width: 92px;
   }
-
   .women-speaker-avatar-border {
     width: 95px;
     height: 95px;
@@ -336,7 +322,6 @@
   .women-speakers-heading {
     font-size: 26px;
   }
-
   .women-speaker-card {
     flex-direction: column-reverse;
     align-items: flex-start;
@@ -344,12 +329,10 @@
     min-height: auto;
     gap: 20px;
   }
-
   .women-speakers-slider-container {
     padding-left: 0;
     padding-right: 0;
   }
-
   .women-speakers-controls {
     position: static;
     justify-content: center;
@@ -357,21 +340,17 @@
     transform: none;
     margin-top: 18px;
   }
-
   .women-speaker-card-content {
     padding-right: 0;
     max-width: 100%;
     width: 100%;
   }
-
   .women-speaker-card-image-wrap {
     flex: 0 0 auto;
   }
-
   .women-speaker-logo-panel {
     width: 104px;
   }
-
   .women-speaker-avatar-border {
     width: 90px;
     height: 90px;

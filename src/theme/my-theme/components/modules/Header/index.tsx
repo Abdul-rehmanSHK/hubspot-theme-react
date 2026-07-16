@@ -7,6 +7,60 @@ import {
   MenuField,
 } from '@hubspot/cms-components/fields';
 import logo from '../../../assets/images/gai-insights-logo-1.webp';
+import './styles.css';
+
+function CountdownDisplay({ targetDate }: { targetDate: number }) {
+  const scriptContent = `
+    (function() {
+      const container = document.querySelector('.header-promo-countdown[data-promo-countdown-target]');
+      if (!container) return;
+      const targetDate = parseInt(container.getAttribute('data-promo-countdown-target'), 10);
+      if (!targetDate || isNaN(targetDate)) return;
+      const updateDisplay = function() {
+        const now = new Date().getTime();
+        const diff = Math.max(0, targetDate - now);
+        const days = String(Math.floor(diff / 86400000)).padStart(2, '0');
+        const hours = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
+        const minutes = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+        const seconds = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+        const daysSpan = container.querySelector('[data-countdown="days"]');
+        const hoursSpan = container.querySelector('[data-countdown="hours"]');
+        const minutesSpan = container.querySelector('[data-countdown="minutes"]');
+        const secondsSpan = container.querySelector('[data-countdown="seconds"]');
+        if (daysSpan) daysSpan.textContent = days;
+        if (hoursSpan) hoursSpan.textContent = hours;
+        if (minutesSpan) minutesSpan.textContent = minutes;
+        if (secondsSpan) secondsSpan.textContent = seconds;
+      };
+      updateDisplay();
+      setInterval(updateDisplay, 1000);
+    })();
+  `;
+
+  return (
+    <>
+      <div className="header-promo-countdown" data-promo-countdown-target={targetDate}>
+        <div className="header-promo-cd">
+          <span className="header-promo-cd__num" data-countdown="days">00</span>
+          <span className="header-promo-cd__label">Days</span>
+        </div>
+        <div className="header-promo-cd">
+          <span className="header-promo-cd__num" data-countdown="hours">00</span>
+          <span className="header-promo-cd__label">Hours</span>
+        </div>
+        <div className="header-promo-cd">
+          <span className="header-promo-cd__num" data-countdown="minutes">00</span>
+          <span className="header-promo-cd__label">Minutes</span>
+        </div>
+        <div className="header-promo-cd">
+          <span className="header-promo-cd__num" data-countdown="seconds">00</span>
+          <span className="header-promo-cd__label">Seconds</span>
+        </div>
+      </div>
+      <script dangerouslySetInnerHTML={{ __html: scriptContent }} />
+    </>
+  );
+}
 
 // Normalize HubSpot menu tree (from layout-passed menuItems) to same shape as manual navItems
 function getMenuItemsAsNavItems(menuValue) {
@@ -187,97 +241,109 @@ export function Component({ fieldValues, hublParameters, hublData }) {
   const ctaLink = getUrl(fieldValues.ctaLink);
 
   return (
-    <header className="header">
-      <div className="header-wrapper">
-        <div className="logo-div">
-          <a href={logoLink} target={logoOpenInNewTab ? '_blank' : undefined} rel={logoOpenInNewTab ? 'noopener noreferrer' : undefined} data-header-logo>
-            <img src={logoImg?.src} alt={logoImg?.alt || 'Logo'} data-header-logo-img />
-          </a>
-        </div>
-        <nav className="navbar navbar-expand-lg navbar-light">
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNavDropdown"
-            aria-controls="navbarNavDropdown"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarNavDropdown">
-            <ul className="navbar-nav">
-              {navItems.map((item, index) => {
-                const linkUrl = getUrl(item.link);
-                const openInNewWindow = !!item.openInNewWindow;
-                const childNavItems = item.childNavItems || [];
-                const hasChildren = childNavItems.length > 0;
-                const dynamicSelfActive = usingDynamicMenu && isDynamicLinkActive(linkUrl);
-                const dynamicChildActive =
-                  usingDynamicMenu &&
-                  Array.isArray(childNavItems) &&
-                  childNavItems.some((c) => isDynamicLinkActive(getUrl(c?.link)));
-                const isActive = dynamicSelfActive || dynamicChildActive;
-
-                return (
-                  <li className={`nav-item ${hasChildren ? 'nav-item-dropdown' : ''} ${isActive ? 'active' : ''}`} key={index}>
-                    {hasChildren ? (
-                      <>
-                        <span className="nav-link nav-link-dropdown">
-                          {item.text}
-                          <i className="fa-solid fa-chevron-down dropdown-icon"></i>
-                        </span>
-                        <ul className="nav-dropdown-menu">
-                          {childNavItems.map((childItem, childIndex) => {
-                            const childLinkUrl = getUrl(childItem.link);
-                            const childOpenInNewWindow = !!childItem.openInNewWindow;
-                            const childIsActive = usingDynamicMenu && isDynamicLinkActive(childLinkUrl);
-                            return (
-                              <li key={childIndex}>
-                                <a
-                                  className={`nav-dropdown-link ${childIsActive ? 'active' : ''}`}
-                                  href={childLinkUrl}
-                                  target={childOpenInNewWindow ? '_blank' : undefined}
-                                  rel={childOpenInNewWindow ? 'noopener noreferrer' : undefined}
-                                >
-                                  {childItem.text}
-                                </a>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </>
-                    ) : (
-                      <a
-                        className="nav-link"
-                        href={linkUrl}
-                        target={openInNewWindow ? '_blank' : undefined}
-                        rel={openInNewWindow ? 'noopener noreferrer' : undefined}
-                      >
-                        {item.text}
-                      </a>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+    <>
+      {fieldValues.showPromoBanner && (
+        <div className="header-promo-banner">
+          <div className="header-promo-banner__content">
+            <span class="header-promo-banner__text">{fieldValues.promoBannerText}</span>
+            {fieldValues.countdownEnable && fieldValues.countdownTarget && (() => {
+              const targetTime = new Date(fieldValues.countdownTarget).getTime();
+              return !isNaN(targetTime) && targetTime > 0 ? <CountdownDisplay targetDate={targetTime} /> : null;
+            })()}
           </div>
-        </nav>
-        <div className="header-btn">
-          <a
-            href={ctaLink || '#conatct-us'}
-            className="transparent-btn"
-            data-header-cta
-            target={fieldValues.ctaOpenInNewWindow ? '_blank' : undefined}
-            rel={fieldValues.ctaOpenInNewWindow ? 'noopener noreferrer' : undefined}
-          >
-            {fieldValues.ctaText || 'Contact Us'}
-          </a>
         </div>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
+      )}
+      <header className="header">
+        <div className="header-wrapper">
+          <div className="logo-div">
+            <a href={logoLink} target={logoOpenInNewTab ? '_blank' : undefined} rel={logoOpenInNewTab ? 'noopener noreferrer' : undefined} data-header-logo>
+              <img src={logoImg?.src} alt={logoImg?.alt || 'Logo'} data-header-logo-img />
+            </a>
+          </div>
+          <nav className="navbar navbar-expand-lg navbar-light">
+            <button
+              className="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarNavDropdown"
+              aria-controls="navbarNavDropdown"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span className="navbar-toggler-icon"></span>
+            </button>
+            <div className="collapse navbar-collapse" id="navbarNavDropdown">
+              <ul className="navbar-nav">
+                {navItems.map((item, index) => {
+                  const linkUrl = getUrl(item.link);
+                  const openInNewWindow = !!item.openInNewWindow;
+                  const childNavItems = item.childNavItems || [];
+                  const hasChildren = childNavItems.length > 0;
+                  const dynamicSelfActive = usingDynamicMenu && isDynamicLinkActive(linkUrl);
+                  const dynamicChildActive =
+                    usingDynamicMenu &&
+                    Array.isArray(childNavItems) &&
+                    childNavItems.some((c) => isDynamicLinkActive(getUrl(c?.link)));
+                  const isActive = dynamicSelfActive || dynamicChildActive;
+
+                  return (
+                    <li className={`nav-item ${hasChildren ? 'nav-item-dropdown' : ''} ${isActive ? 'active' : ''}`} key={index}>
+                      {hasChildren ? (
+                        <>
+                          <span className="nav-link nav-link-dropdown">
+                            {item.text}
+                            <i className="fa-solid fa-chevron-down dropdown-icon"></i>
+                          </span>
+                          <ul className="nav-dropdown-menu">
+                            {childNavItems.map((childItem, childIndex) => {
+                              const childLinkUrl = getUrl(childItem.link);
+                              const childOpenInNewWindow = !!childItem.openInNewWindow;
+                              const childIsActive = usingDynamicMenu && isDynamicLinkActive(childLinkUrl);
+                              return (
+                                <li key={childIndex}>
+                                  <a
+                                    className={`nav-dropdown-link ${childIsActive ? 'active' : ''}`}
+                                    href={childLinkUrl}
+                                    target={childOpenInNewWindow ? '_blank' : undefined}
+                                    rel={childOpenInNewWindow ? 'noopener noreferrer' : undefined}
+                                  >
+                                    {childItem.text}
+                                  </a>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </>
+                      ) : (
+                        <a
+                          className="nav-link"
+                          href={linkUrl}
+                          target={openInNewWindow ? '_blank' : undefined}
+                          rel={openInNewWindow ? 'noopener noreferrer' : undefined}
+                        >
+                          {item.text}
+                        </a>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </nav>
+          <div className="header-btn">
+            <a
+              href={ctaLink || '#conatct-us'}
+              className="transparent-btn"
+              data-header-cta
+              target={fieldValues.ctaOpenInNewWindow ? '_blank' : undefined}
+              rel={fieldValues.ctaOpenInNewWindow ? 'noopener noreferrer' : undefined}
+            >
+              {fieldValues.ctaText || 'Contact Us'}
+            </a>
+          </div>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
           (function() {
             function applyHubDbHeader() {
               var btn = document.querySelector('.header [data-header-cta]');
@@ -307,11 +373,11 @@ export function Component({ fieldValues, hublParameters, hublData }) {
             else applyHubDbHeader();
           })();
           `,
-          }}
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
+            }}
+          />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
           (function() {
             // Remove active only from nav items whose MAIN link is cross-origin (fixes wrong active on other domain home)
             function fixActiveByOrigin() {
@@ -494,9 +560,11 @@ export function Component({ fieldValues, hublParameters, hublData }) {
               // Function to handle scroll
               function handleScroll() {
                 const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                const promoBanner = document.querySelector('.header-promo-banner');
+                const promoBannerHeight = promoBanner ? promoBanner.offsetHeight : 0;
 
-                // Add 'scrolled' class when scrolled down more than 50px
-                if (scrollTop > 50) {
+                // Add 'scrolled' class when scrolled down more than promo banner height
+                if (scrollTop > promoBannerHeight) {
                   header.classList.add('scrolled');
                   const headerHeight = header.offsetHeight;
                   body.style.paddingTop = headerHeight + 'px';
@@ -525,10 +593,11 @@ export function Component({ fieldValues, hublParameters, hublData }) {
             }
           })();
         `,
-          }}
-        />
-      </div>
-    </header>
+            }}
+          />
+        </div>
+      </header>
+    </>
   );
 }
 
@@ -560,6 +629,27 @@ export const fields = (
       label="CTA open in new window"
       default={false}
       helpText="Check to open the CTA link in a new tab/window"
+    />
+    <BooleanField
+      name="showPromoBanner"
+      label="Show promo banner"
+      default={false}
+    />
+    <TextField
+      name="promoBannerText"
+      label="Promo banner text"
+      default="Preferred Pricing in Effect Through August 16, 2026 - Save $700"
+    />
+    <BooleanField
+      name="countdownEnable"
+      label="Show countdown timer"
+      default={true}
+    />
+    <TextField
+      name="countdownTarget"
+      label="Countdown target (ISO 8601 with offset)"
+      default="2026-08-16T23:59:00-04:00"
+      helpText="e.g. 2026-08-16T23:59:00-04:00 (deadline in ET)."
     />
   </ModuleFields>
 );

@@ -3,7 +3,6 @@ import {
   TextField,
   UrlField,
   BooleanField,
-  ChoiceField,
 } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
@@ -31,10 +30,10 @@ export function Component({ fieldValues }) {
   const tableId = '323606672'; // Speakers 2026 table ID
   // Filter options - handle BooleanField values (can be boolean, string "true"/"false", or undefined)
   const showAllSpeakers = fieldValues.showAllSpeakers !== false && fieldValues.showAllSpeakers !== 'false';
+  const showFeaturedFemales = fieldValues.showFeaturedFemales === true || fieldValues.showFeaturedFemales === 'true';
   const showFeaturedAll = fieldValues.showFeaturedAll === true || fieldValues.showFeaturedAll === 'true';
   const showRoundtableLeaders = fieldValues.showRoundtableLeaders === true || fieldValues.showRoundtableLeaders === 'true';
   const showSteeringCommittee = fieldValues.showSteeringCommittee === true || fieldValues.showSteeringCommittee === 'true';
-  const genderFilter = fieldValues.genderFilter || 'all';
   const hideSearchIcon = fieldValues.hideSearchIcon === true || fieldValues.hideSearchIcon === 'true';
   const hideTopicFilter = fieldValues.hideTopicFilter === true || fieldValues.hideTopicFilter === 'true';
   const hideSpeakerTypeFilter = fieldValues.hideSpeakerTypeFilter === true || fieldValues.hideSpeakerTypeFilter === 'true';
@@ -164,10 +163,10 @@ export function Component({ fieldValues }) {
             
             // Filter settings from editor (passed as template variables)
             const showAllSpeakers = ${showAllSpeakers};
+            const showFeaturedFemales = ${showFeaturedFemales};
             const showFeaturedAll = ${showFeaturedAll};
             const showRoundtableLeaders = ${showRoundtableLeaders};
             const showSteeringCommittee = ${showSteeringCommittee};
-            const genderFilter = '${genderFilter}';
             const hideSearchIcon = ${hideSearchIcon};
             const hideTopicFilter = ${hideTopicFilter};
             const hideSpeakerTypeFilter = ${hideSpeakerTypeFilter};
@@ -283,7 +282,13 @@ export function Component({ fieldValues }) {
                 let filteredSpeakers = allSpeakers;
                 let skipTopicGrouping = false; // Flag to skip topic grouping for special filters
                 
-                if (showFeaturedAll) {
+                if (showFeaturedFemales) {
+                  // If "Show Featured Females" is checked, filter to female AND featured speakers
+                  filteredSpeakers = allSpeakers.filter(function(speaker) {
+                    return speaker.gender === 'female' && speaker.featured === true;
+                  });
+                  skipTopicGrouping = true;
+                } else if(showFeaturedAll){
                   // If "Show Featured All" is checked, filter to featured speakers
                   filteredSpeakers = allSpeakers.filter(function(speaker) {
                     return speaker.featured === true;
@@ -299,12 +304,6 @@ export function Component({ fieldValues }) {
                   // If "Show Steering Committee" is checked, filter to steering committee members only
                   filteredSpeakers = allSpeakers.filter(function(speaker) {
                     return speaker.steeringCommittee === true;
-                  });
-                  skipTopicGrouping = true;
-                } else if (genderFilter !== 'all') {
-                  // If a specific gender is selected, filter to speakers of that gender only
-                  filteredSpeakers = allSpeakers.filter(function(speaker) {
-                    return speaker.gender === genderFilter.toLowerCase();
                   });
                   skipTopicGrouping = true;
                 }
@@ -782,6 +781,12 @@ export const fields = (
       helpText="Show all speakers grouped by topics. Default: checked"
     />
     <BooleanField
+      name="showFeaturedFemales"
+      label="Show Featured Females"
+      default={false}
+      helpText="Show only female speakers who are featured. Speakers will not be grouped by topics."
+    />
+    <BooleanField
       name="showFeaturedAll"
       label="Show Featured All"
       default={false}
@@ -798,19 +803,6 @@ export const fields = (
       label="Show Steering Committee"
       default={false}
       helpText="Show only steering committee members (speakers with steering_committee: 1). Speakers will not be grouped by topics."
-    />
-    <ChoiceField
-      name="genderFilter"
-      label="Filter by Gender"
-      display="select"
-      default="all"
-      choices={[
-        ['all', 'All'],
-        ['male', 'Male'],
-        ['female', 'Female'],
-        ['other', 'Other'],
-      ]}
-      helpText="Show only speakers of the selected gender. Only applies when 'All Speakers', 'Featured Females', 'Featured All', 'Roundtable Leaders', and 'Steering Committee' are all unchecked. Speakers will not be grouped by topics."
     />
     <BooleanField
       name="hideSearchIcon"

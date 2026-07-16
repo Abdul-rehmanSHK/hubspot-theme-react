@@ -1,0 +1,25 @@
+<!--
+  templateType: page
+  isAvailableForNewContent: true
+  label: Communication Preferences LP
+  description: Landing page with GAI global header & footer and an editable area for the communication-preferences form module
+-->
+
+{% extends "./layouts/base-lp.hubl.html" %}
+
+{% block body %}
+
+  {# Everything below sits between the global GAI Header and Footer (provided by the base layout). #}
+  {# Drag-and-drop area: the Communication Preferences form module is pre-placed here, and marketers #}
+  {# can add, remove, or reorder modules around it directly in the page editor. #}
+  {% dnd_area "main_content", label="Page content" %}
+
+    {# Communication Preferences form module #}
+    {% dnd_section %}
+      {% dnd_module path="../components/modules/CommunicationPreferences" %}
+      {% end_dnd_module %}
+    {% end_dnd_section %}
+
+  {% end_dnd_area %}
+
+{% endblock body %}

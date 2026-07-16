@@ -20,10 +20,12 @@ interface FieldValues {
 
 export function Component({ fieldValues }: { fieldValues: FieldValues; hublParameters?: any; hublData?: any }) {
   return (
-    <section className="gw gw-section gw-section--mist gw-logos">
+    <section className="gw gw-section gw-section--dark gw-logos">
       <div className="gw-wrap">
-        <div className="gw-eyebrow gw-logos__label">{fieldValues.eyebrow}</div>
-        <div className="gw-logos__sub">{fieldValues.sub}</div>
+        <div className="gw-sec-head">
+          <div className="gw-eyebrow">{fieldValues.eyebrow}</div>
+          <h2>{fieldValues.sub}</h2>
+        </div>
         {fieldValues.logos && fieldValues.logos.length > 0 && (
           <div className="gw-logos__marquee">
             <div className="gw-logos__track">

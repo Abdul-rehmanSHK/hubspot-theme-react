@@ -1,10 +1,6 @@
-.gw-sizzle__grid {
-  display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 48px;
-  align-items: center;
-  max-width: 960px;
-  margin: 0 auto;
+.gw-sizzle__video-container {
+  max-width: 900px;
+  margin: 40px auto;
 }
 
 .gw-video {
@@ -24,25 +20,21 @@
 .gw-sizzle__image {
   border-radius: var(--gw-r-card);
   overflow: hidden;
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
-.gw-sizzle__label {
-  color: var(--gw-cyan);
+.gw-sizzle__iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--gw-r-card);
+  box-shadow: var(--gw-sh-strong);
 }
 
-.gw-sizzle h2 {
-  font-size: 26px !important;
-  font-weight: 800 !important;
-  color: var(--gw-indigo);
-  line-height: 1.25;
-  margin: 12px 0;
-}
-
-.gw-sizzle p {
-  font-size: 15px;
-  color: #475569;
-  line-height: 1.75;
-  margin-bottom: 22px;
+.gw-sizzle__cta {
+  text-align: center;
+  margin: 30px 0 40px;
 }
 
 .gw-stats {
@@ -86,14 +78,6 @@
     gap: 32px;
   }
 
-  .gw-sizzle h2 {
-    font-size: 22px !important;
-  }
-
-  .gw-sizzle p {
-    font-size: 14px;
-  }
-
   .gw-stats {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 10px;
@@ -115,15 +99,6 @@
 @media (max-width: 480px) {
   .gw-sizzle__grid {
     gap: 20px;
-  }
-
-  .gw-sizzle h2 {
-    font-size: 18px !important;
-  }
-
-  .gw-sizzle p {
-    font-size: 13px;
-    margin-bottom: 16px;
   }
 
   .gw-stats {

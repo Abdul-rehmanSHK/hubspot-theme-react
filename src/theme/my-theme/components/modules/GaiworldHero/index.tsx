@@ -1,12 +1,12 @@
-import React from 'react';
 import {
   ModuleFields,
   TextField,
-  TextAreaField,
+  RichTextField,
   ImageField,
   UrlField,
   BooleanField,
-  RepeatedFieldGroup,
+  ColorField,
+  NumberField,
 } from '@hubspot/cms-components/fields';
 import './styles.css';
 
@@ -14,7 +14,7 @@ interface Speaker {
   photo?: { src: string; alt: string };
   speaker_name: string;
   title: string;
-  company: string;
+  company_logo_white?: { src: string; alt: string };
 }
 
 interface FieldValues {
@@ -23,147 +23,34 @@ interface FieldValues {
   title_year: string;
   date_line: string;
   tagline: string;
+  description: string;
+  background_image: { src: string; alt: string };
+  overlay_color: string;
+  overlay_opacity: number;
+  show_bg_video: boolean;
   bg_video_url: string;
   bg_poster: { src: string; alt: string };
-  speakers: Speaker[];
   view_all_text: string;
   view_all_url: { href: string };
   primary_cta_text: string;
   primary_cta_url: { href: string };
-  pricing_badge: string;
-  countdown_enable: boolean;
-  countdown_target: string;
   moduleInstanceId?: string;
 }
 
-function CountdownDisplay({ targetDate }: { targetDate: number }) {
-  const scriptContent = `
-    (function() {
-      const container = document.querySelector('[data-countdown-target]');
-      if (!container) return;
-      const targetDate = parseInt(container.getAttribute('data-countdown-target'), 10);
-      if (!targetDate || isNaN(targetDate)) return;
-      const updateDisplay = function() {
-        const now = new Date().getTime();
-        const diff = Math.max(0, targetDate - now);
-        const days = String(Math.floor(diff / 86400000)).padStart(2, '0');
-        const hours = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
-        const minutes = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-        const seconds = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-        const daysSpan = container.querySelector('[data-countdown="days"]');
-        const hoursSpan = container.querySelector('[data-countdown="hours"]');
-        const minutesSpan = container.querySelector('[data-countdown="minutes"]');
-        const secondsSpan = container.querySelector('[data-countdown="seconds"]');
-        if (daysSpan) daysSpan.textContent = days;
-        if (hoursSpan) hoursSpan.textContent = hours;
-        if (minutesSpan) minutesSpan.textContent = minutes;
-        if (secondsSpan) secondsSpan.textContent = seconds;
-      };
-      updateDisplay();
-      setInterval(updateDisplay, 1000);
-    })();
-  `;
-
-  return (
-    <>
-      <div className="gw-countdown" data-countdown-target={targetDate}>
-        <div className="gw-cd">
-          <span className="gw-cd__num" data-countdown="days">00</span>
-          <span className="gw-cd__label">Days</span>
-        </div>
-        <div className="gw-cd">
-          <span className="gw-cd__num" data-countdown="hours">00</span>
-          <span className="gw-cd__label">Hours</span>
-        </div>
-        <div className="gw-cd">
-          <span className="gw-cd__num" data-countdown="minutes">00</span>
-          <span className="gw-cd__label">Minutes</span>
-        </div>
-        <div className="gw-cd">
-          <span className="gw-cd__num" data-countdown="seconds">00</span>
-          <span className="gw-cd__label">Seconds</span>
-        </div>
-      </div>
-      <script dangerouslySetInnerHTML={{ __html: scriptContent }} />
-    </>
-  );
-}
-
-function SpeakerCarousel({ speakers, viewAllText, viewAllUrl }: {
-  speakers: Speaker[];
-  viewAllText: string;
-  viewAllUrl: { href: string };
-}) {
-  const scriptContent = `
-    (function() {
-      const carousel = document.querySelector('[data-carousel-id="speakers"]');
-      if (!carousel) return;
-      const track = carousel.querySelector('.gw-carousel__track');
-      const prevBtn = carousel.querySelector('[data-carousel-btn="prev"]');
-      const nextBtn = carousel.querySelector('[data-carousel-btn="next"]');
-      if (!track || !prevBtn || !nextBtn) return;
-      const scroll = function(direction) {
-        track.scrollLeft += direction === 'left' ? -172 : 172;
-      };
-      prevBtn.addEventListener('click', function() { scroll('left'); });
-      nextBtn.addEventListener('click', function() { scroll('right'); });
-    })();
-  `;
-
-  return (
-    <div className="gw-carousel" data-carousel-id="speakers">
-      <button
-        className="gw-carousel__arrow"
-        data-carousel-btn="prev"
-        aria-label="Previous speakers"
-        type="button"
-        style={{ cursor: 'pointer' }}
-      >
-        ‹
-      </button>
-      <div className="gw-carousel__track">
-        {speakers.map((speaker, idx) => (
-          <div key={idx} className="gw-speaker">
-            {speaker.photo?.src ? (
-              <img
-                className="gw-speaker__ph"
-                src={speaker.photo.src}
-                alt={speaker.photo.alt || speaker.speaker_name}
-                loading="lazy"
-              />
-            ) : (
-              <div className="gw-speaker__ph">★</div>
-            )}
-            <div className="gw-speaker__name">{speaker.speaker_name}</div>
-            <div className="gw-speaker__title">{speaker.title}</div>
-            <div className="gw-speaker__co">{speaker.company}</div>
-          </div>
-        ))}
-        {viewAllText && (
-          <a href={viewAllUrl.href} className="gw-speaker gw-speaker--all">
-            <span style={{ fontSize: '28px', marginBottom: '6px' }}>👥</span>
-            <span>{viewAllText}</span>
-          </a>
-        )}
-      </div>
-      <button
-        className="gw-carousel__arrow"
-        data-carousel-btn="next"
-        aria-label="Next speakers"
-        type="button"
-        style={{ cursor: 'pointer' }}
-      >
-        ›
-      </button>
-      <script dangerouslySetInnerHTML={{ __html: scriptContent }} />
-    </div>
-  );
-}
-
 export function Component({ fieldValues }: { fieldValues: FieldValues; hublParameters?: any; hublData?: any }) {
+  const moduleId = `gaiworld-hero-${fieldValues.moduleInstanceId || Math.random().toString(36).slice(2)}`;
+
   return (
-    <section className="gw gw-hero">
-      {fieldValues.bg_video_url && (
+    <section
+      className="gw gw-hero"
+      style={{
+        backgroundImage: fieldValues.background_image?.src ? `url(${fieldValues.background_image.src})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        position: 'relative',
+      }}
+    >
+      {fieldValues.show_bg_video && fieldValues.bg_video_url && (
         <video
           className="gw-hero__video"
           autoPlay
@@ -178,42 +65,156 @@ export function Component({ fieldValues }: { fieldValues: FieldValues; hublParam
           <source src={fieldValues.bg_video_url} type="video/mp4" />
         </video>
       )}
-      <div className="gw-hero__scrim"></div>
+      {fieldValues.overlay_color && (
+        <div
+          className="gw-section__overlay"
+          style={{
+            backgroundColor: fieldValues.overlay_color,
+            opacity: fieldValues.overlay_opacity ?? 1,
+          }}
+        />
+      )}
+      {fieldValues.show_bg_video && <div className="gw-hero__scrim"></div>}
       <div className="gw-hero__glow"></div>
 
-      <div className="gw-wrap">
-        <div className="gw-eyebrow gw-hero__eyebrow">{fieldValues.eyebrow}</div>
-        <h1 className="gw-hero__title">
-          {fieldValues.title_main} <span>{fieldValues.title_year}</span>
-        </h1>
-        <div className="gw-hero__date">{fieldValues.date_line}</div>
-        <div className="gw-hero__tagline">{fieldValues.tagline}</div>
-
-        {fieldValues.speakers && fieldValues.speakers.length > 0 && (
-          <SpeakerCarousel
-            speakers={fieldValues.speakers}
-            viewAllText={fieldValues.view_all_text}
-            viewAllUrl={fieldValues.view_all_url}
-          />
-        )}
-
-        <div className="gw-hero__ctablock">
-          <a
-            href={fieldValues.primary_cta_url?.href || '#'}
-            className="gw-btn gw-btn--ticket"
-          >
-            {fieldValues.primary_cta_text}
-          </a>
-          {fieldValues.pricing_badge && (
-            <div className="gw-pricing-badge">{fieldValues.pricing_badge}</div>
+      <div className="gw-stack">
+        <div className="gw-wrap">
+          <div className="gw-eyebrow gw-hero__eyebrow">{fieldValues.eyebrow}</div>
+          <h1 className="gw-hero__title">
+            {fieldValues.title_main} <span>{fieldValues.title_year}</span>
+          </h1>
+          <div className="gw-hero__date">{fieldValues.date_line}</div>
+          <div className="gw-hero__tagline">{fieldValues.tagline}</div>
+          {fieldValues.description && (
+            <p className="gw-hero__description">{fieldValues.description}</p>
           )}
-        </div>
 
-        {fieldValues.countdown_enable && fieldValues.countdown_target && (() => {
-          const targetTime = new Date(fieldValues.countdown_target).getTime();
-          return !isNaN(targetTime) && targetTime > 0 ? <CountdownDisplay targetDate={targetTime} /> : null;
-        })()}
+          {/* Speakers carousel - populated by JavaScript */}
+          <div id={`speakers-container-${moduleId}`}></div>
+
+          <div className="gw-hero__ctablock">
+            <a
+              href={fieldValues.primary_cta_url?.href || '#'}
+              className="gw-btn gw-btn--ticket"
+            >
+              {fieldValues.primary_cta_text}
+            </a>
+          </div>
+        </div>
       </div>
+
+      {/* Fetch speakers from HubDB and render carousel */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+          (function() {
+            const portalId = '39650877';
+            const tableId = '323606672';
+            const moduleId = '${moduleId}';
+            const container = document.querySelector('#speakers-container-' + moduleId);
+
+            if (!container) return;
+
+            async function fetchAndRenderSpeakers() {
+              try {
+                const apiUrl = 'https://api.hubapi.com/cms/v3/hubdb/tables/' + tableId + '/rows?portalId=' + portalId;
+
+                const response = await fetch(apiUrl);
+
+                if (!response.ok) {
+                  throw new Error('Failed to fetch: ' + response.status);
+                }
+
+                const data = await response.json();
+
+                const speakers = (data.results || [])
+                  .filter(function(row) {
+                    return row.values?.featured === 1;
+                  })
+                  .map(function(row) {
+                    return {
+                      speaker_name: row.values?.name || 'Featured Speaker',
+                      title: row.values?.title || 'Title',
+                      photo: row.values?.image ? {
+                        src: row.values.image.url || '',
+                        alt: row.values.image.altText || row.values?.name || 'Speaker'
+                      } : null,
+                      company_logo_white: row.values?.company_logo_white ? {
+                        src: row.values.company_logo_white.url || row.values.company_logo_white,
+                        alt: row.values?.company || 'Company'
+                      } : null
+                    };
+                  });
+
+                if (speakers.length === 0) {
+                  container.innerHTML = '<div style="color: #fff; padding: 20px;">No speakers found</div>';
+                  return;
+                }
+
+                // Build carousel HTML
+                let html = '<div class="gw-carousel" data-carousel-id="speakers">';
+                html += '<button class="gw-carousel__arrow" data-carousel-btn="prev" style="cursor: pointer;">‹</button>';
+                html += '<div class="gw-carousel__track">';
+
+                speakers.forEach(function(speaker, idx) {
+                  html += '<div class="gw-speaker">';
+                  if (speaker.photo?.src) {
+                    html += '<img class="gw-speaker__ph" src="' + speaker.photo.src + '" alt="' + (speaker.photo.alt || speaker.speaker_name) + '" loading="lazy" />';
+                  } else {
+                    html += '<div class="gw-speaker__ph">★</div>';
+                  }
+                  html += '<div class="gw-speaker__name">' + speaker.speaker_name + '</div>';
+                  html += '<div class="gw-speaker__title">' + speaker.title + '</div>';
+                  if (speaker.company_logo_white?.src) {
+                    html += '<img class="gw-speaker__logo" src="' + speaker.company_logo_white.src + '" alt="' + (speaker.company_logo_white.alt || 'Company logo') + '" />';
+                  }
+                  html += '</div>';
+                });
+
+                html += '<a href="${fieldValues.view_all_url.href}" class="gw-speaker gw-speaker--all">';
+                html += '<span style="font-size: 28px; margin-bottom: 6px;">👥</span>';
+                html += '<span>${fieldValues.view_all_text}</span>';
+                html += '</a>';
+
+                html += '</div>';
+                html += '<button class="gw-carousel__arrow" data-carousel-btn="next" style="cursor: pointer;">›</button>';
+                html += '</div>';
+
+                container.innerHTML = html;
+
+                // Initialize carousel
+                initCarousel();
+              } catch (error) {
+                container.innerHTML = '<div style="color: #fff; padding: 20px;">Error loading speakers</div>';
+              }
+            }
+
+            function initCarousel() {
+              const carousel = document.querySelector('[data-carousel-id="speakers"]');
+              if (!carousel) return;
+              const track = carousel.querySelector('.gw-carousel__track');
+              const prevBtn = carousel.querySelector('[data-carousel-btn="prev"]');
+              const nextBtn = carousel.querySelector('[data-carousel-btn="next"]');
+              if (!track || !prevBtn || !nextBtn) return;
+              const scroll = function(direction) {
+                track.scrollLeft += direction === 'left' ? -172 : 172;
+              };
+              prevBtn.addEventListener('click', function() { scroll('left'); });
+              nextBtn.addEventListener('click', function() { scroll('right'); });
+            }
+
+            // Start fetching
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(fetchAndRenderSpeakers, 100);
+              });
+            } else {
+              setTimeout(fetchAndRenderSpeakers, 100);
+            }
+          })();
+        `,
+        }}
+      />
     </section>
   );
 }
@@ -224,6 +225,28 @@ export const meta = {
 
 export const fields = (
   <ModuleFields>
+    <ImageField
+      name="background_image"
+      label="Background image"
+      default={{
+        src: 'https://www.gaiworld.com/hubfs/gallery-img-new04.jpeg',
+        alt: 'GAI World 2026 background',
+      }}
+    />
+    <ColorField
+      name="overlay_color"
+      label="Overlay color"
+      default="#050D51"
+    />
+    <NumberField
+      name="overlay_opacity"
+      label="Overlay opacity"
+      default={0.7}
+      min={0}
+      max={1}
+      step={0.1}
+      helpText="Range: 0 (transparent) to 1 (opaque)"
+    />
     <TextField
       name="eyebrow"
       label="Eyebrow"
@@ -249,6 +272,16 @@ export const fields = (
       label="Tagline"
       default="From AI Experimentation to Enterprise Advantage"
     />
+    <RichTextField
+      name="description"
+      label="Description"
+      default="Presented by GAI Insights, the 4th annual GAI World brings together executives, operators, and practitioners to explore how AI is driving measurable results. Through real-world case studies, peer discussions, and hands-on training, this enterprise AI conference focuses on what delivers impact today. Join peers to exchange insights, challenge assumptions, and leave with clarity you can act on."
+    />
+    <BooleanField
+      name="show_bg_video"
+      label="Show background video"
+      default={false}
+    />
     <TextField
       name="bg_video_url"
       label="Background video URL (mp4)"
@@ -263,43 +296,6 @@ export const fields = (
         src: 'https://www.gaiworld.com/hubfs/gallery-img-new02.jpeg',
         alt: 'GAI World conference',
       }}
-    />
-    <RepeatedFieldGroup
-      name="speakers"
-      label="Featured speakers"
-      occurrence={{ min: 0, max: 20, default: 5 }}
-      default={[
-        { speaker_name: 'Featured Speaker', title: 'Title', company: 'Company' },
-        { speaker_name: 'Featured Speaker', title: 'Title', company: 'Company' },
-        { speaker_name: 'Featured Speaker', title: 'Title', company: 'Company' },
-        { speaker_name: 'Featured Speaker', title: 'Title', company: 'Company' },
-        { speaker_name: 'Featured Speaker', title: 'Title', company: 'Company' },
-      ]}
-      children={[
-        <ImageField
-          name="photo"
-          label="Speaker photo"
-          required={false}
-        />,
-        <TextField
-          name="speaker_name"
-          label="Speaker name"
-          required={true}
-          default="Featured Speaker"
-        />,
-        <TextField
-          name="title"
-          label="Title"
-          required={true}
-          default="Title"
-        />,
-        <TextField
-          name="company"
-          label="Company"
-          required={true}
-          default="Company"
-        />,
-      ]}
     />
     <TextField
       name="view_all_text"
@@ -320,22 +316,6 @@ export const fields = (
       name="primary_cta_url"
       label="Primary CTA link (ticket page)"
       default={{ href: '/tickets' }}
-    />
-    <TextField
-      name="pricing_badge"
-      label="Pricing badge"
-      default="Preferred Pricing in Effect Through August 16, 2026 - Save $700"
-    />
-    <BooleanField
-      name="countdown_enable"
-      label="Show countdown"
-      default={true}
-    />
-    <TextField
-      name="countdown_target"
-      label="Countdown target (ISO 8601 with offset)"
-      default="2026-08-16T23:59:00-04:00"
-      helpText="e.g. 2026-08-16T23:59:00-04:00 (deadline in ET)."
     />
   </ModuleFields>
 );

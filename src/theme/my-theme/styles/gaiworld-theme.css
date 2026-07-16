@@ -97,7 +97,7 @@
 
 /* sections — light sections share one cool off-white; dark sections share indigo */
 .gw-section {
-  padding: 72px 0
+  padding: 60px 0
 }
 
 .gw-section--mist {
@@ -137,7 +137,8 @@
   font-size: 34px !important;
   font-weight: 800 !important;
   color: var(--gw-indigo);
-  margin: 10px 0
+  margin: 0 0 10px;
+  text-wrap: balance;
 }
 
 .gw-section--dark .gw-sec-head h2,
@@ -399,6 +400,12 @@
 
   .gw-nav__links a:not(.gw-nav__cta) {
     display: none
+  }
+}
+
+@media(max-width: 767px) {
+  .gw-sec-head h2 br {
+    display: none;
   }
 }
 

@@ -29,9 +29,11 @@ export function Component({ fieldValues }: { fieldValues: FieldValues; hublParam
     <section className="gw gw-section gw-section--mist gw-agenda" id="agenda">
       <div className="gw-wrap">
         <div className="gw-sec-head">
-          <div className="gw-eyebrow" style={{ color: 'var(--gw-electric)' }}>
-            {fieldValues.eyebrow}
-          </div>
+          {fieldValues.eyebrow && (
+            <div className="gw-eyebrow" style={{ color: 'var(--gw-electric)' }}>
+              {fieldValues.eyebrow}
+            </div>
+          )}
           <h2>{fieldValues.heading}</h2>
           <p>{fieldValues.intro}</p>
         </div>
