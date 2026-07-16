@@ -3,6 +3,7 @@ import {
   TextField,
   UrlField,
   BooleanField,
+  ChoiceField,
 } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
@@ -34,6 +35,7 @@ export function Component({ fieldValues }) {
   const showFeaturedAll = fieldValues.showFeaturedAll === true || fieldValues.showFeaturedAll === 'true';
   const showRoundtableLeaders = fieldValues.showRoundtableLeaders === true || fieldValues.showRoundtableLeaders === 'true';
   const showSteeringCommittee = fieldValues.showSteeringCommittee === true || fieldValues.showSteeringCommittee === 'true';
+  const genderFilter = fieldValues.genderFilter || '';
   const hideSearchIcon = fieldValues.hideSearchIcon === true || fieldValues.hideSearchIcon === 'true';
   const hideTopicFilter = fieldValues.hideTopicFilter === true || fieldValues.hideTopicFilter === 'true';
   const hideSpeakerTypeFilter = fieldValues.hideSpeakerTypeFilter === true || fieldValues.hideSpeakerTypeFilter === 'true';
@@ -167,6 +169,7 @@ export function Component({ fieldValues }) {
             const showFeaturedAll = ${showFeaturedAll};
             const showRoundtableLeaders = ${showRoundtableLeaders};
             const showSteeringCommittee = ${showSteeringCommittee};
+            const genderFilter = '${genderFilter}';
             const hideSearchIcon = ${hideSearchIcon};
             const hideTopicFilter = ${hideTopicFilter};
             const hideSpeakerTypeFilter = ${hideSpeakerTypeFilter};
@@ -288,12 +291,12 @@ export function Component({ fieldValues }) {
                     return speaker.gender === 'female' && speaker.featured === true;
                   });
                   skipTopicGrouping = true;
-                } else if(showFeaturedAll){
+                } else if (showFeaturedAll) {
                   // If "Show Featured All" is checked, filter to featured speakers
                   filteredSpeakers = allSpeakers.filter(function(speaker) {
                     return speaker.featured === true;
                   });
-                  skipTopicGrouping = true;                 
+                  skipTopicGrouping = true;
                 } else if (showRoundtableLeaders) {
                   // If "Show Roundtable Leaders" is checked, filter to leaders only
                   filteredSpeakers = allSpeakers.filter(function(speaker) {
@@ -306,8 +309,14 @@ export function Component({ fieldValues }) {
                     return speaker.steeringCommittee === true;
                   });
                   skipTopicGrouping = true;
+                } else if (genderFilter) {
+                  // If a specific gender is selected, filter to speakers of that gender only
+                  filteredSpeakers = allSpeakers.filter(function(speaker) {
+                    return speaker.gender === genderFilter.toLowerCase();
+                  });
+                  skipTopicGrouping = true;
                 }
-                // If "Show All Speakers" is checked (or other filters are false), show all speakers
+                // If "Show All Speakers" is checked (or no filter/gender is selected), show all speakers
                 
                 // Store filtered speakers for search (so search only searches within displayed speakers)
                 allSpeakersData = filteredSpeakers;
@@ -803,6 +812,19 @@ export const fields = (
       label="Show Steering Committee"
       default={false}
       helpText="Show only steering committee members (speakers with steering_committee: 1). Speakers will not be grouped by topics."
+    />
+    <ChoiceField
+      name="genderFilter"
+      label="Filter by Gender"
+      display="select"
+      default=""
+      choices={[
+        ['', 'None (no gender filter)'],
+        ['male', 'Male'],
+        ['female', 'Female'],
+        ['other', 'Other'],
+      ]}
+      helpText="By default nothing is selected and no gender filter is applied. Select a gender to show only speakers of that gender. Only applies when 'Show Featured Females', 'Show Featured All', 'Show Roundtable Leaders', and 'Show Steering Committee' are all unchecked. Speakers will not be grouped by topics."
     />
     <BooleanField
       name="hideSearchIcon"
