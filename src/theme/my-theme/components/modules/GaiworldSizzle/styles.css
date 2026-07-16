@@ -1,0 +1,146 @@
+.gw-sizzle__grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 48px;
+  align-items: center;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.gw-video {
+  position: relative;
+  border-radius: var(--gw-r-card);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  box-shadow: var(--gw-sh-strong);
+  cursor: pointer;
+  background: var(--gw-navy-deep);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gw-sizzle__image {
+  border-radius: var(--gw-r-card);
+  overflow: hidden;
+}
+
+.gw-sizzle__label {
+  color: var(--gw-cyan);
+}
+
+.gw-sizzle h2 {
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  color: var(--gw-indigo);
+  line-height: 1.25;
+  margin: 12px 0;
+}
+
+.gw-sizzle p {
+  font-size: 15px;
+  color: #475569;
+  line-height: 1.75;
+  margin-bottom: 22px;
+}
+
+.gw-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  max-width: 960px;
+  margin: 44px auto 0;
+}
+
+.gw-stat {
+  background: #fff;
+  border: 1px solid var(--gw-gray-200);
+  border-radius: var(--gw-r-card);
+  padding: 20px 10px;
+  text-align: center;
+  box-shadow: var(--gw-sh-soft);
+}
+
+.gw-stat__num {
+  font-family: var(--gw-font-display);
+  font-size: 30px;
+  font-weight: 900;
+  color: var(--gw-electric);
+  display: block;
+  line-height: 1;
+}
+
+.gw-stat__label {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 6px;
+  display: block;
+  line-height: 1.3;
+}
+
+/* Responsive */
+@media (max-width: 860px) {
+  .gw-sizzle__grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .gw-sizzle h2 {
+    font-size: 22px !important;
+  }
+
+  .gw-sizzle p {
+    font-size: 14px;
+  }
+
+  .gw-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px;
+  }
+
+  .gw-stat {
+    padding: 16px 8px;
+  }
+
+  .gw-stat__num {
+    font-size: 24px;
+  }
+
+  .gw-stat__label {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gw-sizzle__grid {
+    gap: 20px;
+  }
+
+  .gw-sizzle h2 {
+    font-size: 18px !important;
+  }
+
+  .gw-sizzle p {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .gw-stats {
+    grid-template-columns: 1fr !important;
+    gap: 8px;
+    margin-top: 32px;
+  }
+
+  .gw-stat {
+    padding: 12px 8px;
+  }
+
+  .gw-stat__num {
+    font-size: 20px;
+  }
+
+  .gw-stat__label {
+    font-size: 10px;
+  }
+}

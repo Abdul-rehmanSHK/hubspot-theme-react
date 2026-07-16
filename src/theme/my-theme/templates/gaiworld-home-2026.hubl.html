@@ -1,0 +1,42 @@
+<!--
+  templateType: page
+  isAvailableForNewContent: true
+  label: GAI World Home 2026 Page
+  description: Page template with the GAI World hero section featuring countdown, speakers carousel, and CTA
+-->
+
+{% extends "./layouts/base.hubl.html" %}
+
+{% block body %}
+
+{# GAI World Hero Section #}
+{% module "gaiworld_hero" path="../components/modules/GaiworldHero" label="GAI World Hero" %}
+
+{# GAI World Sponsor Logo Carousel #}
+{% module "gaiworld_logos" path="../components/modules/GaiworldLogos" label="GW — Sponsor Logo Carousel" %}
+
+{# GAI World Sizzle Video + Stats #}
+{% module "gaiworld_sizzle" path="../components/modules/GaiworldSizzle" label="GW — Sizzle Video + Stats" %}
+
+{# GAI World Agenda Preview #}
+{% module "gaiworld_agenda" path="../components/modules/GaiworldAgenda" label="GW — Agenda Preview (Key Themes)" %}
+
+{# GAI World Tracks #}
+{% module "gaiworld_tracks" path="../components/modules/GaiworldTracks" label="GW — Tracks (industry)" %}
+
+{# GAI World Community Gatherings #}
+{% module "gaiworld_community" path="../components/modules/GaiworldCommunity" label="GW — Community Gatherings" %}
+
+{# GAI World Video Testimonials #}
+{% module "gaiworld_testimonials" path="../components/modules/GaiworldTestimonials" label="GW — Video Testimonials" %}
+
+{# GAI World Tickets / What's Included #}
+{% module "gaiworld_tickets" path="../components/modules/GaiworldTickets" label="GW — Tickets / What's Included" %}
+
+{# GAI World Photo Gallery #}
+{% module "gaiworld_photos" path="../components/modules/GaiworldPhotos" label="GW — Photo Gallery (Inside GAI World)" %}
+
+{# GAI World Save the Date #}
+{% module "gaiworld_savedate" path="../components/modules/GaiworldSaveDate" label="GW — Save the Date" %}
+
+{% endblock body %}

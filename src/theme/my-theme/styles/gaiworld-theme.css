@@ -1,0 +1,407 @@
+/* ============================================================
+   GAI World 2026 — shared theme stylesheet
+   Upload once (Design Manager) and attach in the template <head>.
+   Tokens + scoped base + utilities used by every gw- module.
+   Namespaced `gw-` (BEM) and scoped to `.gw` so nothing leaks
+   into or collides with the surrounding HubSpot theme.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css');
+
+:root {
+  --gw-indigo: #050D51;
+  --gw-navy-deep: #030E2F;
+  --gw-navy-text: #001D57;
+  --gw-near-black: #020E26;
+  --gw-cyan: #06C7EE;
+  --gw-electric: #0E41FB;
+  --gw-logo-blue: #0840F8;
+  --gw-amber: #FBCC24;
+  --gw-purple: #6A5CFF;
+  --gw-purple-deep: #613899;
+  --gw-white: #fff;
+  --gw-mist: #F4F7FB;
+  --gw-ivory: #F8F5EE;
+  --gw-gray-100: #F5F5F5;
+  --gw-gray-200: #E0E0E0;
+  --gw-gray-500: #9F9F9F;
+  --gw-grad-hero: linear-gradient(180deg, #0B30BF 0%, #050D51 55%, #030E2F 100%);
+  --gw-font-display: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
+  --gw-font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --gw-r-btn: 5px;
+  --gw-r-card: 12px;
+  --gw-r-pill: 50px;
+  --gw-sh-soft: 0 4px 12px rgba(0, 0, 0, .1);
+  --gw-sh-strong: 0 4px 12px rgba(0, 0, 0, .3);
+  --gw-sh-cyan: 0 8px 25px rgba(6, 199, 238, .3);
+}
+
+/* scoped base — applies only inside a `.gw` module wrapper */
+.gw {
+  font-family: var(--gw-font-body);
+  color: var(--gw-indigo);
+  line-height: 1.6;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased
+}
+
+.gw *,
+.gw *::before,
+.gw *::after {
+  box-sizing: border-box
+}
+
+.gw h1,
+.gw h2,
+.gw h3,
+.gw h4 {
+  font-family: var(--gw-font-display);
+  line-height: 1.1;
+  letter-spacing: -.01em;
+  margin: 0
+}
+
+.gw p {
+  margin: 0
+}
+
+.gw img {
+  max-width: 100%;
+  display: block
+}
+
+.gw a {
+  text-decoration: none
+}
+
+/* utilities */
+.gw-wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 40px
+}
+
+.gw-stack {
+  position: relative;
+  z-index: 1;
+}
+
+.gw-eyebrow {
+  font-family: var(--gw-font-display);
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  font-size: 14px !important;
+  color: var(--gw-cyan)
+}
+
+/* sections — light sections share one cool off-white; dark sections share indigo */
+.gw-section {
+  padding: 72px 0
+}
+
+.gw-section--mist {
+  background: var(--gw-mist)
+}
+
+.gw-section--white {
+  background: var(--gw-white)
+}
+
+.gw-section--dark {
+  background: var(--gw-indigo);
+  color: #fff
+}
+
+.gw-section--deep {
+  background: var(--gw-navy-deep);
+  color: #fff
+}
+
+.gw-section__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none
+}
+
+.gw-sec-head {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 44px
+}
+
+.gw-sec-head h2 {
+  font-size: 34px !important;
+  font-weight: 800 !important;
+  color: var(--gw-indigo);
+  margin: 10px 0
+}
+
+.gw-section--dark .gw-sec-head h2,
+.gw-section--deep .gw-sec-head h2 {
+  color: #fff
+}
+
+.gw-sec-head p {
+  font-size: 16px;
+  color: #475569;
+  line-height: 1.7
+}
+
+.gw-section--dark .gw-sec-head p {
+  color: #c7d2e8
+}
+
+/* buttons — ticket=amber, other=purple (per Website Updates doc); pill radius per brand */
+.gw-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--gw-font-display);
+  font-weight: 600;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  padding: 14px 28px;
+  border-radius: var(--gw-r-pill);
+  cursor: pointer;
+  border: 2px solid transparent;
+  text-decoration: none;
+  transition: .25s ease
+}
+
+.gw-btn--ticket {
+  background: var(--gw-amber);
+  color: var(--gw-near-black);
+  box-shadow: 0 8px 22px rgba(251, 204, 36, .3)
+}
+
+.gw-btn--ticket:hover {
+  background: var(--gw-electric);
+  color: var(--gw-amber);
+  transform: translateY(-2px)
+}
+
+.gw-btn--purple {
+  background: var(--gw-purple);
+  color: #fff
+}
+
+.gw-btn--purple:hover {
+  background: var(--gw-purple-deep);
+  color: #fff;
+}
+
+.gw-btn--purple-outline {
+  background: transparent;
+  color: var(--gw-purple);
+  border-color: var(--gw-purple)
+}
+
+.gw-btn--purple-outline:hover {
+  background: var(--gw-purple);
+  color: #fff
+}
+
+.gw-btn--ghost {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255, 255, 255, .5)
+}
+
+.gw-btn--ghost:hover {
+  background: rgba(255, 255, 255, .1)
+}
+
+.gw-ctas {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 36px;
+  flex-wrap: wrap
+}
+
+/* nav + footer chrome (rendered in the template) */
+.gw-nav {
+  background: rgba(3, 14, 47, .95);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(255, 255, 255, .08)
+}
+
+.gw-nav__in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px
+}
+
+.gw-nav__brand {
+  font-family: var(--gw-font-display);
+  font-weight: 800;
+  font-size: 21px;
+  letter-spacing: -.01em;
+  color: #fff;
+  text-decoration: none;
+  display: flex;
+  align-items: baseline;
+  gap: 7px
+}
+
+.gw-nav__brand span {
+  color: var(--gw-amber)
+}
+
+.gw-nav__brand small {
+  font-family: var(--gw-font-body);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: .04em;
+  color: #8ea0c4;
+  text-transform: uppercase
+}
+
+.gw-nav__links {
+  display: flex;
+  gap: 26px;
+  align-items: center
+}
+
+.gw-nav__links a:not(.gw-btn) {
+  font-size: 14px;
+  font-weight: 500;
+  color: #c7d2e8;
+  text-decoration: none
+}
+
+.gw-nav__links a:not(.gw-btn):hover {
+  color: #fff
+}
+
+.gw-nav__cta {
+  padding: 10px 22px;
+  font-size: 13px
+}
+
+.gw-footer {
+  background: var(--gw-navy-deep);
+  color: #9fb0d0;
+  padding: 40px 0;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, .08)
+}
+
+.gw-footer img {
+  height: 28px;
+  margin: 0 auto 14px
+}
+
+.gw-footer__tag {
+  font-family: var(--gw-font-display);
+  font-weight: 600;
+  color: #c7d2e8;
+  margin-bottom: 8px
+}
+
+.gw-footer__meta {
+  font-size: 13px
+}
+
+.gw-footer__meta a {
+  color: var(--gw-cyan);
+  text-decoration: none
+}
+
+/* accessibility & interaction polish */
+.gw a:focus-visible,
+.gw button:focus-visible,
+.gw video:focus-visible,
+.gw [tabindex]:focus-visible {
+  outline: 3px solid var(--gw-cyan);
+  outline-offset: 3px;
+  border-radius: 6px
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .gw * {
+    scroll-behavior: auto !important
+  }
+
+  .gw-btn,
+  .gw-track,
+  .gw-theme,
+  .gw-photo img {
+    transition: none !important
+  }
+
+  .gw-btn--ticket:hover,
+  .gw-track:hover {
+    transform: none !important
+  }
+
+  .gw-logos__track {
+    animation: none !important
+  }
+
+  .gw-logos__marquee {
+    overflow-x: auto
+  }
+
+  .gw-hero__video {
+    display: none
+  }
+}
+
+/* shared responsive breakpoints */
+@media(max-width:860px) {
+  .gw-wrap {
+    padding: 0 22px
+  }
+
+  .gw-hero__title {
+    font-size: 44px
+  }
+
+  .gw-sizzle__grid,
+  .gw-community {
+    grid-template-columns: 1fr
+  }
+
+  .gw-stats {
+    grid-template-columns: repeat(2, 1fr)
+  }
+
+  .gw-themes,
+  .gw-testimonials {
+    grid-template-columns: 1fr
+  }
+
+  .gw-tracks {
+    grid-template-columns: 1fr 1fr
+  }
+
+  .gw-tickets {
+    grid-template-columns: 1fr
+  }
+
+  .gw-photo-grid {
+    grid-template-columns: 1fr 1fr
+  }
+
+  .gw-sec-head h2 {
+    font-size: 27px !important;
+  }
+
+  .gw-nav__links a:not(.gw-nav__cta) {
+    display: none
+  }
+}
+
+footer.footer::after {
+  display: none !important;
+}

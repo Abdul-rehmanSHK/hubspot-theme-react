@@ -1,0 +1,379 @@
+.women-speakers-section {
+  padding: 80px 20px;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+.women-speakers-section .container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0;
+  width: 100%;
+}
+
+.women-speaker-card:before {
+  display: none;
+}
+
+.women-speakers-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.women-speakers-heading h2 {
+  margin-bottom: 40px;
+  text-align: left;
+  font-weight: bold;
+  font-size: 45px;
+  color: #020e26;
+}
+
+/* Swiper Slider Wrapper */
+.women-speakers-slider-container {
+  position: relative;
+  padding: 0px 10px;
+}
+
+.women-speakers-slider {
+  overflow: hidden;
+  padding: 60px 0;
+}
+
+/* Match height: stretch every slide in a row to the tallest one */
+.women-speakers-slider .swiper-wrapper {
+  align-items: stretch;
+}
+
+.women-speakers-slider .swiper-slide {
+  height: auto;
+  display: flex;
+}
+
+/* Card Styling */
+.women-speaker-card {
+  background-image: url('https://www.gaiworld.com/hubfs/speaker-card-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 24px;
+  padding: 30px 26px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* AI Network overlay - Dark overlay for text visibility */
+.women-speaker-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(27, 59, 245, 0.85) 0%, rgba(6, 14, 70, 0.9) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.women-speaker-card:hover {
+  transform: translateY(-5px);
+}
+
+.women-speaker-card-content {
+  flex: 1;
+  padding-right: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  max-width: calc(100% - 120px);
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.women-speaker-card-image-wrap {
+  flex: 0 0 104px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Typography inside card */
+.women-speaker-name {
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.women-speaker-meta {
+  border-left: 2.5px solid #ff2e93;
+  /* The pink vertical line */
+  padding-left: 14px;
+  margin-left: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.women-speaker-designation {
+  color: #ff66c4;
+  font-weight: 500;
+  margin-bottom: 5px;
+  font-size: 19px;
+  line-height: 23px;
+  position: relative;
+  margin-top: 10px;
+  text-align: left;
+}
+
+.women-speaker-company {
+  color: #93c5fd;
+  /* Soft blue text */
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.women-speaker-logo-wrap {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.women-speaker-logo-panel {
+  width: 104px;
+  min-height: 74px;
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 24px rgba(6, 14, 70, 0.24);
+  box-sizing: border-box;
+}
+
+.women-speaker-logo {
+  max-height: 46px;
+  max-width: 82px;
+  object-fit: contain;
+  opacity: 1;
+}
+
+.women-speaker-description {
+  color: #fff;
+  line-height: normal;
+  margin-bottom: 0;
+  overflow: hidden;
+  text-align: left;
+}
+
+/* Circular avatar styling */
+.women-speaker-avatar-border {
+  width: 105px;
+  height: 105px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff2e93 0%, #1b3bf5 100%);
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+}
+
+.women-speaker-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #0b132b;
+}
+
+/* Swiper Pagination (Dots) styling */
+.women-speakers-slider-container .swiper-pagination {
+  bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.women-speakers-slider-container .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  background-color: #cbd5e1;
+  opacity: 0.6;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  margin: 0;
+  cursor: pointer;
+}
+
+.women-speakers-slider-container .swiper-pagination-bullet-active {
+  background-color: #ff2e93;
+  /* Active pink dot */
+  opacity: 1;
+  transform: scale(1.25);
+  width: 10px;
+  height: 10px;
+}
+
+/* Slider Controls (Arrows) styling */
+.women-speakers-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  position: absolute;
+  top: calc(50% - 40px);
+  left: -50px;
+  right: -50px;
+  transform: translateY(-50%);
+  z-index: 20;
+}
+
+.women-speakers-arrow {
+  position: static;
+  margin: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  color: #050d51;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.women-speakers-arrow::after {
+  display: none;
+}
+
+.women-speakers-arrow:hover {
+  background-color: #ff2e93;
+  color: #ffffff;
+  border-color: #ff2e93;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -3px rgba(255, 46, 147, 0.45);
+}
+
+.women-speakers-arrow i {
+  font-size: 14px;
+  transition: opacity 0.2s ease;
+}
+
+/* Loading/Error States */
+.women-speakers-loading,
+.women-speakers-error {
+  padding: 60px 20px;
+  text-align: center;
+  font-size: 16px;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.women-speakers-error {
+  color: #fda4af;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+  .women-speakers-heading {
+    font-size: 32px;
+  }
+
+  .women-speaker-card {
+    padding: 24px 20px;
+    min-height: 200px;
+  }
+
+  .women-speakers-slider-container {
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+
+  .women-speaker-card-content {
+    max-width: calc(100% - 108px);
+  }
+
+  .women-speaker-card-image-wrap {
+    flex-basis: 92px;
+  }
+
+  .women-speaker-logo-panel {
+    width: 92px;
+  }
+
+  .women-speaker-avatar-border {
+    width: 95px;
+    height: 95px;
+  }
+}
+
+@media (max-width: 480px) {
+  .women-speakers-heading {
+    font-size: 26px;
+  }
+
+  .women-speaker-card {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    padding: 24px;
+    min-height: auto;
+    gap: 20px;
+  }
+
+  .women-speakers-slider-container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .women-speakers-controls {
+    position: static;
+    justify-content: center;
+    gap: 16px;
+    transform: none;
+    margin-top: 18px;
+  }
+
+  .women-speaker-card-content {
+    padding-right: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .women-speaker-card-image-wrap {
+    flex: 0 0 auto;
+  }
+
+  .women-speaker-logo-panel {
+    width: 104px;
+  }
+
+  .women-speaker-avatar-border {
+    width: 90px;
+    height: 90px;
+  }
+}

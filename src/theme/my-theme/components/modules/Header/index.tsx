@@ -1,0 +1,593 @@
+import {
+  ModuleFields,
+  ImageField,
+  TextField,
+  UrlField,
+  BooleanField,
+  MenuField,
+} from '@hubspot/cms-components/fields';
+import logo from '../../../assets/images/gai-insights-logo-1.webp';
+
+// Normalize HubSpot menu tree (from layout-passed menuItems) to same shape as manual navItems
+function getMenuItemsAsNavItems(menuValue) {
+  if (!menuValue) return [];
+  let items = [];
+  if (Array.isArray(menuValue)) {
+    items = menuValue;
+  } else if (typeof menuValue === 'object' && menuValue !== null) {
+    const obj = menuValue;
+    if (Array.isArray(obj.children)) items = obj.children;
+    else if (Array.isArray(obj.items)) items = obj.items;
+  }
+  return items.map((item) => {
+    if (!item || typeof item !== 'object') return { text: '', link: '#', childNavItems: [] };
+    const o = item;
+    const text = String(o.label ?? o.name ?? o.text ?? '').trim();
+    const link = String(o.url ?? o.link ?? o.href ?? '#').trim() || '#';
+    const rawChildren = o.children ?? o.childNavItems ?? o.submenu;
+    const childNavItems = Array.isArray(rawChildren)
+      ? rawChildren.map((c) => {
+        if (!c || typeof c !== 'object') return { text: '', link: '#' };
+        return {
+          text: String(c.label ?? c.name ?? c.text ?? '').trim(),
+          link: String(c.url ?? c.link ?? c.href ?? '#').trim() || '#',
+          openInNewWindow: false,
+          active: false,
+        };
+      })
+      : [];
+    return { text, link, openInNewWindow: false, active: false, childNavItems };
+  });
+}
+
+export function Component({ fieldValues, hublParameters, hublData }) {
+  // Menu priority: (1) Header component's menu selection (module) overrides; (2) theme header_menu_id from layout (all pages); (3) manual nav.
+  // So theme menu is default for all pages unless this Header instance has another menu selected.
+  const normalizeMenuParam = (v) => {
+    if (!v) return null;
+    if (typeof v === 'string') {
+      try {
+        return JSON.parse(v);
+      } catch {
+        return null;
+      }
+    }
+    return v;
+  };
+
+  const moduleMenuItems = normalizeMenuParam(hublData?.menuItems);
+  const layoutMenuItems = normalizeMenuParam(hublParameters?.menuItems);
+  const hasMenuItemsValue = (v) => {
+    if (!v) return false;
+    if (Array.isArray(v)) return v.length > 0;
+    if (typeof v === 'object') return (v.children?.length > 0) || (v.items?.length > 0);
+    return false;
+  };
+
+  const menuItems = hasMenuItemsValue(moduleMenuItems)
+    ? moduleMenuItems
+    : (hasMenuItemsValue(layoutMenuItems) ? layoutMenuItems : null);
+
+  const hasMenu = hasMenuItemsValue(menuItems);
+
+  const navItems = hasMenu ? getMenuItemsAsNavItems(menuItems) : [];
+  const usingDynamicMenu = hasMenu;
+
+  const normalizePathname = (pathname) => {
+    if (!pathname || typeof pathname !== 'string') return '';
+    if (pathname === '/') return '/';
+    return pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+  };
+
+  const currentPath = normalizePathname(
+    (hublData && hublData.currentPath) ||
+    (hublParameters && hublParameters.currentPath) ||
+    ''
+  );
+
+  const currentOrigin = (() => {
+    const pageUrl = hublParameters?.pageUrl ?? hublParameters?.page_url;
+    if (pageUrl && typeof pageUrl === 'string') {
+      try {
+        const o = new URL(pageUrl).origin;
+        if (o) return o;
+      } catch {
+        // fallthrough
+      }
+    }
+    if (typeof window !== 'undefined' && window.location && window.location.origin) {
+      return window.location.origin;
+    }
+    return '';
+  })();
+
+  const getComparablePathFromUrl = (rawUrl) => {
+    if (rawUrl == null) return '';
+    const str = typeof rawUrl === 'string' ? rawUrl.trim() : String(rawUrl).trim();
+    if (!str || str === '#') return '';
+    // Already a path
+    if (str.startsWith('/')) return normalizePathname(str);
+    // Relative path like "about" or "event/schedule"
+    if (!str.startsWith('http') && !str.includes(':')) return normalizePathname('/' + str.replace(/^\/*/, ''));
+    try {
+      const u = new URL(str, 'https://example.invalid');
+      if (u.protocol && !u.protocol.startsWith('http')) return '';
+      return normalizePathname(u.pathname || '');
+    } catch {
+      return '';
+    }
+  };
+
+  const isDynamicLinkActive = (rawUrl) => {
+    if (!currentPath) return false;
+    const str = rawUrl == null ? '' : (typeof rawUrl === 'string' ? rawUrl.trim() : String(rawUrl).trim());
+    if (str.startsWith('http')) {
+      try {
+        const linkUrl = new URL(str, 'https://example.invalid');
+        if (currentOrigin && linkUrl.origin !== currentOrigin) return false;
+      } catch {
+        return false;
+      }
+    }
+    const itemPath = getComparablePathFromUrl(rawUrl);
+    if (!itemPath) return false;
+    if (currentPath === itemPath) return true;
+    if (itemPath !== '/' && currentPath.startsWith(itemPath + '/')) return true;
+    return false;
+  };
+
+  // Handle UrlField / link field: string, or object with url/href/link or nested url.href
+  const getUrl = (urlField) => {
+    if (!urlField) return '#';
+    if (typeof urlField === 'string') return urlField;
+    if (typeof urlField === 'object') {
+      const u = urlField.url ?? urlField;
+      const h = typeof u === 'object' ? (u?.href ?? u?.link) : u;
+      if (h) return h;
+      return urlField.href ?? urlField.link ?? '#';
+    }
+    return '#';
+  };
+
+  const getOpenInNewTab = (linkField) => {
+    if (!linkField || typeof linkField !== 'object') return false;
+    return linkField.open_in_new_tab === true || linkField.openInNewTab === true;
+  };
+
+  // Base URL (origin) of the current site for default logo link when none set
+  const getBaseUrl = () => {
+    const pageUrl = hublParameters?.pageUrl;
+    if (pageUrl && typeof pageUrl === 'string') {
+      try {
+        return new URL(pageUrl).origin;
+      } catch {
+        // fallthrough
+      }
+    }
+    if (typeof window !== 'undefined' && window.location && window.location.origin) {
+      return window.location.origin;
+    }
+    return '/';
+  };
+
+  // Logo: theme (from layout) overrides module when set; otherwise use module logo/link; empty link -> base URL
+  let themeLogo = hublParameters?.headerLogo;
+  if (typeof themeLogo === 'string') {
+    try {
+      themeLogo = JSON.parse(themeLogo);
+    } catch {
+      themeLogo = null;
+    }
+  }
+  const useThemeLogo = themeLogo && themeLogo.src;
+  const logoImg = useThemeLogo ? themeLogo : (fieldValues.logo || null);
+  let logoLink = getUrl(fieldValues.logoLink);
+  if (!logoLink || logoLink === '#') logoLink = getBaseUrl();
+  const logoOpenInNewTab = !!(fieldValues.logoLink && typeof fieldValues.logoLink === 'object' && (fieldValues.logoLink.open_in_new_tab || fieldValues.logoLink.openInNewTab));
+  const ctaLink = getUrl(fieldValues.ctaLink);
+
+  return (
+    <header className="header">
+      <div className="header-wrapper">
+        <div className="logo-div">
+          <a href={logoLink} target={logoOpenInNewTab ? '_blank' : undefined} rel={logoOpenInNewTab ? 'noopener noreferrer' : undefined} data-header-logo>
+            <img src={logoImg?.src} alt={logoImg?.alt || 'Logo'} data-header-logo-img />
+          </a>
+        </div>
+        <nav className="navbar navbar-expand-lg navbar-light">
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul className="navbar-nav">
+              {navItems.map((item, index) => {
+                const linkUrl = getUrl(item.link);
+                const openInNewWindow = !!item.openInNewWindow;
+                const childNavItems = item.childNavItems || [];
+                const hasChildren = childNavItems.length > 0;
+                const dynamicSelfActive = usingDynamicMenu && isDynamicLinkActive(linkUrl);
+                const dynamicChildActive =
+                  usingDynamicMenu &&
+                  Array.isArray(childNavItems) &&
+                  childNavItems.some((c) => isDynamicLinkActive(getUrl(c?.link)));
+                const isActive = dynamicSelfActive || dynamicChildActive;
+
+                return (
+                  <li className={`nav-item ${hasChildren ? 'nav-item-dropdown' : ''} ${isActive ? 'active' : ''}`} key={index}>
+                    {hasChildren ? (
+                      <>
+                        <span className="nav-link nav-link-dropdown">
+                          {item.text}
+                          <i className="fa-solid fa-chevron-down dropdown-icon"></i>
+                        </span>
+                        <ul className="nav-dropdown-menu">
+                          {childNavItems.map((childItem, childIndex) => {
+                            const childLinkUrl = getUrl(childItem.link);
+                            const childOpenInNewWindow = !!childItem.openInNewWindow;
+                            const childIsActive = usingDynamicMenu && isDynamicLinkActive(childLinkUrl);
+                            return (
+                              <li key={childIndex}>
+                                <a
+                                  className={`nav-dropdown-link ${childIsActive ? 'active' : ''}`}
+                                  href={childLinkUrl}
+                                  target={childOpenInNewWindow ? '_blank' : undefined}
+                                  rel={childOpenInNewWindow ? 'noopener noreferrer' : undefined}
+                                >
+                                  {childItem.text}
+                                </a>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </>
+                    ) : (
+                      <a
+                        className="nav-link"
+                        href={linkUrl}
+                        target={openInNewWindow ? '_blank' : undefined}
+                        rel={openInNewWindow ? 'noopener noreferrer' : undefined}
+                      >
+                        {item.text}
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </nav>
+        <div className="header-btn">
+          <a
+            href={ctaLink || '#conatct-us'}
+            className="transparent-btn"
+            data-header-cta
+            target={fieldValues.ctaOpenInNewWindow ? '_blank' : undefined}
+            rel={fieldValues.ctaOpenInNewWindow ? 'noopener noreferrer' : undefined}
+          >
+            {fieldValues.ctaText || 'Contact Us'}
+          </a>
+        </div>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+          (function() {
+            function applyHubDbHeader() {
+              var btn = document.querySelector('.header [data-header-cta]');
+              var logoLink = document.querySelector('.header [data-header-logo]');
+              var logoImg = document.querySelector('.header [data-header-logo-img]');
+              fetch('https://api.hubapi.com/cms/v3/hubdb/tables/199638385/rows?portalId=39650877')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                  var results = data && data.results;
+                  if (!results || results.length === 0) return;
+                  var last = results[results.length - 1];
+                  var values = last && last.values;
+                  if (!values) return;
+                  if (btn) {
+                    if (values.cta_url) btn.setAttribute('href', values.cta_url);
+                    if (values.cta_text) btn.textContent = values.cta_text;
+                  }
+                  if (logoLink && values.logo_url) logoLink.setAttribute('href', values.logo_url);
+                  if (logoImg && values.logo_image && values.logo_image.url) {
+                    logoImg.setAttribute('src', values.logo_image.url);
+                    if (values.logo_image.altText) logoImg.setAttribute('alt', values.logo_image.altText);
+                  }
+                })
+                .catch(function() {});
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyHubDbHeader);
+            else applyHubDbHeader();
+          })();
+          `,
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+          (function() {
+            // Remove active only from nav items whose MAIN link is cross-origin (fixes wrong active on other domain home)
+            function fixActiveByOrigin() {
+              try {
+                var currentOrigin = window.location.origin;
+                if (!currentOrigin) return;
+                document.querySelectorAll('.header .nav-item').forEach(function(item) {
+                  var mainLink = item.querySelector(':scope > .nav-link, :scope > .nav-link-dropdown');
+                  if (!mainLink || !mainLink.getAttribute('href') || !mainLink.getAttribute('href').startsWith('http')) return;
+                  try {
+                    var linkOrigin = new URL(mainLink.getAttribute('href')).origin;
+                    if (linkOrigin !== currentOrigin) {
+                      item.classList.remove('active');
+                      mainLink.classList.remove('dropdown-active');
+                    }
+                  } catch (err) {}
+                });
+              } catch (e) {}
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fixActiveByOrigin);
+            else fixActiveByOrigin();
+
+            // Handle smooth scrolling for anchor links in header
+            function handleAnchorClick(e, href) {
+              // Only handle anchor links (starting with #) on same page
+              if (href && href.startsWith('#') && href.length > 1) {
+                e.preventDefault();
+                const targetId = href.substring(1); // Remove the #
+                const target = document.getElementById(targetId);
+                if (target) {
+                  target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                  });
+                }
+              }
+            }
+
+            // Handle navigation links (only non-dropdown links)
+            document.querySelectorAll('.header .nav-link:not(.nav-link-dropdown)').forEach(function(link) {
+              link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                // Only handle if not opening in new window
+                if (!this.getAttribute('target')) {
+                  handleAnchorClick(e, href);
+                }
+              });
+            });
+
+            // Handle dropdown navigation - hover for desktop, click toggle for mobile/tablet
+            document.querySelectorAll('.header .nav-item-dropdown').forEach(function(dropdownItem) {
+              const dropdownMenu = dropdownItem.querySelector('.nav-dropdown-menu');
+              const navLink = dropdownItem.querySelector('.nav-link-dropdown');
+              
+              if (dropdownMenu && navLink) {
+                // Check if device is mobile/tablet (small screen)
+                function isMobileOrTablet() {
+                  return window.innerWidth <= 991;
+                }
+                
+                // Flag to track if nav link was just clicked (to prevent click-outside from interfering)
+                var navLinkJustClicked = false;
+                
+                // Handle click on nav link for mobile/tablet ONLY
+                // Use both click and touchstart for better mobile support
+                function handleNavLinkClick(e) {
+                  if (isMobileOrTablet()) {
+                    // Set flag to prevent click-outside handler from running
+                    navLinkJustClicked = true;
+                    setTimeout(function() {
+                      navLinkJustClicked = false;
+                    }, 200);
+                    
+                    if (e) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                    
+                    // Directly check and toggle
+                    var hasActiveClass = dropdownItem.classList.contains('active');
+                    
+                    if (hasActiveClass) {
+                      // Currently open - CLOSE it
+                      dropdownItem.classList.remove('active');
+                      navLink.classList.remove('dropdown-active');
+                    } else {
+                      // Currently closed - OPEN it
+                      // Close other open dropdowns first
+                      document.querySelectorAll('.header .nav-item-dropdown.active').forEach(function(item) {
+                        if (item !== dropdownItem) {
+                          item.classList.remove('active');
+                          var otherLink = item.querySelector('.nav-link-dropdown');
+                          if (otherLink) {
+                            otherLink.classList.remove('dropdown-active');
+                          }
+                        }
+                      });
+                      // Open this dropdown
+                      dropdownItem.classList.add('active');
+                      navLink.classList.add('dropdown-active');
+                    }
+                  }
+                }
+                
+                navLink.addEventListener('click', handleNavLinkClick);
+                navLink.addEventListener('touchend', function(e) {
+                  handleNavLinkClick(e);
+                });
+                
+                // Handle hover for desktop
+                dropdownItem.addEventListener('mouseenter', function() {
+                  if (!isMobileOrTablet()) {
+                    navLink.classList.add('dropdown-active');
+                  }
+                });
+                
+                dropdownItem.addEventListener('mouseleave', function() {
+                  if (!isMobileOrTablet()) {
+                    navLink.classList.remove('dropdown-active');
+                  }
+                });
+                
+                // Close dropdown when clicking outside on mobile/tablet
+                document.addEventListener('click', function(e) {
+                  if (isMobileOrTablet() && !navLinkJustClicked) {
+                    // Check if click is outside the dropdown item
+                    if (!dropdownItem.contains(e.target)) {
+                      dropdownItem.classList.remove('active');
+                      navLink.classList.remove('dropdown-active');
+                    }
+                  }
+                });
+              }
+            });
+
+            // Handle dropdown child links
+            document.querySelectorAll('.header .nav-dropdown-link').forEach(function(link) {
+              link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                // Only handle if not opening in new window
+                if (!this.getAttribute('target')) {
+                  handleAnchorClick(e, href);
+                }
+              });
+            });
+
+            // Handle CTA button
+            const ctaBtn = document.querySelector('.header .transparent-btn');
+            if (ctaBtn) {
+              ctaBtn.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                // Only handle if not opening in new window
+                if (!this.getAttribute('target')) {
+                  handleAnchorClick(e, href);
+                }
+              });
+            }
+
+            // Handle header transparency on scroll
+            const header = document.querySelector('.header');
+            const body = document.body;
+
+            if (header) {
+              let lastScrollTop = 0;
+              let ticking = false;
+
+              // Throttle function for better performance
+              function throttle(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                  const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                  };
+                  clearTimeout(timeout);
+                  timeout = setTimeout(later, wait);
+                };
+              }
+
+              // Function to handle scroll
+              function handleScroll() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+                // Add 'scrolled' class when scrolled down more than 50px
+                if (scrollTop > 50) {
+                  header.classList.add('scrolled');
+                  const headerHeight = header.offsetHeight;
+                  body.style.paddingTop = headerHeight + 'px';
+                } else {
+                  header.classList.remove('scrolled');
+                  body.style.paddingTop = '0';
+                }
+
+                lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+                ticking = false;
+              }
+              
+              // Throttled scroll handler (runs max once every 10ms)
+              const throttledScrollHandler = throttle(handleScroll, 10);
+              
+              // Initial check on page load
+              handleScroll();
+              
+              // Listen to scroll events
+              window.addEventListener('scroll', function() {
+                if (!ticking) {
+                  window.requestAnimationFrame(throttledScrollHandler);
+                  ticking = true;
+                }
+              }, { passive: true });
+            }
+          })();
+        `,
+          }}
+        />
+      </div>
+    </header>
+  );
+}
+
+export const fields = (
+  <ModuleFields>
+    <ImageField
+      name="logo"
+      label="Logo"
+      default={{ src: logo, alt: 'GAI Insights', width: 180, height: 60 }}
+      resizable={true}
+    />
+    <UrlField
+      name="logoLink"
+      label="Logo link"
+    />
+    <MenuField
+      name="menu"
+      label="HubSpot menu"
+      helpText="Select a HubSpot menu to show in the header."
+    />
+    <TextField name="ctaText" label="CTA text" default="Contact Us" />
+    <UrlField
+      name="ctaLink"
+      label="CTA link"
+      helpText="URL for the Contact Us button"
+    />
+    <BooleanField
+      name="ctaOpenInNewWindow"
+      label="CTA open in new window"
+      default={false}
+      helpText="Check to open the CTA link in a new tab/window"
+    />
+  </ModuleFields>
+);
+
+export const meta = {
+  label: 'GAI Header',
+};
+
+// Resolve menu in MODULE context (same as when user picks menu in UI): module.menu wins; else theme.header_menu_id. menu(id) only works correctly here, not in layout.
+const _hsStmtOpen = '\x7b\x25'; // {%
+const _hsStmtClose = '\x25\x7d'; // %}
+export const hublDataTemplate =
+  _hsStmtOpen + ' set _mid = module.menu ' + _hsStmtClose +
+  _hsStmtOpen + ' if _mid is mapping and _mid.id is defined ' + _hsStmtClose +
+  _hsStmtOpen + ' set _mid = _mid.id ' + _hsStmtClose +
+  _hsStmtOpen + ' endif ' + _hsStmtClose +
+  _hsStmtOpen + ' if not _mid ' + _hsStmtClose +
+  _hsStmtOpen + ' set _tid = theme.header_menu_id|default(0) ' + _hsStmtClose +
+  _hsStmtOpen + ' if _tid is mapping and _tid.id is defined ' + _hsStmtClose +
+  _hsStmtOpen + ' set _tid = _tid.id ' + _hsStmtClose +
+  _hsStmtOpen + ' endif ' + _hsStmtClose +
+  _hsStmtOpen + ' set _tid = _tid|string|replace(",","")|replace(" ","")|trim|int ' + _hsStmtClose +
+  _hsStmtOpen + ' if _tid ' + _hsStmtClose +
+  _hsStmtOpen + ' set _mid = _tid ' + _hsStmtClose +
+  _hsStmtOpen + ' endif ' + _hsStmtClose +
+  _hsStmtOpen + ' endif ' + _hsStmtClose +
+  _hsStmtOpen + ' if _mid ' + _hsStmtClose +
+  _hsStmtOpen + ' set hublData = {"menuItems": menu(_mid), "currentPath": request.path} ' + _hsStmtClose +
+  _hsStmtOpen + ' else ' + _hsStmtClose +
+  _hsStmtOpen + ' set hublData = {"menuItems": [], "currentPath": request.path} ' + _hsStmtClose +
+  _hsStmtOpen + ' endif ' + _hsStmtClose;
