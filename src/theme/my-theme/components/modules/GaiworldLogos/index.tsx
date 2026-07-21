@@ -36,7 +36,7 @@ export function Component({ fieldValues }: { fieldValues: FieldValues; hublParam
               ))}
               {fieldValues.logos.map((l, idx) => (
                 <div key={`duplicate-${idx}`} className="gw-logo-pill" aria-hidden="true">
-                  <img src={l.logo?.src} alt="" loading="lazy" />
+                  <img src={l.logo?.src} alt={l.logo?.alt} loading="lazy" />
                 </div>
               ))}
             </div>

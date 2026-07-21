@@ -1,0 +1,153 @@
+/*
+  Communication Preferences landing page — scoped styles.
+  Loaded ONLY by templates/layouts/base-lp.hubl.html.
+  Everything is scoped under .comm-prefs-area, a class unique to this module,
+  so it cannot affect any other page, module, or global style.
+*/
+
+/* ---- Section surface (overrides the global dark body background) ---- */
+.comm-prefs-area {
+  background: #f6f8fb !important;
+  color: #020e26 !important;
+  padding: 90px 0;
+}
+.comm-prefs-area .comm-prefs-inner { max-width: 1140px; margin: 0 auto; }
+
+/* ---- Intro copy ---- */
+.comm-prefs-area .comm-prefs-content { padding-right: 20px; }
+.comm-prefs-area .comm-prefs-content h1,
+.comm-prefs-area .comm-prefs-content h2 {
+  color: #020e26 !important;
+  font-size: 40px;
+  line-height: 1.12;
+  font-weight: 700;
+  margin: 0 0 18px;
+}
+.comm-prefs-area .comm-prefs-content p {
+  color: #3a4256 !important;
+  font-size: 17px;
+  line-height: 1.7;
+  margin: 0 0 14px;
+}
+.comm-prefs-area .comm-prefs-content ul { margin: 0 0 8px; padding-left: 20px; }
+.comm-prefs-area .comm-prefs-content li {
+  color: #3a4256 !important;
+  font-size: 16px;
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+.comm-prefs-area .comm-prefs-note {
+  margin-top: 22px;
+  font-size: 13.5px;
+  color: #6b7280 !important;
+  line-height: 1.6;
+}
+
+/* ---- Form card ---- */
+.comm-prefs-area .comm-prefs-form {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 36px;
+  box-shadow: 0 14px 40px rgba(2, 14, 38, 0.08);
+}
+.comm-prefs-area .comm-prefs-form-placeholder,
+.comm-prefs-area .comm-prefs-form-error {
+  padding: 24px;
+  text-align: center;
+  color: #6b7280;
+  border: 2px dashed #cbd5e1;
+  border-radius: 10px;
+  font-size: 15px;
+}
+.comm-prefs-area .comm-prefs-form-error { color: #d32f2f; border-color: #f0b4b4; }
+
+/* ---- Embedded HubSpot form styling ---- */
+.comm-prefs-area .hs-form fieldset { max-width: 100% !important; }
+.comm-prefs-area .hs-form label {
+  color: #020e26 !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  display: block;
+  margin-bottom: 8px;
+}
+.comm-prefs-area .hs-form .hs-field-desc {
+  color: #6b7280 !important;
+  font-weight: 400 !important;
+  font-size: 13px !important;
+}
+.comm-prefs-area .hs-form .input { margin-bottom: 18px; }
+.comm-prefs-area .hs-form input.hs-input,
+.comm-prefs-area .hs-form textarea.hs-input,
+.comm-prefs-area .hs-form select.hs-input {
+  width: 100% !important;
+  background: #ffffff !important;
+  color: #020e26 !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  padding: 12px 14px !important;
+  font-size: 15px !important;
+  box-shadow: none !important;
+}
+.comm-prefs-area .hs-form input.hs-input:focus,
+.comm-prefs-area .hs-form textarea.hs-input:focus,
+.comm-prefs-area .hs-form select.hs-input:focus {
+  border-color: #fbcc24 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(251, 204, 36, 0.25) !important;
+}
+
+/* Checkbox / subscription preference list */
+.comm-prefs-area .hs-form ul.inputs-list { list-style: none; margin: 6px 0 18px; padding: 0; }
+.comm-prefs-area .hs-form ul.inputs-list li { margin-bottom: 12px; }
+.comm-prefs-area .hs-form ul.inputs-list li label {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500 !important;
+  color: #1f2937 !important;
+  margin: 0 !important;
+  cursor: pointer;
+}
+.comm-prefs-area .hs-form ul.inputs-list input[type="checkbox"],
+.comm-prefs-area .hs-form ul.inputs-list input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: #020e26;
+}
+
+/* Submit button (brand amber) */
+.comm-prefs-area .hs-form .hs-submit input[type="submit"],
+.comm-prefs-area .hs-form .hs-button {
+  background: #fbcc24 !important;
+  color: #020e26 !important;
+  border: 0 !important;
+  border-radius: 50px !important;
+  padding: 14px 34px !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  cursor: pointer;
+  transition: 0.25s ease-in-out;
+  -webkit-appearance: none;
+}
+.comm-prefs-area .hs-form .hs-submit input[type="submit"]:hover,
+.comm-prefs-area .hs-form .hs-button:hover {
+  background: #f0bc10 !important;
+  box-shadow: 0 6px 18px rgba(251, 204, 36, 0.4);
+  transform: translateY(-2px);
+}
+.comm-prefs-area .hs-form .hs-error-msg,
+.comm-prefs-area .hs-form .hs-error-msgs label {
+  color: #d32f2f !important;
+  font-weight: 500 !important;
+}
+
+@media (max-width: 991px) {
+  .comm-prefs-area { padding: 56px 0; }
+  .comm-prefs-area .comm-prefs-content { padding-right: 0; margin-bottom: 32px; text-align: center; }
+  .comm-prefs-area .comm-prefs-content h1,
+  .comm-prefs-area .comm-prefs-content h2 { font-size: 30px; }
+  .comm-prefs-area .comm-prefs-form { padding: 26px; }
+}

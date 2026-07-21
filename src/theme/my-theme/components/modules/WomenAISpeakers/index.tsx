@@ -4,7 +4,6 @@ import {
   TextField,
   RichTextField,
   NumberField,
-  BooleanField,
 } from '@hubspot/cms-components/fields';
 import './styles.css';
 
@@ -16,7 +15,6 @@ interface FieldValues {
   sectionClass: string;
   autoplayDelay: number;
   speed: number;
-  showLeadersOnly: boolean;
 }
 
 function decodeHtmlEntities(value: string) {
@@ -64,7 +62,6 @@ export function Component({ fieldValues, hublData }: { fieldValues: FieldValues;
   const sectionClass = fieldValues.sectionClass || 'women-speakers-section';
   const autoplayDelay = fieldValues.autoplayDelay ?? 3000;
   const speed = fieldValues.speed ?? 600;
-  const showLeadersOnly = fieldValues.showLeadersOnly === true || (fieldValues.showLeadersOnly as unknown) === 'true';
 
   // Retrieve server-side rendered speakers list
   const speakers = hublData?.speakers || [];
@@ -158,7 +155,6 @@ export function Component({ fieldValues, hublData }: { fieldValues: FieldValues;
 
             const portalId = '${portalId}';
             const tableId = '${tableId}';
-            const showLeadersOnly = ${showLeadersOnly};
             const wrapper = root.querySelector('#wrapper-${instanceId}');
             const loadingEl = root.querySelector('#loading-${instanceId}');
             const errorEl = root.querySelector('#error-${instanceId}');
@@ -187,14 +183,8 @@ export function Component({ fieldValues, hublData }: { fieldValues: FieldValues;
                 }
                 
                 const data = await response.json();
-                let rows = data.results || [];
-
-                if (showLeadersOnly) {
-                  rows = rows.filter(function(row) {
-                    return row.values?.leader === true || row.values?.leader === 1 || row.values?.leader === '1';
-                  });
-                }
-
+                const rows = data.results || [];
+                
                 if (rows.length === 0) {
                   loadingEl.innerHTML = 'No speaker data found in HubDB table.';
                   loadingEl.style.display = 'block';
@@ -385,34 +375,31 @@ const _c = '\x25\x7d';
 
 export const hublDataTemplate =
   _o + ' set _table_id = module.tableId|default("351853163", true) ' + _c +
-  _o + ' set _show_leaders_only = module.showLeadersOnly|default(false, true) ' + _c +
   _o + ' set _mapped_rows = [] ' + _c +
   _o + ' if _table_id ' + _c +
   _o + '   set _rows = hubdb_table_rows(_table_id|trim|int) ' + _c +
   _o + '   for _row in _rows ' + _c +
-  _o + '     if not _show_leaders_only or _row.leader ' + _c +
-  _o + '       set _name = _row.name ' + _c +
-  _o + '       set _title = _row.title ' + _c +
-  _o + '       set _company = _row.company ' + _c +
-  _o + '       set _description = _row.description ' + _c +
+  _o + '     set _name = _row.name ' + _c +
+  _o + '     set _title = _row.title ' + _c +
+  _o + '     set _company = _row.company ' + _c +
+  _o + '     set _description = _row.description ' + _c +
   // image
-  _o + '       set _img_url = "" ' + _c +
-  _o + '       set _img_alt = "" ' + _c +
-  _o + '       if _row.image ' + _c +
-  _o + '         set _img_url = _row.image.url ' + _c +
-  _o + '         set _img_alt = _row.image.altText ' + _c +
-  _o + '       endif ' + _c +
-  // logo
-  _o + '       set _logo_url = "" ' + _c +
-  _o + '       set _logo_alt = "" ' + _c +
-  _o + '       if _row.logo ' + _c +
-  _o + '         set _logo_url = _row.logo.url ' + _c +
-  _o + '         set _logo_alt = _row.logo.altText ' + _c +
-  _o + '       endif ' + _c +
-  // build dictionary
-  _o + '       set _item = {"name": _name, "title": _title, "company": _company, "description": _description, "image": {"url": _img_url, "altText": _img_alt}, "logo": {"url": _logo_url, "altText": _logo_alt}} ' + _c +
-  _o + '       set _dummy = _mapped_rows.append(_item) ' + _c +
+  _o + '     set _img_url = "" ' + _c +
+  _o + '     set _img_alt = "" ' + _c +
+  _o + '     if _row.image ' + _c +
+  _o + '       set _img_url = _row.image.url ' + _c +
+  _o + '       set _img_alt = _row.image.altText ' + _c +
   _o + '     endif ' + _c +
+  // logo
+  _o + '     set _logo_url = "" ' + _c +
+  _o + '     set _logo_alt = "" ' + _c +
+  _o + '     if _row.logo ' + _c +
+  _o + '       set _logo_url = _row.logo.url ' + _c +
+  _o + '       set _logo_alt = _row.logo.altText ' + _c +
+  _o + '     endif ' + _c +
+  // build dictionary
+  _o + '     set _item = {"name": _name, "title": _title, "company": _company, "description": _description, "image": {"url": _img_url, "altText": _img_alt}, "logo": {"url": _logo_url, "altText": _logo_alt}} ' + _c +
+  _o + '     set _dummy = _mapped_rows.append(_item) ' + _c +
   _o + '   endfor ' + _c +
   _o + ' endif ' + _c +
   _o + ' set hublData = {"speakers": _mapped_rows} ' + _c;
@@ -448,12 +435,6 @@ export const fields = (
       label="HTML Section CSS Class"
       default="women-speakers-section"
       helpText="Custom CSS class name for styling the section wrapper."
-    />
-    <BooleanField
-      name="showLeadersOnly"
-      label="Show Leaders Only"
-      default={false}
-      helpText="Show only speakers marked as Leader (leader checkbox) in the HubDB table. Default: unchecked (shows all Women in AI speakers)."
     />
     <NumberField
       name="autoplayDelay"
