@@ -2,12 +2,14 @@ import {
   ModuleFields,
   TextField,
   ImageField,
+  ChoiceField,
 } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
   const heading = fieldValues.heading || 'All Sessions';
   const sectionId = fieldValues.sectionId || 'all-sessions';
   const sectionClass = fieldValues.sectionClass || 'sessions-area';
+  const defaultView = fieldValues.defaultView === 'calendar' ? 'calendar' : 'grid';
 
   const moduleId = `all-sessions-${fieldValues.moduleInstanceId || Math.random().toString(36).slice(2)}`;
 
@@ -21,14 +23,14 @@ export function Component({ fieldValues }) {
                 <div className="speakers-text sessions-header-row">
                   <h2>{heading}</h2>
                   <div className="sessions-view-toggle">
-                    <button className="sessions-view-chip active" id={`grid-view-btn-${moduleId}`} data-view="grid" type="button" aria-label="Grid view">
+                    <button className={`sessions-view-chip${defaultView === 'grid' ? ' active' : ''}`} id={`grid-view-btn-${moduleId}`} data-view="grid" type="button" aria-label="Grid view">
                       {fieldValues.gridViewIcon?.src ? (
                         <img src={fieldValues.gridViewIcon.src} alt="Grid view" className="sessions-view-chip-icon" />
                       ) : (
                         'Grid View'
                       )}
                     </button>
-                    <button className="sessions-view-chip" id={`calendar-view-btn-${moduleId}`} data-view="calendar" type="button" aria-label="Calendar view">
+                    <button className={`sessions-view-chip${defaultView === 'calendar' ? ' active' : ''}`} id={`calendar-view-btn-${moduleId}`} data-view="calendar" type="button" aria-label="Calendar view">
                       {fieldValues.calendarViewIcon?.src ? (
                         <img src={fieldValues.calendarViewIcon.src} alt="Calendar view" className="sessions-view-chip-icon" />
                       ) : (
@@ -115,7 +117,7 @@ export function Component({ fieldValues }) {
             const calendarViewBtn = root.querySelector('#calendar-view-btn-' + moduleId);
             
             // Current view state
-            let currentView = 'calendar'; // Default to grid view
+            let currentView = '${defaultView}'; // Default view is set from module config (defaultView field)
             
             // Time range filter state
             let minTimeOfDay = null; // Minimum time for selected day (in minutes from start of day)
@@ -203,7 +205,15 @@ export function Component({ fieldValues }) {
                     topics: topics,
                     description: row.values?.description || '',
                     linkedin_profile: row.values?.linkedin_profile || '',
-                    portfolio_site: row.values?.portfolio_site || ''
+                    portfolio_site: row.values?.portfolio_site || '',
+                    companyLogoWhite: row.values?.company_logo_white ? {
+                      src: row.values.company_logo_white.url || row.values.company_logo_white,
+                      alt: (row.values?.company || 'Company') + ' logo'
+                    } : null,
+                    companyLogo: row.values?.company_logo ? {
+                      src: row.values.company_logo.url || row.values.company_logo,
+                      alt: (row.values?.company || 'Company') + ' logo'
+                    } : null
                   };
                 });
                 
@@ -950,11 +960,14 @@ export function Component({ fieldValues }) {
                     moderatorSpeakerIds: moderatorSpeakerIds,
                     moderators: moderators,
                     description: row.values?.description || '',
+                    longDescription: row.values?.long_description || '',
                     date: dateValue ? [dateValue] : null,
-                    sessionTypes: sessionTypes
+                    sessionTypes: sessionTypes,
+                    hideSession: (row.values?.hide_session === true || row.values?.hide_session === 1 || row.values?.hide_session === '1' || row.values?.hide_session === 'true')
                   };
                 }).filter(function(session) {
-                  return session.start_time > 0 && session.end_time > 0;
+                  // Exclude sessions flagged "Hide Session" in HubDB (hidden from both grid and calendar views)
+                  return !session.hideSession && session.start_time > 0 && session.end_time > 0;
                 });
 
                 // Build a stable mapping of room name -> venue id (for header rendering)
@@ -1845,6 +1858,14 @@ export function Component({ fieldValues }) {
                 titleDiv.className = 'sessions-card-title';
                 titleDiv.textContent = session.title;
                 card.appendChild(titleDiv);
+                
+                // Session short description (HubDB "Short Description")
+                if (session.description && session.description.trim()) {
+                  const cardDescDiv = document.createElement('div');
+                  cardDescDiv.className = 'sessions-card-description';
+                  cardDescDiv.textContent = stripHtmlTags(session.description);
+                  card.appendChild(cardDescDiv);
+                }
                 
                 // Session types (if any)
                 if (session.sessionTypes && session.sessionTypes.length > 0) {
@@ -2831,12 +2852,15 @@ export function Component({ fieldValues }) {
               dateTimeDiv.textContent = dateTimeText;
               body.appendChild(dateTimeDiv);
               
-              // Session description (strip HTML tags like <span>)
-              if (session.description && session.description.trim()) {
+              // Session description: prefer Long Description, fall back to Short Description
+              const detailDescription = (session.longDescription && session.longDescription.trim())
+                ? session.longDescription
+                : session.description;
+              if (detailDescription && detailDescription.trim()) {
                 const descDiv = document.createElement('div');
                 descDiv.className = 'session-detail-description';
-                // Strip HTML tags from description before displaying
-                descDiv.textContent = stripHtmlTags(session.description);
+                // Strip HTML tags before displaying
+                descDiv.textContent = stripHtmlTags(detailDescription);
                 body.appendChild(descDiv);
               }
               
@@ -2923,11 +2947,16 @@ export function Component({ fieldValues }) {
                       titleDiv.textContent = speaker.title;
                       nameTopicCol.appendChild(titleDiv);
                     }
-                    if (speaker.company) {
-                      const companyDiv = document.createElement('div');
-                      companyDiv.className = 'gai-speaker-company';
-                      companyDiv.textContent = speaker.company;
-                      nameTopicCol.appendChild(companyDiv);
+                    // Show company LOGO (white version) instead of the company name
+                    var speakerCompanyLogo = (speaker.companyLogoWhite && speaker.companyLogoWhite.src)
+                      ? speaker.companyLogoWhite
+                      : ((speaker.companyLogo && speaker.companyLogo.src) ? speaker.companyLogo : null);
+                    if (speakerCompanyLogo) {
+                      const companyLogoImg = document.createElement('img');
+                      companyLogoImg.className = 'session-detail-speaker-company-logo';
+                      companyLogoImg.src = speakerCompanyLogo.src;
+                      companyLogoImg.alt = speakerCompanyLogo.alt || 'Company logo';
+                      nameTopicCol.appendChild(companyLogoImg);
                     }
                     if (isModerator) {
                       const roleTag = document.createElement('span');
@@ -3130,6 +3159,18 @@ export const fields = (
       name="calendarViewIcon"
       label="Calendar view button icon"
       helpText="Upload an icon to show instead of 'Calendar' text. Leave empty to show text."
+    />
+    <ChoiceField
+      name="defaultView"
+      label="Default display"
+      helpText="Choose which view visitors see first when the module loads."
+      choices={[
+        ['grid', 'Grid View'],
+        ['calendar', 'Calendar View'],
+      ]}
+      default="grid"
+      display="select"
+      required={true}
     />
   </ModuleFields>
 );
