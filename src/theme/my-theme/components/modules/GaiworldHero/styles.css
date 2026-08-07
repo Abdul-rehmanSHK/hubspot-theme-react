@@ -216,12 +216,12 @@ p.gw-hero__description {
 }
 
 .gw-speaker .gw-speaker__logo {
-  padding-top: 10px;
+  padding-top: 15px;
   max-width: 100%;
   height: auto;
   object-fit: contain;
   margin-top: auto;
-  width: 100px;
+  width: 120px;
 }
 
 .gw-speaker--all {
