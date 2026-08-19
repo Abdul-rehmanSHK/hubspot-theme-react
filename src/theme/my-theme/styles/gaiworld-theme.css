@@ -412,3 +412,165 @@
 footer.footer::after {
   display: none !important;
 }
+
+/* AllSpeakers: company logo shown in place of the company name.
+   Specificity here has to beat `.speaker-card .team-member img` in gai-insights.css,
+   which would otherwise size the logo as a 200px circular avatar. */
+.speaker-card .team-member .team-info .speaker-company-logo,
+.speaker-search-result-card .team-info .speaker-company-logo {
+  display: block;
+  width: auto;
+  height: 50px !important;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 0;
+  margin: 0.5rem auto 0;
+}
+
+@media (max-width: 480px) {
+  .speaker-card .team-member .team-info .speaker-company-logo,
+  .speaker-search-result-card .team-info .speaker-company-logo {
+    height: 26px !important;
+  }
+}
+/* Hero sponsor strip — "Sponsored by" + sponsor logo plaque, rendered by the
+   Hero module as the first child of .hero .container, above .hero-content.
+   Colors assume the hero's dark background. */
+#stellix-hero-strip {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 0 0 38px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+#stellix-hero-strip .sx-label {
+  flex: 0 0 auto;
+  font-family: var(--gw-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2.6px;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--gw-amber);
+  white-space: nowrap;
+}
+
+#stellix-hero-strip .sx-plaque {
+  flex: 0 0 auto;
+  padding: 11px 17px;
+  border-radius: 10px;
+  background: var(--gw-white);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+}
+
+#stellix-hero-strip .sx-plaque img {
+  display: block;
+  width: 100%;
+  max-width: 150px;
+  height: auto;
+  margin: 0 auto;
+}
+
+@media (max-width: 767px) {
+  #stellix-hero-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  #stellix-hero-strip .sx-label {
+    font-size: 12px;
+    letter-spacing: 2.2px;
+  }
+}
+/* GAI World 2026 — "Inspiring Women Taking the Stage" speaker cards
+   Paste into DevTools, or add to the site stylesheet. */
+
+.speakers-grid{
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr)) !important;
+  gap:24px !important;
+  align-items:stretch !important;
+}
+
+.speakers-grid .speaker-card{
+  position:relative;
+  height:100%;
+  background:#fff;
+  border:1px solid #E7EBF2;
+  border-radius:18px;
+  padding:26px 16px 20px;
+  box-shadow:0 1px 2px rgba(2,14,38,.04), 0 6px 18px rgba(2,14,38,.05);
+  overflow:hidden;
+  transition:transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .28s, border-color .28s;
+}
+
+/* Bright-blue accent bar that wipes in on hover */
+.speakers-grid .speaker-card::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,#0E41FB,#0099FF);
+  transform:scaleX(0);transform-origin:left;transition:transform .3s ease;
+}
+.speakers-grid .speaker-card:hover{
+  transform:translateY(-6px);
+  border-color:rgba(14,65,251,.28);
+  box-shadow:0 18px 38px rgba(2,14,38,.13);
+}
+.speakers-grid .speaker-card:hover::before{transform:scaleX(1);}
+
+.speakers-grid .speaker-card .team-member{
+  height:100%;display:flex;flex-direction:column;align-items:center;
+}
+
+/* Headshot: double ring, turns brand blue on hover */
+.speakers-grid .speaker-card .team-member > img{
+  width:128px !important;height:128px !important;
+  border-radius:50% !important;object-fit:cover;
+  box-shadow:0 0 0 4px #fff, 0 0 0 6px #E7EBF2;
+  transition:box-shadow .28s ease, transform .28s ease;
+  margin-bottom:18px;
+}
+.speakers-grid .speaker-card:hover .team-member > img{
+  box-shadow:0 0 0 4px #fff, 0 0 0 6px rgba(14,65,251,.45);
+}
+
+.speakers-grid .speaker-card .team-info{
+  display:flex;flex-direction:column;align-items:center;flex:1 1 auto;width:100%;
+}
+.speakers-grid .speaker-card .team-info h4{
+  order:0;
+  font-size:18px !important;font-weight:600 !important;
+  color:#020E26 !important;letter-spacing:-.01em;margin:0 0 6px !important;line-height:1.25;
+}
+.speakers-grid .speaker-card .team-info span{
+  order:1;
+  font-size:13.5px !important;font-weight:400 !important;
+  color:#465469 !important;line-height:1.4 !important;
+  margin:0 0 14px !important;
+}
+
+/* Full-width hairline pushed to the card floor — creates a consistent logo band */
+.speakers-grid .speaker-card .team-info::after{
+  content:"";order:2;margin-top:auto;width:72%;height:1px;background:#EDF0F5;
+}
+
+/* Company logo: full color, uniform height, baseline-aligned across every card */
+.speakers-grid .speaker-card .speaker-company-logo{
+  order:3;
+  margin-top:0 !important;
+  border-top:none !important;
+  height:36px;
+  max-height:none;
+  width:auto !important;
+  max-width:88%;
+  object-fit:contain;
+  align-self:center;
+  padding:18px 0 4px !important;
+  box-sizing:content-box;
+  filter:none;
+  opacity:1;
+  transition:transform .28s ease !important;
+}
+.speakers-grid .speaker-card:hover .speaker-company-logo{transform:scale(1.04);}

@@ -149,6 +149,12 @@ export function Component({ fieldValues }) {
   const showPastSponsors = fieldValues.showPastSponsors || false;
   const sponsorSliderPreTitle = fieldValues.sponsorSliderPreTitle || '';
 
+  // Sponsor strip shown above the hero content (Women in AI page)
+  const showHeroSponsor = fieldValues.showHeroSponsor || false;
+  const heroSponsorLabel = fieldValues.heroSponsorLabel || '';
+  const heroSponsorLogoSrc = fieldValues.heroSponsorLogo?.src || '';
+  const heroSponsorLogoAlt = fieldValues.heroSponsorLogo?.alt || 'Sponsor logo';
+
   // Handle autoplay setting
   const videoAutoplay = fieldValues.videoAutoplay === true || fieldValues.videoAutoplay === 'true';
 
@@ -241,6 +247,14 @@ export function Component({ fieldValues }) {
   return (
     <div className={sectionClass} id={sectionId} style={heroStyle}>
       <div className="container">
+        {showHeroSponsor && heroSponsorLogoSrc && (
+          <div id="stellix-hero-strip">
+            {heroSponsorLabel && <span className="sx-label">{heroSponsorLabel}</span>}
+            <div className="sx-plaque">
+              <img src={heroSponsorLogoSrc} alt={heroSponsorLogoAlt} loading="lazy" />
+            </div>
+          </div>
+        )}
         <div className="hero-content">
           <div className="row g-5 align-items-center">
             <div className="col-md-12">
@@ -1557,6 +1571,23 @@ export const fields = (
       name="selectedForm"
       label="Select HubSpot Form"
       helpText="Choose a form from your HubSpot account. The form will be displayed in the hero content area."
+    />
+    <BooleanField
+      name="showHeroSponsor"
+      label="Show Sponsor Strip"
+      default={false}
+      helpText="Check this to show a sponsor label and logo above the hero headline. Used on the Women in AI page."
+    />
+    <TextField
+      name="heroSponsorLabel"
+      label="Sponsor Strip Label"
+      default="Sponsored by"
+      helpText="Small amber label shown to the left of the logo."
+    />
+    <ImageField
+      name="heroSponsorLogo"
+      label="Sponsor Strip Logo"
+      helpText="Sponsor logo shown on the white plaque. Upload a PNG with a transparent or white background. The strip stays hidden until this is set."
     />
   </ModuleFields>
 );

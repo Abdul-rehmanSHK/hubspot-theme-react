@@ -209,6 +209,22 @@ export function Component({ fieldValues }) {
               });
             }
             
+            // Show the company logo (from the "Company logo" HubDB column) in place of
+            // the company name. Falls back to the company name when no logo is set.
+            // Pass preferWhite = true on dark backgrounds (e.g. the search modal) to use
+            // the "Company logo white" column, falling back to the standard logo.
+            function buildCompanyMarkup(speaker, preferWhite) {
+              const logo = (preferWhite && speaker.companyLogoWhite && speaker.companyLogoWhite.src)
+                ? speaker.companyLogoWhite
+                : speaker.companyLogo;
+              const logoSrc = logo && logo.src ? logo.src : '';
+              if (logoSrc) {
+                const logoAlt = (logo.alt || speaker.company || 'Company logo');
+                return '<img class="speaker-company-logo" src="' + logoSrc + '" alt="' + logoAlt + '" />';
+              }
+              return speaker.company ? '<p>' + speaker.company + '</p>' : '';
+            }
+
             // Fetch ALL speakers from HubDB API (no filter - shows all featured and non-featured)
             async function fetchSpeakers() {
               try {
@@ -268,6 +284,14 @@ export function Component({ fieldValues }) {
                     speakerName: row.values?.name || '',
                     title: row.values?.title || '',
                     company: row.values?.company || '',
+                    companyLogo: row.values?.company_logo ? {
+                      src: row.values.company_logo.url || row.values.company_logo,
+                      alt: row.values.company_logo.altText || row.values?.company || 'Company logo'
+                    } : null,
+                    companyLogoWhite: row.values?.company_logo_white ? {
+                      src: row.values.company_logo_white.url || row.values.company_logo_white,
+                      alt: row.values.company_logo_white.altText || row.values?.company || 'Company logo'
+                    } : null,
                     image: row.values?.image ? {
                       src: row.values.image.url || '',
                       alt: row.values.image.altText || row.values?.name || 'Speaker'
@@ -374,14 +398,14 @@ export function Component({ fieldValues }) {
                     const imageAlt = speaker.image?.alt || speaker.speakerName || 'Speaker';
                     
                     speakerCard.innerHTML = '<div class="team-member">' +
-                      (imageSrc ? 
+                      (imageSrc ?
                         '<img src="' + imageSrc + '" alt="' + imageAlt + '" />' :
                         '<div style="width: 200px; height: 200px; border-radius: 50%; background: #06C7EE; display: flex; align-items: center; justify-content: center; color: #fff; margin: 0 auto;">No Image</div>'
                       ) +
                       '<div class="team-info">' +
                       (speaker.speakerName ? '<h4>' + speaker.speakerName + '</h4>' : '') +
-                      (speaker.company ? '<p>' + speaker.company + '</p>' : '') +
                       (speaker.title ? '<span>' + speaker.title + '</span>' : '') +
+                      buildCompanyMarkup(speaker) +
                       '</div></div>';
                     
                     speakersGrid.appendChild(speakerCard);
@@ -492,14 +516,14 @@ export function Component({ fieldValues }) {
                       const imageAlt = speaker.image?.alt || speaker.speakerName || 'Speaker';
                       
                       speakerCard.innerHTML = '<div class="team-member">' +
-                        (imageSrc ? 
+                        (imageSrc ?
                           '<img src="' + imageSrc + '" alt="' + imageAlt + '" />' :
                           '<div style="width: 200px; height: 200px; border-radius: 50%; background: #06C7EE; display: flex; align-items: center; justify-content: center; color: #fff; margin: 0 auto;">No Image</div>'
                         ) +
                         '<div class="team-info">' +
                         (speaker.speakerName ? '<h4>' + speaker.speakerName + '</h4>' : '') +
-                        (speaker.company ? '<p>' + speaker.company + '</p>' : '') +
                         (speaker.title ? '<span>' + speaker.title + '</span>' : '') +
+                        buildCompanyMarkup(speaker) +
                         '</div></div>';
                       
                       speakersGrid.appendChild(speakerCard);
@@ -756,8 +780,8 @@ export function Component({ fieldValues }) {
                           imgHTML +
                           '<div class="team-info">' +
                           (speaker.speakerName ? '<h4>' + speaker.speakerName + '</h4>' : '') +
-                          (speaker.company ? '<p>' + speaker.company + '</p>' : '') +
                           (speaker.title ? '<span>' + speaker.title + '</span>' : '') +
+                          buildCompanyMarkup(speaker, true) +
                           '</div></div>';
                       });
                       
