@@ -4387,6 +4387,20 @@ a.cta-link:hover {
   margin-top: 5px;
 }
 
+.sessions-card-moderator {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 14px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.sessions-card-moderator-label {
+  font-weight: 600;
+  color: #050d51;
+}
+
 .sessions-grid-wrapper {
   margin-top: 20px;
 }
@@ -4784,6 +4798,26 @@ a.cta-link:hover {
   margin-bottom: 30px;
   padding-bottom: 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.session-detail-moderator {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.session-detail-moderator-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.session-detail-moderator-name {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .session-detail-topics-list {

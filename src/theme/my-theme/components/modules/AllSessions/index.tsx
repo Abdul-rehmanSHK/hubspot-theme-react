@@ -858,7 +858,22 @@ export function Component({ fieldValues }) {
                   
                   card.appendChild(speakersDiv);
                 }
-                
+
+                // Moderator heading + name (only for non-break sessions), from HubDB "moderator" column
+                if (!isBreak && session.moderators && session.moderators.length > 0) {
+                  const moderatorDiv = document.createElement('div');
+                  moderatorDiv.className = 'sessions-card-moderator';
+                  const moderatorLabel = document.createElement('span');
+                  moderatorLabel.className = 'sessions-card-moderator-label';
+                  moderatorLabel.textContent = 'Moderator: ';
+                  moderatorDiv.appendChild(moderatorLabel);
+                  const moderatorName = document.createElement('span');
+                  moderatorName.className = 'sessions-card-moderator-name';
+                  moderatorName.textContent = session.moderators.join(', ');
+                  moderatorDiv.appendChild(moderatorName);
+                  card.appendChild(moderatorDiv);
+                }
+
                 // Add click event to open session detail modal (only for non-break sessions)
                 if (!isBreak) {
                   card.style.cursor = 'pointer';
@@ -867,12 +882,12 @@ export function Component({ fieldValues }) {
                     openSessionDetailModal(session);
                   });
                 }
-                
+
                 gridContainer.appendChild(card);
               });
-              
+
               gridWrapper.appendChild(gridContainer);
-              
+
               // Hide loading, show grid
               loadingDiv.style.display = 'none';
               errorDiv.style.display = 'none';
@@ -1866,7 +1881,22 @@ export function Component({ fieldValues }) {
                   cardDescDiv.textContent = stripHtmlTags(session.description);
                   card.appendChild(cardDescDiv);
                 }
-                
+
+                // Moderator heading + name (only for non-break sessions), from HubDB "moderator" column
+                if (!isBreak && session.moderators && session.moderators.length > 0) {
+                  const moderatorDiv = document.createElement('div');
+                  moderatorDiv.className = 'sessions-card-moderator';
+                  const moderatorLabel = document.createElement('span');
+                  moderatorLabel.className = 'sessions-card-moderator-label';
+                  moderatorLabel.textContent = 'Moderator: ';
+                  moderatorDiv.appendChild(moderatorLabel);
+                  const moderatorName = document.createElement('span');
+                  moderatorName.className = 'sessions-card-moderator-name';
+                  moderatorName.textContent = session.moderators.join(', ');
+                  moderatorDiv.appendChild(moderatorName);
+                  card.appendChild(moderatorDiv);
+                }
+
                 // Session types (if any)
                 if (session.sessionTypes && session.sessionTypes.length > 0) {
                   const typesWrapper = document.createElement('div');
@@ -1879,19 +1909,19 @@ export function Component({ fieldValues }) {
                   });
                   card.appendChild(typesWrapper);
                 }
-                
+
                 // Speaker images and names (only for non-break sessions)
                 if (!isBreak && session.speakerIds && session.speakerIds.length > 0) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers';
-                  
+
                   // Speaker images
                   const imagesDiv = document.createElement('div');
                   imagesDiv.className = 'sessions-card-speaker-images';
-                  
+
                   const speakerNames = [];
                   const speakerTopics = [];
-                  
+
                   session.speakerIds.forEach(function(speakerId) {
                     const speaker = allSpeakersData[speakerId];
                     if (speaker) {
@@ -1903,7 +1933,7 @@ export function Component({ fieldValues }) {
                         img.className = 'sessions-card-speaker-image';
                         imagesDiv.appendChild(img);
                       }
-                      
+
                       // Collect names and topics
                       if (speaker.name) {
                         speakerNames.push(speaker.name);
@@ -1913,9 +1943,9 @@ export function Component({ fieldValues }) {
                       }
                     }
                   });
-                  
+
                   speakersDiv.appendChild(imagesDiv);
-                  
+
                   // Speaker names
                   if (speakerNames.length > 0) {
                     const namesDiv = document.createElement('div');
@@ -1923,7 +1953,7 @@ export function Component({ fieldValues }) {
                     namesDiv.textContent = speakerNames.join(', ');
                     speakersDiv.appendChild(namesDiv);
                   }
-                  
+
                   // Speaker topics (unique, comma separated)
                   if (speakerTopics.length > 0) {
                     const uniqueTopics = Array.from(new Set(speakerTopics));
@@ -1932,10 +1962,10 @@ export function Component({ fieldValues }) {
                     topicsDiv.textContent = uniqueTopics.join(', ');
                     speakersDiv.appendChild(topicsDiv);
                   }
-                  
+
                   card.appendChild(speakersDiv);
                 }
-                
+
                 // Add click event to open session detail modal (only for non-break sessions)
                 if (!isBreak) {
                   card.style.cursor = 'pointer';
@@ -1944,12 +1974,12 @@ export function Component({ fieldValues }) {
                     openSessionDetailModal(session);
                   });
                 }
-                
+
                 gridContainer.appendChild(card);
               });
-              
+
               gridWrapper.appendChild(gridContainer);
-              
+
               // Hide loading, show grid
               loadingDiv.style.display = 'none';
               errorDiv.style.display = 'none';
@@ -2897,6 +2927,21 @@ export function Component({ fieldValues }) {
                 }
               }
               
+              // Moderator section (heading + name on one line, from HubDB "moderator" column)
+              if (session.moderators && session.moderators.length > 0) {
+                const moderatorDiv = document.createElement('div');
+                moderatorDiv.className = 'session-detail-moderator';
+                const moderatorLabel = document.createElement('span');
+                moderatorLabel.className = 'session-detail-moderator-label';
+                moderatorLabel.textContent = 'Moderator:';
+                moderatorDiv.appendChild(moderatorLabel);
+                const moderatorNameDiv = document.createElement('span');
+                moderatorNameDiv.className = 'session-detail-moderator-name';
+                moderatorNameDiv.textContent = session.moderators.join(', ');
+                moderatorDiv.appendChild(moderatorNameDiv);
+                body.appendChild(moderatorDiv);
+              }
+
               // Speakers section
               if (session.speakerIds && session.speakerIds.length > 0) {
                 const speakersDiv = document.createElement('div');
@@ -3027,7 +3072,7 @@ export function Component({ fieldValues }) {
                 speakersDiv.appendChild(speakersList);
                 body.appendChild(speakersDiv);
               }
-              
+
               // Show modal
               modal.classList.add('active');
               document.body.style.overflow = 'hidden';
