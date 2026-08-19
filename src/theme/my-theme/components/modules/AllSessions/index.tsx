@@ -137,7 +137,7 @@ export function Component({ fieldValues }) {
             let allSessionsData = []; // Store all sessions for search functionality
             let selectedTopic = 'all'; // Store selected topic filter
             let searchQuery = ''; // Store search query
-            let hideSpeakers = ;
+            let hideSpeakers = ${fieldValues.hideSpeakers ? 'true' : 'false'};
             
             // Helper function to format date and time for grid view: "Wed • Sep 3 • 9:30am - 10:30am"
             // dateTimestamp: timestamp from date.name (UTC, normalized to midnight)
