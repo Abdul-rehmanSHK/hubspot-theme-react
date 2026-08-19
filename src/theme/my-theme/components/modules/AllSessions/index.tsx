@@ -3,6 +3,7 @@ import {
   TextField,
   ImageField,
   ChoiceField,
+  BooleanField,
 } from '@hubspot/cms-components/fields';
 
 export function Component({ fieldValues }) {
@@ -136,6 +137,7 @@ export function Component({ fieldValues }) {
             let allSessionsData = []; // Store all sessions for search functionality
             let selectedTopic = 'all'; // Store selected topic filter
             let searchQuery = ''; // Store search query
+            let hideSpeakers = ;
             
             // Helper function to format date and time for grid view: "Wed • Sep 3 • 9:30am - 10:30am"
             // dateTimestamp: timestamp from date.name (UTC, normalized to midnight)
@@ -804,7 +806,7 @@ export function Component({ fieldValues }) {
                 }
                 
                 // Speaker images and names (only for non-break sessions)
-                if (!isBreak && session.speakerIds && session.speakerIds.length > 0) {
+                if (!isBreak && session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers';
                   
@@ -1116,7 +1118,7 @@ export function Component({ fieldValues }) {
                     let matches = false;
 
                     // Speakers
-                    if (session.speakerIds && session.speakerIds.length > 0) {
+                    if (session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers) {
                       matches = session.speakerIds.some(function(speakerId) {
                         const speaker = allSpeakersData[speakerId];
                         return !!(speaker && speaker.topics && speaker.topics.includes(selectedTopic));
@@ -1143,7 +1145,7 @@ export function Component({ fieldValues }) {
                     // Search in session title OR speaker name(s)
                     const titleMatch = session.title && session.title.toLowerCase().includes(query);
                     if (titleMatch) return true;
-                    if (session.speakerIds && session.speakerIds.length > 0) {
+                    if (session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers) {
                       return session.speakerIds.some(function(speakerId) {
                         const speaker = allSpeakersData[speakerId];
                         return speaker && speaker.name && String(speaker.name).toLowerCase().includes(query);
@@ -1911,7 +1913,7 @@ export function Component({ fieldValues }) {
                 }
 
                 // Speaker images and names (only for non-break sessions)
-                if (!isBreak && session.speakerIds && session.speakerIds.length > 0) {
+                if (!isBreak && session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers';
 
@@ -2123,7 +2125,7 @@ export function Component({ fieldValues }) {
                   const sessionTopics = new Set();
 
                   // Topics from speakers
-                  if (session.speakerIds && session.speakerIds.length > 0) {
+                  if (session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers) {
                     session.speakerIds.forEach(function(speakerId) {
                       const speaker = allSpeakersData[speakerId];
                       if (speaker && speaker.topics && speaker.topics.length > 0) {
@@ -2330,7 +2332,7 @@ export function Component({ fieldValues }) {
                     const matchingSessions = allSessionsData.filter(function(session) {
                       const titleMatch = session.title && session.title.toLowerCase().includes(searchQuery);
                       if (titleMatch) return true;
-                      if (session.speakerIds && session.speakerIds.length > 0) {
+                      if (session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers) {
                         return session.speakerIds.some(function(speakerId) {
                           const speaker = allSpeakersData[speakerId];
                           return speaker && speaker.name && String(speaker.name).toLowerCase().includes(searchQuery);
@@ -2352,7 +2354,7 @@ export function Component({ fieldValues }) {
                         const dateTime = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
                         // Speaker images (same small rounded icons as grid view)
                         var imagesHTML = '';
-                        if (session.speakerIds && session.speakerIds.length > 0) {
+                        if (session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers) {
                           var firstImages = [];
                           session.speakerIds.forEach(function(speakerId) {
                             var speaker = allSpeakersData[speakerId];
@@ -2895,7 +2897,7 @@ export function Component({ fieldValues }) {
               }
               
               // Session topics
-              if (session.speakerIds && session.speakerIds.length > 0) {
+              if (session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers) {
                 const topicSet = new Set();
                 session.speakerIds.forEach(function(speakerId) {
                   const speaker = allSpeakersData[speakerId];
@@ -2943,7 +2945,7 @@ export function Component({ fieldValues }) {
               }
 
               // Speakers section
-              if (session.speakerIds && session.speakerIds.length > 0) {
+              if (session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers) {
                 const speakersDiv = document.createElement('div');
                 speakersDiv.className = 'session-detail-speakers';
                 const speakersLabel = document.createElement('div');
@@ -3179,6 +3181,12 @@ export function Component({ fieldValues }) {
 
 export const fields = (
   <ModuleFields>
+    <BooleanField
+      name="hideSpeakers"
+      label="Hide Speakers"
+      default={false}
+      helpText="Check this box to hide the speakers on the front end."
+    />
     <TextField
       name="heading"
       label="Heading"
@@ -3223,4 +3231,6 @@ export const fields = (
 export const meta = {
   label: 'All Sessions',
 };
+
+
 
