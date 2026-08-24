@@ -806,7 +806,7 @@ export function Component({ fieldValues }) {
                 }
                 
                 // Speaker images and names (only for non-break sessions)
-                if (!isBreak && session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers) {
+                if (!isBreak && session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers && !session.hideSpeakers) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers';
                   
@@ -980,6 +980,7 @@ export function Component({ fieldValues }) {
                     longDescription: row.values?.long_description || '',
                     date: dateValue ? [dateValue] : null,
                     sessionTypes: sessionTypes,
+                    hideSpeakers: (row.values?.hide_speakers === true || row.values?.hide_speakers === 1 || row.values?.hide_speakers === '1' || row.values?.hide_speakers === 'true' || row.values?.hide_speakers === 'TRUE'),
                     hideSession: (row.values?.hide_session === true || row.values?.hide_session === 1 || row.values?.hide_session === '1' || row.values?.hide_session === 'true')
                   };
                 }).filter(function(session) {
@@ -1913,7 +1914,7 @@ export function Component({ fieldValues }) {
                 }
 
                 // Speaker images and names (only for non-break sessions)
-                if (!isBreak && session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers) {
+                if (!isBreak && session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers && !session.hideSpeakers) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers';
 
@@ -2354,7 +2355,7 @@ export function Component({ fieldValues }) {
                         const dateTime = formatDateTimeRange(sessionDateTs, session.start_time, session.end_time);
                         // Speaker images (same small rounded icons as grid view)
                         var imagesHTML = '';
-                        if (session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers) {
+                        if (session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers && !session.hideSpeakers) {
                           var firstImages = [];
                           session.speakerIds.forEach(function(speakerId) {
                             var speaker = allSpeakersData[speakerId];
@@ -2897,7 +2898,7 @@ export function Component({ fieldValues }) {
               }
               
               // Session topics
-              if (session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers) {
+              if (session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers && !session.hideSpeakers) {
                 const topicSet = new Set();
                 session.speakerIds.forEach(function(speakerId) {
                   const speaker = allSpeakersData[speakerId];
@@ -2945,7 +2946,7 @@ export function Component({ fieldValues }) {
               }
 
               // Speakers section
-              if (session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers) {
+              if (session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers && !session.hideSpeakers) {
                 const speakersDiv = document.createElement('div');
                 speakersDiv.className = 'session-detail-speakers';
                 const speakersLabel = document.createElement('div');
