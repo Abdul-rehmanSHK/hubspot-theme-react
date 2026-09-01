@@ -2109,6 +2109,17 @@ button#toggleAutoplay {
   transform: rotate(180deg);
 }
 
+.featured-filter-btn.active {
+  background: #2b52ff !important;
+  color: #ffffff !important;
+  border-color: #2b52ff !important;
+  box-shadow: 0 4px 14px rgba(43, 82, 255, 0.35) !important;
+}
+
+.featured-filter-btn.active i {
+  color: #ffca28 !important;
+}
+
 .topic-dropdown-menu {
   position: absolute;
   top: calc(100% + 10px);

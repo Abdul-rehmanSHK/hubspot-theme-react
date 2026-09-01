@@ -62,6 +62,9 @@ export function Component({ fieldValues }) {
                 </div>
               </div>
               <div className="sessions-actions-wrapper">
+                <button className="transparent-btn topic-filter-btn featured-filter-btn" id={`session-featured-filter-btn-${moduleId}`} style={{ marginRight: '10px' }}>
+                  Featured <i className="fa-solid fa-star"></i>
+                </button>
                 <button className="transparent-btn topic-filter-btn" id={`session-topic-filter-btn-${moduleId}`}>
                   Filter by Topic <i className="fa-solid fa-filter"></i>
                 </button>
@@ -138,6 +141,8 @@ export function Component({ fieldValues }) {
             let selectedTopic = 'all'; // Store selected topic filter
             let searchQuery = ''; // Store search query
             let hideSpeakers = ${fieldValues.hideSpeakers ? 'true' : 'false'};
+            let showFeaturedOnly = false; // Store featured filter state
+            const featuredFilterBtn = root.querySelector('#session-featured-filter-btn-' + moduleId);
             
             // Helper function to format date and time for grid view: "Wed • Sep 3 • 9:30am - 10:30am"
             // dateTimestamp: timestamp from date.name (UTC, normalized to midnight)
@@ -804,59 +809,105 @@ export function Component({ fieldValues }) {
                   });
                   card.appendChild(typesWrapper);
                 }
-                
                 // Speaker images and names (only for non-break sessions)
                 if (!isBreak && session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers && !session.hideSpeakers) {
                   const speakersDiv = document.createElement('div');
-                  speakersDiv.className = 'sessions-card-speakers';
-                  
-                  // Speaker images
-                  const imagesDiv = document.createElement('div');
-                  imagesDiv.className = 'sessions-card-speaker-images';
-                  
-                  const speakerNames = [];
-                  const speakerTopics = [];
+                  speakersDiv.className = 'sessions-card-speakers sessions-card-speakers-column-layout';
+                  // Basic styles for scrollable list of speakers
+                  speakersDiv.style.maxHeight = '170px';
+                  speakersDiv.style.overflowY = 'auto';
+                  speakersDiv.style.scrollbarColor = '#020e26 transparent';
+                  speakersDiv.style.scrollbarWidth = 'thin';
+                  speakersDiv.style.display = 'flex';
+                  speakersDiv.style.flexDirection = 'column';
+                  speakersDiv.style.gap = '15px';
+                  speakersDiv.style.paddingTop = '15px';
                   
                   session.speakerIds.forEach(function(speakerId) {
                     const speaker = allSpeakersData[speakerId];
                     if (speaker) {
-                      // Add image
+                      const speakerRow = document.createElement('div');
+                      speakerRow.className = 'sessions-card-speaker-row';
+                      speakerRow.style.display = 'flex';
+                      speakerRow.style.alignItems = 'center';
+                      speakerRow.style.gap = '10px';
+                      speakerRow.style.marginBottom = '18px';
+                      
+                      // 1. Headshot
+                      const imgDiv = document.createElement('div');
+                      imgDiv.className = 'sessions-card-speaker-image-wrap';
+                      imgDiv.style.flexShrink = '0';
+                      imgDiv.style.width = '48px';
+                      imgDiv.style.height = '48px';
                       if (speaker.image && speaker.image.src) {
                         const img = document.createElement('img');
                         img.src = speaker.image.src;
                         img.alt = speaker.image.alt || speaker.name;
                         img.className = 'sessions-card-speaker-image';
-                        imagesDiv.appendChild(img);
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.borderRadius = '50%';
+                        img.style.objectFit = 'cover';
+                        imgDiv.appendChild(img);
+                      }
+                      speakerRow.appendChild(imgDiv);
+                      
+                      // 2. Name and Job Title
+                      const infoDiv = document.createElement('div');
+                      infoDiv.className = 'sessions-card-speaker-info';
+                      infoDiv.style.flexGrow = '1';
+                      infoDiv.style.display = 'flex';
+                      infoDiv.style.flexDirection = 'column';
+                      infoDiv.style.justifyContent = 'center';
+                      
+                      if (speaker.name) {
+                        const nameDiv = document.createElement('div');
+                        nameDiv.className = 'sessions-card-speaker-name';
+                        nameDiv.style.fontWeight = 'bold';
+                        nameDiv.style.fontSize = '14px';
+                        nameDiv.style.lineHeight = '1.2';
+                        nameDiv.style.color = 'var(--text-color, inherit)';
+                        nameDiv.textContent = speaker.name;
+                        infoDiv.appendChild(nameDiv);
                       }
                       
-                      // Collect names and topics
-                      if (speaker.name) {
-                        speakerNames.push(speaker.name);
+                      if (speaker.title) {
+                        const titleDiv = document.createElement('div');
+                        titleDiv.className = 'sessions-card-speaker-job-title';
+                        titleDiv.style.fontSize = '12px';
+                        titleDiv.style.lineHeight = '1.2';
+                        titleDiv.style.marginTop = '2px';
+                        titleDiv.style.color = 'var(--text-color, inherit)';
+                        titleDiv.textContent = speaker.title;
+                        infoDiv.appendChild(titleDiv);
                       }
-                      if (speaker.topics && speaker.topics.length > 0) {
-                        speakerTopics.push.apply(speakerTopics, speaker.topics);
+                      
+                      speakerRow.appendChild(infoDiv);
+                      
+                      // 3. Company Logo
+                      const logoDiv = document.createElement('div');
+                      logoDiv.className = 'sessions-card-speaker-logo-wrap';
+                      logoDiv.style.flexShrink = '0';
+                      logoDiv.style.marginLeft = 'auto';
+                      logoDiv.style.paddingRight = '15px';
+                      
+                      const logoData = speaker.companyLogo || speaker.companyLogoWhite;
+                      if (logoData && logoData.src) {
+                        const logoImg = document.createElement('img');
+                        logoImg.src = logoData.src;
+                        logoImg.alt = logoData.alt || (speaker.company ? speaker.company + ' logo' : 'Company logo');
+                        logoImg.className = 'sessions-card-speaker-company-logo';
+                        logoImg.style.maxHeight = '50px';
+                        logoImg.style.maxWidth = '110px';
+                        logoImg.style.objectFit = 'contain';
+                        logoDiv.appendChild(logoImg);
                       }
+                      
+                      speakerRow.appendChild(logoDiv);
+                      
+                      speakersDiv.appendChild(speakerRow);
                     }
                   });
-                  
-                  speakersDiv.appendChild(imagesDiv);
-                  
-                  // Speaker names
-                  if (speakerNames.length > 0) {
-                    const namesDiv = document.createElement('div');
-                    namesDiv.className = 'sessions-card-speaker-names';
-                    namesDiv.textContent = speakerNames.join(', ');
-                    speakersDiv.appendChild(namesDiv);
-                  }
-                  
-                  // Speaker topics (unique, comma separated)
-                  if (speakerTopics.length > 0) {
-                    const uniqueTopics = Array.from(new Set(speakerTopics));
-                    const topicsDiv = document.createElement('div');
-                    topicsDiv.className = 'sessions-card-speaker-topics';
-                    topicsDiv.textContent = uniqueTopics.join(', ');
-                    speakersDiv.appendChild(topicsDiv);
-                  }
                   
                   card.appendChild(speakersDiv);
                 }
@@ -981,7 +1032,8 @@ export function Component({ fieldValues }) {
                     date: dateValue ? [dateValue] : null,
                     sessionTypes: sessionTypes,
                     hideSpeakers: (row.values?.hide_speakers === true || row.values?.hide_speakers === 1 || row.values?.hide_speakers === '1' || row.values?.hide_speakers === 'true' || row.values?.hide_speakers === 'TRUE'),
-                    hideSession: (row.values?.hide_session === true || row.values?.hide_session === 1 || row.values?.hide_session === '1' || row.values?.hide_session === 'true')
+                    hideSession: (row.values?.hide_session === true || row.values?.hide_session === 1 || row.values?.hide_session === '1' || row.values?.hide_session === 'true'),
+                    featuredSession: (row.values?.featured_session === true || row.values?.featured_session === 1 || row.values?.featured_session === '1' || row.values?.featured_session === 'true' || row.values?.featured_session === 'TRUE')
                   };
                 }).filter(function(session) {
                   // Exclude sessions flagged "Hide Session" in HubDB (hidden from both grid and calendar views)
@@ -1136,6 +1188,12 @@ export function Component({ fieldValues }) {
                     }
 
                     return false;
+                  });
+                }
+                // Filter by featured session if active
+                if (showFeaturedOnly) {
+                  filteredSessions = filteredSessions.filter(function(session) {
+                    return session.featuredSession;
                   });
                 }
                 
@@ -1912,60 +1970,108 @@ export function Component({ fieldValues }) {
                   });
                   card.appendChild(typesWrapper);
                 }
-
                 // Speaker images and names (only for non-break sessions)
                 if (!isBreak && session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers && !session.hideSpeakers) {
                   const speakersDiv = document.createElement('div');
-                  speakersDiv.className = 'sessions-card-speakers';
-
-                  // Speaker images
-                  const imagesDiv = document.createElement('div');
-                  imagesDiv.className = 'sessions-card-speaker-images';
-
-                  const speakerNames = [];
-                  const speakerTopics = [];
-
+                  speakersDiv.className = 'sessions-card-speakers sessions-card-speakers-column-layout';
+                  // Basic styles for scrollable list of speakers
+                  speakersDiv.style.maxHeight = '150px';
+                  speakersDiv.style.overflowY = 'auto';
+                  speakersDiv.style.scrollbarColor = '#020e26 transparent';
+                  speakersDiv.style.scrollbarWidth = 'thin';
+                  speakersDiv.style.display = 'flex';
+                  speakersDiv.style.flexDirection = 'column';
+                  speakersDiv.style.gap = '15px';
+                  speakersDiv.style.paddingTop = '15px';
+                  
                   session.speakerIds.forEach(function(speakerId) {
                     const speaker = allSpeakersData[speakerId];
                     if (speaker) {
-                      // Add image
+                      const speakerRow = document.createElement('div');
+                      speakerRow.className = 'sessions-card-speaker-row';
+                      speakerRow.style.display = 'flex';
+                      speakerRow.style.alignItems = 'center';
+                      speakerRow.style.gap = '10px';
+                      speakerRow.style.marginBottom = '12px';
+                      speakerRow.style.paddingBottom = '10px';
+                      speakerRow.style.borderBottom = '1px solid #e3ebdd';
+                      
+                      // 1. Headshot
+                      const imgDiv = document.createElement('div');
+                      imgDiv.className = 'sessions-card-speaker-image-wrap';
+                      imgDiv.style.flexShrink = '0';
+                      imgDiv.style.width = '48px';
+                      imgDiv.style.height = '48px';
                       if (speaker.image && speaker.image.src) {
                         const img = document.createElement('img');
                         img.src = speaker.image.src;
                         img.alt = speaker.image.alt || speaker.name;
                         img.className = 'sessions-card-speaker-image';
-                        imagesDiv.appendChild(img);
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.borderRadius = '50%';
+                        img.style.objectFit = 'cover';
+                        imgDiv.appendChild(img);
                       }
-
-                      // Collect names and topics
+                      speakerRow.appendChild(imgDiv);
+                      
+                      // 2. Name and Job Title
+                      const infoDiv = document.createElement('div');
+                      infoDiv.className = 'sessions-card-speaker-info';
+                      infoDiv.style.flexGrow = '1';
+                      infoDiv.style.display = 'flex';
+                      infoDiv.style.flexDirection = 'column';
+                      infoDiv.style.justifyContent = 'center';
+                      
                       if (speaker.name) {
-                        speakerNames.push(speaker.name);
+                        const nameDiv = document.createElement('div');
+                        nameDiv.className = 'sessions-card-speaker-name';
+                        nameDiv.style.fontWeight = 'bold';
+                        nameDiv.style.fontSize = '14px';
+                        nameDiv.style.lineHeight = '1.2';
+                        nameDiv.style.color = 'var(--text-color, inherit)';
+                        nameDiv.textContent = speaker.name;
+                        infoDiv.appendChild(nameDiv);
                       }
-                      if (speaker.topics && speaker.topics.length > 0) {
-                        speakerTopics.push.apply(speakerTopics, speaker.topics);
+                      
+                      if (speaker.title) {
+                        const titleDiv = document.createElement('div');
+                        titleDiv.className = 'sessions-card-speaker-job-title';
+                        titleDiv.style.fontSize = '12px';
+                        titleDiv.style.lineHeight = '1.2';
+                        titleDiv.style.marginTop = '2px';
+                        titleDiv.style.color = 'var(--text-color, inherit)';
+                        titleDiv.textContent = speaker.title;
+                        infoDiv.appendChild(titleDiv);
                       }
+                      
+                      speakerRow.appendChild(infoDiv);
+                      
+                      // 3. Company Logo
+                      const logoDiv = document.createElement('div');
+                      logoDiv.className = 'sessions-card-speaker-logo-wrap';
+                      logoDiv.style.flexShrink = '0';
+                      logoDiv.style.marginLeft = 'auto';
+                      logoDiv.style.paddingRight = '5px';
+                      
+                      const logoData = speaker.companyLogo || speaker.companyLogoWhite;
+                      if (logoData && logoData.src) {
+                        const logoImg = document.createElement('img');
+                        logoImg.src = logoData.src;
+                        logoImg.alt = logoData.alt || (speaker.company ? speaker.company + ' logo' : 'Company logo');
+                        logoImg.className = 'sessions-card-speaker-company-logo';
+                        logoImg.style.maxHeight = '28px';
+                        logoImg.style.maxWidth = '70px';
+                        logoImg.style.objectFit = 'contain';
+                        logoDiv.appendChild(logoImg);
+                      }
+                      
+                      speakerRow.appendChild(logoDiv);
+                      
+                      speakersDiv.appendChild(speakerRow);
                     }
                   });
-
-                  speakersDiv.appendChild(imagesDiv);
-
-                  // Speaker names
-                  if (speakerNames.length > 0) {
-                    const namesDiv = document.createElement('div');
-                    namesDiv.className = 'sessions-card-speaker-names';
-                    namesDiv.textContent = speakerNames.join(', ');
-                    speakersDiv.appendChild(namesDiv);
-                  }
-
-                  // Speaker topics (unique, comma separated)
-                  if (speakerTopics.length > 0) {
-                    const uniqueTopics = Array.from(new Set(speakerTopics));
-                    const topicsDiv = document.createElement('div');
-                    topicsDiv.className = 'sessions-card-speaker-topics';
-                    topicsDiv.textContent = uniqueTopics.join(', ');
-                    speakersDiv.appendChild(topicsDiv);
-                  }
-
+                  
                   card.appendChild(speakersDiv);
                 }
 
@@ -2026,6 +2132,19 @@ export function Component({ fieldValues }) {
                   selectedDateToPreserve = 'all';
                 } else if (selectedValue) {
                   selectedDateToPreserve = parseInt(selectedValue, 10);
+                }
+                renderTable();
+              });
+            }
+            
+            // Add event listener for featured filter
+            if (featuredFilterBtn) {
+              featuredFilterBtn.addEventListener('click', function() {
+                showFeaturedOnly = !showFeaturedOnly;
+                if (showFeaturedOnly) {
+                  featuredFilterBtn.classList.add('active');
+                } else {
+                  featuredFilterBtn.classList.remove('active');
                 }
                 renderTable();
               });
