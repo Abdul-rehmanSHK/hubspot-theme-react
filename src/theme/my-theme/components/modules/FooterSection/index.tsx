@@ -23,6 +23,54 @@ function extractEmail(raw: any): string {
     return m ? m[0] : text;
 }
 
+function parseCardDetails(
+    rawHtml: any,
+    defaultLabel: string,
+    defaultEmail: string,
+    defaultCtaText: string,
+    defaultCtaUrl: string
+) {
+    if (!rawHtml) {
+        return {
+            label: defaultLabel,
+            email: defaultEmail,
+            ctaText: defaultCtaText,
+            ctaUrl: defaultCtaUrl,
+            iconUrl: `mailto:${defaultEmail}`
+        };
+    }
+    const htmlStr = String(rawHtml);
+
+    // Label
+    const labelMatch = htmlStr.match(/<span[^>]*class=["'][^"']*label[^"']*["'][^>]*>([\s\S]*?)<\/span>/i);
+    const label = labelMatch ? stripHtml(labelMatch[1]) : defaultLabel;
+
+    // Email link text & mailto
+    const emailMatch = htmlStr.match(/<a[^>]*class=["'][^"']*main-contact-link[^"']*["'][^>]*>([\s\S]*?)<\/a>/i);
+    const emailStr = emailMatch ? stripHtml(emailMatch[1]) : extractEmail(htmlStr) || defaultEmail;
+
+    // CTA link href & text
+    const ctaMatch = htmlStr.match(/<a[^>]*class=["'][^"']*cta-link[^"']*["'][^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/i);
+    let ctaUrl = defaultCtaUrl;
+    let ctaText = defaultCtaText;
+    if (ctaMatch) {
+        ctaUrl = ctaMatch[1];
+        ctaText = stripHtml(ctaMatch[2]);
+    } else {
+        const allLinks = [...htmlStr.matchAll(/<a[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)];
+        if (allLinks.length > 1) {
+            ctaUrl = allLinks[allLinks.length - 1][1];
+            ctaText = stripHtml(allLinks[allLinks.length - 1][2]);
+        }
+    }
+
+    // Icon href
+    const iconMatch = htmlStr.match(/<div[^>]*class=["'][^"']*bar-icons[^"']*["'][^>]*>[\s\S]*?<a[^>]*href=["']([^"']+)["']/i);
+    const iconUrl = iconMatch ? iconMatch[1] : (ctaUrl || `mailto:${emailStr}`);
+
+    return { label, email: emailStr, ctaText, ctaUrl, iconUrl };
+}
+
 function getMenuLinks(tree: any): Array<{ label: string; url: string }> {
     if (!tree) return [];
     const items: any[] = Array.isArray(tree) ? tree
@@ -74,128 +122,198 @@ export function Component({ fieldValues, hublData }: { fieldValues?: any; hublDa
 
     // Social icons — ensure every link opens in a new tab
     const socialHtml = ensureNewTab(db?.footer_social_icon || '');
+    const hasH6InSocial = /<h6\b/i.test(socialHtml);
 
-    // Contact emails
-    const regEmail  = extractEmail(db?.registration_support);
-    const sponEmail = extractEmail(db?.sponsorship_detail);
-    const spkEmail  = extractEmail(db?.speakers_application);
+    // Parse Cards from HubDB columns
+    const regCard = parseCardDetails(
+        db?.registration_support,
+        'Registration Support',
+        'laura@gaiinsights.com',
+        'Secure Your Spot \u2192',
+        'https://www.gaiworld.com/buy-tickets'
+    );
+    const sponCard = parseCardDetails(
+        db?.sponsorship_detail,
+        'Sponsorships',
+        'mdavis@gaiinsights.com',
+        'Become a Sponsor \u2192',
+        'https://www.gaiworld.com/sponsors#sponsor-form'
+    );
+    const spkCard = parseCardDetails(
+        db?.speakers_application,
+        'Press Inquiries',
+        'karin@gaiinsights.com',
+        'Apply to Inquiries \u2192',
+        'mailto:karin@gaiinsights.com'
+    );
 
     // Navigation — HubSpot menu (hublData) > HubDB footer_menu
     const menuLinks = getMenuLinks(hublData?.menuItems);
     const navItems  = menuLinks.length > 0 ? menuLinks : parseDbMenu(db?.footer_menu);
 
     // Module fields
-    const hashtag   = fieldValues?.hashtag || '';
+    const hashtag   = fieldValues?.hashtag || '#GAIWorld2026';
     const copyright = stripHtml(db?.copyright_text) || `© ${new Date().getFullYear()} by GAI Insights`;
 
     return (
-        <footer className="footer bg-primary text-white py-5">
+        <footer className="footer">
             <div className="container">
+                <div className="footer-div">
 
-                {/* ── Row 1: Logo + Hashtag + Social ──────────────────────── */}
-                <div className="row align-items-center mb-5">
-                    <div className="col-md-6 footer-top">
-                        <a href={logoHref} data-footer-logo-link>
-                            <img
-                                src={logoSrc}
-                                alt={logoAlt}
-                                data-footer-logo-img
-                                style={{ maxWidth: '200px' }}
-                                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                            />
-                        </a>
-                     
+                    {/* ── Row 1: Logo + Social ──────────────────────── */}
+                    <div className="row g-5">
+                        <div className="col-md-6 test">
+                            <div className="footer-top">
+                                <a href={logoHref} data-footer-logo-link>
+                                    <img
+                                        src={logoSrc}
+                                        alt={logoAlt}
+                                        data-footer-logo-img
+                                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                    />
+                                </a>
+                            </div>
+                        </div>
+                        <div className="col-md-6 test-class">
+                            <div className="footer-social">
+                                <div className="social-icons">
+                                    {!hasH6InSocial && <h6 data-footer-hashtag>{hashtag}</h6>}
+                                    {socialHtml ? (
+                                        <div
+                                            data-footer-social
+                                            dangerouslySetInnerHTML={{ __html: socialHtml }}
+                                        />
+                                    ) : (
+                                        <div data-footer-social />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="col-md-6">
-                        {socialHtml ? (
-                            <div
-                                className="footer-social-icons d-flex gap-3 justify-content-md-end justify-content-start"
-                                data-footer-social
-                                dangerouslySetInnerHTML={{ __html: socialHtml }}
-                            />
-                        ) : (
-                            <div
-                                className="footer-social-icons d-flex gap-3 justify-content-md-end justify-content-start"
-                                data-footer-social
-                            />
-                        )}
-                    </div>
-                </div>
 
-                {/* ── Row 2: Contact columns ──────────────────────────────── */}
-                <div className="row g-4 mb-5">
-                    <div className="col-lg-4 col-md-6 text-center">
-                        <div className="footer-icon-circle mb-3">
-                            <i className="fa fa-envelope"></i>
-                        </div>
-                        <h6>Registration Support</h6>
-                        <p className="mb-1 fw-bold" data-footer-reg-email>{regEmail}</p>
-                        <a
-                            href={regEmail ? `mailto:${regEmail}` : '#'}
-                            className="text-info small"
-                            data-footer-reg-link
-                        >
-                            Secure Your Spot &rarr;
-                        </a>
-                    </div>
-                    <div className="col-lg-4 col-md-6 text-center">
-                        <div className="footer-icon-circle mb-3">
-                            <i className="fa fa-video"></i>
-                        </div>
-                        <h6>Sponsorships</h6>
-                        <p className="mb-1 fw-bold" data-footer-spon-email>{sponEmail}</p>
-                        <a
-                            href={sponEmail ? `mailto:${sponEmail}` : '#'}
-                            className="text-info small"
-                            data-footer-spon-link
-                        >
-                            Become a Sponsor &rarr;
-                        </a>
-                    </div>
-                    <div className="col-lg-4 col-md-6 text-center">
-                        <div className="footer-icon-circle mb-3">
-                            <i className="fa fa-microphone"></i>
-                        </div>
-                        <h6>Speaker Applications</h6>
-                        <p className="mb-1 fw-bold" data-footer-spk-email>{spkEmail}</p>
-                        <a
-                            href={spkEmail ? `mailto:${spkEmail}` : '#'}
-                            className="text-info small"
-                            data-footer-spk-link
-                        >
-                            Apply to speak &rarr;
-                        </a>
-                    </div>
-                </div>
+                    {/* ── Row 2: Contact Info Section (Matches gai-insights.css structure) ── */}
+                    <div className="contact-info-section">
+                        <div className="row">
+                            <div className="contact-container">
 
-                {/* ── Row 3: Nav + copyright ──────────────────────────────── */}
-                <div className="border-top pt-4 text-center">
-                    {/* Always rendered so client-side script can inject HubDB footer_menu links */}
-                    <nav
-                        className="footer-nav mb-3"
+                                {/* Card 1: Registration Support */}
+                                <div className="contact-card">
+                                    <div className="bar-icons">
+                                        <a href={regCard.iconUrl} data-footer-reg-mailto>
+                                            <i className="fa-solid fa-envelope">&nbsp;</i>
+                                        </a>
+                                    </div>
+                                    <div className="content">
+                                        <span className="label" style={{ fontFamily: "'Barlow', sans-serif" }} data-footer-reg-label>
+                                            {regCard.label}
+                                        </span>
+                                        <h3>
+                                            <a
+                                                href={`mailto:${regCard.email}`}
+                                                className="main-contact-link"
+                                                data-footer-reg-email
+                                            >
+                                                {regCard.email}
+                                            </a>
+                                        </h3>
+                                        <a
+                                            href={regCard.ctaUrl}
+                                            className="cta-link"
+                                            data-footer-reg-link
+                                        >
+                                            {regCard.ctaText}
+                                        </a>
+                                    </div>
+                                </div>
+
+                                {/* Card 2: Sponsorships */}
+                                <div className="contact-card">
+                                    <div className="bar-icons">
+                                        <a href={sponCard.iconUrl} data-footer-spon-mailto>
+                                            <i className="fa-solid fa-handshake">&nbsp;</i>
+                                        </a>
+                                    </div>
+                                    <div className="content">
+                                        <span className="label" style={{ fontFamily: "'Barlow', sans-serif" }} data-footer-spon-label>
+                                            {sponCard.label}
+                                        </span>
+                                        <h3>
+                                            <a
+                                                href={`mailto:${sponCard.email}`}
+                                                className="main-contact-link"
+                                                data-footer-spon-email
+                                            >
+                                                {sponCard.email}
+                                            </a>
+                                        </h3>
+                                        <a
+                                            href={sponCard.ctaUrl}
+                                            className="cta-link"
+                                            data-footer-spon-link
+                                        >
+                                            {sponCard.ctaText}
+                                        </a>
+                                    </div>
+                                </div>
+
+                                {/* Card 3: Press Inquiries / Speakers */}
+                                <div className="contact-card">
+                                    <div className="bar-icons">
+                                        <a href={spkCard.iconUrl} data-footer-spk-mailto>
+                                            <i className="fa-solid fa-file-circle-question">&nbsp;</i>
+                                        </a>
+                                    </div>
+                                    <div className="content">
+                                        <span className="label" style={{ fontFamily: "'Barlow', sans-serif" }} data-footer-spk-label>
+                                            {spkCard.label}
+                                        </span>
+                                        <h3>
+                                            <a
+                                                href={`mailto:${spkCard.email}`}
+                                                className="main-contact-link"
+                                                data-footer-spk-email
+                                            >
+                                                {spkCard.email}
+                                            </a>
+                                        </h3>
+                                        <a
+                                            href={spkCard.ctaUrl}
+                                            className="cta-link"
+                                            data-footer-spk-link
+                                        >
+                                            {spkCard.ctaText}
+                                        </a>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── Row 3: Footer Nav ── */}
+                    <div
+                        className="footer-nav"
                         data-footer-nav
                         style={{ display: navItems.length === 0 ? 'none' : undefined }}
                     >
-                        {navItems.map((item, i) => (
-                            <a
-                                key={i}
-                                href={item.url}
-                                className="text-white mx-3 text-decoration-none small"
-                            >
-                                {item.label}
-                            </a>
-                        ))}
-                    </nav>
-                    <p className="small opacity-75" data-footer-copyright>{copyright}</p>
-                </div>
+                        <ul>
+                            {navItems.map((item, i) => (
+                                <li key={i}>
+                                    <a href={item.url}>{item.label}</a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
 
+                    {/* ── Row 4: Copyright ── */}
+                    <div className="footer-copy-right">
+                        <p data-footer-copyright>{copyright}</p>
+                    </div>
+
+                </div>
             </div>
 
-            {/*
-              Client-side HubDB fetch — same proven pattern as the Header module.
-              Runs after DOM ready and updates every data-footer-* element directly,
-              so the footer is always live even if hublDataTemplate cache is stale.
-            */}
+            {/* Client-side HubDB fetch */}
             <script dangerouslySetInnerHTML={{ __html: `
 (function () {
     var TABLE  = '${FOOTER_TABLE}';
@@ -212,7 +330,28 @@ export function Component({ fieldValues, hublData }: { fieldValues?: any; hublDa
     }
     function q(attr) { return document.querySelector('[' + attr + ']'); }
 
-    /* parse footer_menu: JSON array or HTML <a> tags */
+    function parseCard(raw, defaultLabel, defaultEmail, defaultCtaText, defaultCtaUrl) {
+        if (!raw) return { label: defaultLabel, email: defaultEmail, emailHref: 'mailto:' + defaultEmail, ctaText: defaultCtaText, ctaUrl: defaultCtaUrl, iconUrl: 'mailto:' + defaultEmail };
+        var temp = document.createElement('div');
+        temp.innerHTML = raw;
+
+        var lblElem = temp.querySelector('.label') || temp.querySelector('span');
+        var label = lblElem ? sh(lblElem.textContent) : defaultLabel;
+
+        var mainLink = temp.querySelector('.main-contact-link') || temp.querySelector('h3 a') || temp.querySelector('h3');
+        var emailStr = mainLink ? sh(mainLink.textContent) : (email(raw) || defaultEmail);
+        var emailHref = (mainLink && mainLink.getAttribute && mainLink.getAttribute('href')) || ('mailto:' + emailStr);
+
+        var ctaLink = temp.querySelector('.cta-link') || temp.querySelectorAll('a')[1] || temp.querySelector('a');
+        var ctaText = ctaLink ? sh(ctaLink.textContent) : defaultCtaText;
+        var ctaUrl = (ctaLink && ctaLink.getAttribute && ctaLink.getAttribute('href')) || defaultCtaUrl;
+
+        var iconLink = temp.querySelector('.bar-icons a') || temp.querySelector('a');
+        var iconUrl = (iconLink && iconLink.getAttribute && iconLink.getAttribute('href')) || emailHref;
+
+        return { label: label, email: emailStr, emailHref: emailHref, ctaText: ctaText, ctaUrl: ctaUrl, iconUrl: iconUrl };
+    }
+
     function parseMenu(raw) {
         if (!raw) return [];
         try { var p = JSON.parse(raw); if (Array.isArray(p)) return p; } catch(e) {}
@@ -234,10 +373,14 @@ export function Component({ fieldValues, hublData }: { fieldValues?: any; hublDa
         }
         if (ll && v.footer_logo_url) ll.setAttribute('href', v.footer_logo_url);
 
-        /* ── social icons: inject HTML then force all links to open in new tab ── */
+        /* ── social icons ── */
         var soc = q('data-footer-social');
+        var hashElem = q('data-footer-hashtag');
         if (soc && v.footer_social_icon) {
             soc.innerHTML = v.footer_social_icon;
+            if (soc.querySelector('h6') && hashElem) {
+                hashElem.style.display = 'none';
+            }
             var socAs = soc.querySelectorAll('a');
             for (var si = 0; si < socAs.length; si++) {
                 socAs[si].setAttribute('target', '_blank');
@@ -245,42 +388,44 @@ export function Component({ fieldValues, hublData }: { fieldValues?: any; hublDa
             }
         }
 
-        /* ── footer nav from HubDB footer_menu ── */
-        var nav = q('data-footer-nav');
-        if (nav && v.footer_menu) {
-            var links = parseMenu(v.footer_menu);
-            if (links.length > 0) {
-                nav.innerHTML = links.map(function(l) {
-                    return '<a href="' + esc(l.url) + '" class="text-white mx-3 text-decoration-none small">' + esc(l.label) + '</a>';
-                }).join('');
-                nav.style.display = '';
-            }
-        }
-
         /* ── registration ── */
-        var reg = email(v.registration_support);
-        var re  = q('data-footer-reg-email');
-        var rl  = q('data-footer-reg-link');
-        if (re && reg) re.textContent = reg;
-        if (rl && reg) rl.setAttribute('href', 'mailto:' + reg);
+        var regC = parseCard(v.registration_support, 'Registration Support', 'laura@gaiinsights.com', 'Secure Your Spot \u2192', 'https://www.gaiworld.com/buy-tickets');
+        var rel = q('data-footer-reg-label'); if (rel) rel.textContent = regC.label;
+        var re  = q('data-footer-reg-email'); if (re) { re.textContent = regC.email; re.setAttribute('href', regC.emailHref); }
+        var rl  = q('data-footer-reg-link');  if (rl) { rl.textContent = regC.ctaText; rl.setAttribute('href', regC.ctaUrl); }
+        var rm  = q('data-footer-reg-mailto');if (rm) rm.setAttribute('href', regC.iconUrl);
 
         /* ── sponsorship ── */
-        var spon = email(v.sponsorship_detail);
-        var se   = q('data-footer-spon-email');
-        var sl   = q('data-footer-spon-link');
-        if (se && spon) se.textContent = spon;
-        if (sl && spon) sl.setAttribute('href', 'mailto:' + spon);
+        var sponC = parseCard(v.sponsorship_detail, 'Sponsorships', 'mdavis@gaiinsights.com', 'Become a Sponsor \u2192', 'https://www.gaiworld.com/sponsors#sponsor-form');
+        var sel = q('data-footer-spon-label'); if (sel) sel.textContent = sponC.label;
+        var se  = q('data-footer-spon-email'); if (se) { se.textContent = sponC.email; se.setAttribute('href', sponC.emailHref); }
+        var sl  = q('data-footer-spon-link');  if (sl) { sl.textContent = sponC.ctaText; sl.setAttribute('href', sponC.ctaUrl); }
+        var sm  = q('data-footer-spon-mailto');if (sm) sm.setAttribute('href', sponC.iconUrl);
 
-        /* ── speakers ── */
-        var spk = email(v.speakers_application);
-        var ske = q('data-footer-spk-email');
-        var skl = q('data-footer-spk-link');
-        if (ske && spk) ske.textContent = spk;
-        if (skl && spk) skl.setAttribute('href', 'mailto:' + spk);
+        /* ── speakers / press inquiries ── */
+        var spkC = parseCard(v.speakers_application, 'Press Inquiries', 'karin@gaiinsights.com', 'Apply to Inquiries \u2192', 'mailto:karin@gaiinsights.com');
+        var skel = q('data-footer-spk-label'); if (skel) skel.textContent = spkC.label;
+        var ske  = q('data-footer-spk-email'); if (ske) { ske.textContent = spkC.email; ske.setAttribute('href', spkC.emailHref); }
+        var skl  = q('data-footer-spk-link');  if (skl) { skl.textContent = spkC.ctaText; skl.setAttribute('href', spkC.ctaUrl); }
+        var skm  = q('data-footer-spk-mailto');if (skm) skm.setAttribute('href', spkC.iconUrl);
 
         /* ── copyright ── */
         var cp = q('data-footer-copyright');
         if (cp && v.copyright_text) cp.textContent = sh(v.copyright_text);
+
+        /* ── footer nav ── */
+        var nav = q('data-footer-nav');
+        if (nav && v.footer_menu) {
+            var links = parseMenu(v.footer_menu);
+            if (links.length > 0) {
+                var ul = nav.querySelector('ul');
+                var htmlStr = links.map(function(l) {
+                    return '<li><a href="' + esc(l.url) + '">' + esc(l.label) + '</a></li>';
+                }).join('');
+                if (ul) { ul.innerHTML = htmlStr; } else { nav.innerHTML = '<ul>' + htmlStr + '</ul>'; }
+                nav.style.display = '';
+            }
+        }
     }
 
     function load() {
@@ -315,7 +460,7 @@ export const fields = (
         <TextField
             name="hashtag"
             label="Hashtag Text"
-            default="#GAIWorld"
+            default="#GAIWorld2026"
         />
         <MenuField
             name="footerMenu"
@@ -330,14 +475,10 @@ export const meta = {
 };
 
 // ── HubL data template ────────────────────────────────────────────────────────
-// Resolves the nav menu server-side (same pattern as Header module).
-// Also pre-fetches HubDB row so the initial render is populated without
-// waiting for the client-side fetch.
 
 const _o = '\x7b\x25';
 const _c = '\x25\x7d';
 export const hublDataTemplate =
-    // resolve nav menu
     _o + ' set _fmid = module.footerMenu '                                                          + _c +
     _o + ' if _fmid is mapping and _fmid.id is defined '                                           + _c +
     _o + '   set _fmid = _fmid.id '                                                                 + _c +
@@ -353,7 +494,6 @@ export const hublDataTemplate =
     _o + '   endif '                                                                                 + _c +
     _o + ' endif '                                                                                   + _c +
     _o + ' set _menu_items = _fmid ? menu(_fmid) : [] '                                            + _c +
-    // fetch footer row — extract each column into a plain variable so it serializes to JSON
     _o + ' set _row = hubdb_table_row(' + FOOTER_TABLE + ', ' + FOOTER_ROW_ID + ') '               + _c +
     _o + ' set _li  = _row.footer_logo if _row else null '                                         + _c +
     _o + ' set _lu  = _li.url if _li else "" '                                                     + _c +
@@ -365,6 +505,5 @@ export const hublDataTemplate =
     _o + ' set _soc = _row.footer_social_icon     if _row else "" '                                + _c +
     _o + ' set _fm  = _row.footer_menu            if _row else "" '                                + _c +
     _o + ' set _cp  = _row.copyright_text         if _row else "" '                                + _c +
-    // build plain serialisable dict
     _o + ' set _db = {"footer_logo": {"url": _lu, "altText": _la}, "footer_logo_url": _ll, "registration_support": _reg, "sponsorship_detail": _sp, "speakers_application": _spk, "footer_social_icon": _soc, "footer_menu": _fm, "copyright_text": _cp} ' + _c +
     _o + ' set hublData = {"menuItems": _menu_items, "db": _db} '                                  + _c;

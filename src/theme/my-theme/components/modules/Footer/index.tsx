@@ -169,18 +169,17 @@ export function Component({ fieldValues }) {
             function applyHubDbFooterLogo() {
               var logoLink = document.querySelector('.footer [data-footer-logo]');
               var logoImg = document.querySelector('.footer [data-footer-logo-img]');
-              fetch('https://api.hubapi.com/cms/v3/hubdb/tables/199638385/rows?portalId=39650877')
+              fetch('https://api.hubapi.com/cms/v3/hubdb/tables/245423957/rows/210829801378?portalId=39650877')
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
-                  var results = data && data.results;
-                  if (!results || results.length === 0) return;
-                  var last = results[results.length - 1];
-                  var values = last && last.values;
+                  var values = data && data.values;
                   if (!values) return;
-                  if (logoLink && values.logo_url) logoLink.setAttribute('href', values.logo_url);
-                  if (logoImg && values.logo_image && values.logo_image.url) {
-                    logoImg.setAttribute('src', values.logo_image.url);
-                    if (values.logo_image.altText) logoImg.setAttribute('alt', values.logo_image.altText);
+                  var logoUrl = values.footer_logo_url || (values.logo_url);
+                  var logoObj = values.footer_logo || values.logo_image;
+                  if (logoLink && logoUrl) logoLink.setAttribute('href', logoUrl);
+                  if (logoImg && logoObj && logoObj.url) {
+                    logoImg.setAttribute('src', logoObj.url);
+                    if (logoObj.altText) logoImg.setAttribute('alt', logoObj.altText);
                   }
                 })
                 .catch(function() {});

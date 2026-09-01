@@ -63,7 +63,7 @@ export function Component({ fieldValues }) {
               </div>
               <div className="sessions-actions-wrapper">
                 <button className="transparent-btn topic-filter-btn featured-filter-btn" id={`session-featured-filter-btn-${moduleId}`} style={{ marginRight: '10px' }}>
-                  Featured <i className="fa-solid fa-star"></i>
+                  Featured <i className="fa-regular fa-star"></i>
                 </button>
                 <button className="transparent-btn topic-filter-btn" id={`session-topic-filter-btn-${moduleId}`}>
                   Filter by Topic <i className="fa-solid fa-filter"></i>
@@ -814,7 +814,7 @@ export function Component({ fieldValues }) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers sessions-card-speakers-column-layout';
                   // Basic styles for scrollable list of speakers
-                  speakersDiv.style.maxHeight = '170px';
+                  speakersDiv.style.maxHeight = '160px';
                   speakersDiv.style.overflowY = 'auto';
                   speakersDiv.style.scrollbarColor = '#020e26 transparent';
                   speakersDiv.style.scrollbarWidth = 'thin';
@@ -1975,7 +1975,7 @@ export function Component({ fieldValues }) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers sessions-card-speakers-column-layout';
                   // Basic styles for scrollable list of speakers
-                  speakersDiv.style.maxHeight = '150px';
+                  speakersDiv.style.maxHeight = '160px';
                   speakersDiv.style.overflowY = 'auto';
                   speakersDiv.style.scrollbarColor = '#020e26 transparent';
                   speakersDiv.style.scrollbarWidth = 'thin';
@@ -2052,7 +2052,7 @@ export function Component({ fieldValues }) {
                       logoDiv.className = 'sessions-card-speaker-logo-wrap';
                       logoDiv.style.flexShrink = '0';
                       logoDiv.style.marginLeft = 'auto';
-                      logoDiv.style.paddingRight = '5px';
+                      logoDiv.style.paddingRight = '15px';
                       
                       const logoData = speaker.companyLogo || speaker.companyLogoWhite;
                       if (logoData && logoData.src) {
@@ -2060,8 +2060,8 @@ export function Component({ fieldValues }) {
                         logoImg.src = logoData.src;
                         logoImg.alt = logoData.alt || (speaker.company ? speaker.company + ' logo' : 'Company logo');
                         logoImg.className = 'sessions-card-speaker-company-logo';
-                        logoImg.style.maxHeight = '28px';
-                        logoImg.style.maxWidth = '70px';
+                        logoImg.style.maxHeight = '50px';
+                        logoImg.style.maxWidth = '110px';
                         logoImg.style.objectFit = 'contain';
                         logoDiv.appendChild(logoImg);
                       }
@@ -2139,12 +2139,15 @@ export function Component({ fieldValues }) {
             
             // Add event listener for featured filter
             if (featuredFilterBtn) {
+              var featuredIcon = featuredFilterBtn.querySelector('i');
               featuredFilterBtn.addEventListener('click', function() {
                 showFeaturedOnly = !showFeaturedOnly;
                 if (showFeaturedOnly) {
                   featuredFilterBtn.classList.add('active');
+                  if (featuredIcon) featuredIcon.className = 'fa-solid fa-star';
                 } else {
                   featuredFilterBtn.classList.remove('active');
+                  if (featuredIcon) featuredIcon.className = 'fa-regular fa-star';
                 }
                 renderTable();
               });
