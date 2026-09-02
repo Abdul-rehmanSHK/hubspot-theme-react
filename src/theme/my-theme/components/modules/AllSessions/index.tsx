@@ -993,6 +993,11 @@ export function Component({ fieldValues }) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers sessions-card-speakers-column-layout';
                   speakersDiv.style.paddingTop = '10px';
+                  speakersDiv.style.maxHeight = '160px';
+                  speakersDiv.style.overflowY = 'auto';
+                  speakersDiv.style.scrollbarColor = '#020e26 transparent';
+                  speakersDiv.style.scrollbarWidth = 'thin';
+                  speakersDiv.style.paddingRight = '5px';
                   
                   const spkHeading = document.createElement('div');
                   spkHeading.className = 'sessions-card-section-heading';
@@ -2095,6 +2100,11 @@ export function Component({ fieldValues }) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers sessions-card-speakers-column-layout';
                   speakersDiv.style.paddingTop = '10px';
+                  speakersDiv.style.maxHeight = '160px';
+                  speakersDiv.style.overflowY = 'auto';
+                  speakersDiv.style.scrollbarColor = '#020e26 transparent';
+                  speakersDiv.style.scrollbarWidth = 'thin';
+                  speakersDiv.style.paddingRight = '5px';
                   
                   const spkHeading = document.createElement('div');
                   spkHeading.className = 'sessions-card-section-heading';
