@@ -564,6 +564,117 @@ export function Component({ fieldValues }) {
               rowDiv.appendChild(logoDiv);
               return rowDiv;
             }
+
+            // Helper function to render a speaker or moderator card inside the detail popup modal
+            function createModalSpeakerCard(speaker, isModerator, isFullWidth) {
+              const speakerCard = document.createElement('div');
+              speakerCard.className = 'session-detail-speaker-card';
+              if (isFullWidth) {
+                speakerCard.style.width = '100%';
+                speakerCard.style.maxWidth = '100%';
+                speakerCard.style.boxSizing = 'border-box';
+              }
+              
+              // Row 1: image + (name + title + logo + roleTag + topics)
+              const speakerRow = document.createElement('div');
+              speakerRow.className = 'session-detail-speaker-row';
+              if (speaker.image && speaker.image.src) {
+                const img = document.createElement('img');
+                img.src = speaker.image.src;
+                img.alt = speaker.image.alt || speaker.name || 'Speaker';
+                img.className = 'session-detail-speaker-image';
+                speakerRow.appendChild(img);
+              }
+              const nameTopicCol = document.createElement('div');
+              nameTopicCol.className = 'session-detail-speaker-name-topics';
+              if (speaker.name) {
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'session-detail-speaker-name';
+                nameDiv.textContent = speaker.name;
+                nameTopicCol.appendChild(nameDiv);
+              }
+              if (speaker.title) {
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'gai-speaker-title';
+                titleDiv.textContent = speaker.title;
+                nameTopicCol.appendChild(titleDiv);
+              }
+              
+              // Show company LOGO (white version) instead of company name
+              var speakerCompanyLogo = (speaker.companyLogoWhite && speaker.companyLogoWhite.src)
+                ? speaker.companyLogoWhite
+                : ((speaker.companyLogo && speaker.companyLogo.src) ? speaker.companyLogo : null);
+              if (speakerCompanyLogo) {
+                const companyLogoImg = document.createElement('img');
+                companyLogoImg.className = 'session-detail-speaker-company-logo';
+                companyLogoImg.src = speakerCompanyLogo.src;
+                companyLogoImg.alt = speakerCompanyLogo.alt || 'Company logo';
+                nameTopicCol.appendChild(companyLogoImg);
+              }
+              if (isModerator) {
+                const roleTag = document.createElement('span');
+                roleTag.className = 'session-detail-speaker-role-tag';
+                roleTag.textContent = 'Moderator';
+                nameTopicCol.appendChild(roleTag);
+              }
+              if (speaker.topics && speaker.topics.length > 0) {
+                const speakerTopicsDiv = document.createElement('div');
+                speakerTopicsDiv.className = 'session-detail-speaker-topics';
+                speaker.topics.forEach(function(topic) {
+                  const topicTag = document.createElement('span');
+                  topicTag.className = 'session-detail-speaker-topic-tag';
+                  topicTag.textContent = topic;
+                  speakerTopicsDiv.appendChild(topicTag);
+                });
+                nameTopicCol.appendChild(speakerTopicsDiv);
+              }
+              speakerRow.appendChild(nameTopicCol);
+              speakerCard.appendChild(speakerRow);
+              
+              // Row 2: description + bio + links
+              const speakerDetail = document.createElement('div');
+              speakerDetail.className = 'session-detail-speaker-detail';
+              if (speaker.description && speaker.description.trim()) {
+                const descDiv = document.createElement('div');
+                descDiv.className = 'session-detail-speaker-description';
+                descDiv.innerHTML = removeSpanTags(speaker.description);
+                speakerDetail.appendChild(descDiv);
+              }
+              if (speaker.bio) {
+                const bioDiv = document.createElement('div');
+                bioDiv.className = 'session-detail-speaker-bio';
+                bioDiv.textContent = speaker.bio;
+                speakerDetail.appendChild(bioDiv);
+              }
+              if ((speaker.linkedin_profile && speaker.linkedin_profile.trim()) ||
+                  (speaker.portfolio_site && speaker.portfolio_site.trim())) {
+                const socialDiv = document.createElement('div');
+                socialDiv.className = 'session-detail-speaker-social';
+                if (speaker.linkedin_profile && speaker.linkedin_profile.trim()) {
+                  const linkedinLink = document.createElement('a');
+                  linkedinLink.href = speaker.linkedin_profile;
+                  linkedinLink.target = '_blank';
+                  linkedinLink.rel = 'noopener noreferrer';
+                  linkedinLink.className = 'session-detail-speaker-social-link';
+                  linkedinLink.setAttribute('aria-label', 'LinkedIn Profile');
+                  linkedinLink.innerHTML = '<i class="fa-brands fa-linkedin"></i>';
+                  socialDiv.appendChild(linkedinLink);
+                }
+                if (speaker.portfolio_site && speaker.portfolio_site.trim()) {
+                  const portfolioLink = document.createElement('a');
+                  portfolioLink.href = speaker.portfolio_site;
+                  portfolioLink.target = '_blank';
+                  portfolioLink.rel = 'noopener noreferrer';
+                  portfolioLink.className = 'session-detail-speaker-social-link';
+                  portfolioLink.setAttribute('aria-label', 'Portfolio Site');
+                  portfolioLink.innerHTML = '<i class="fa-solid fa-globe"></i>';
+                  socialDiv.appendChild(portfolioLink);
+                }
+                speakerDetail.appendChild(socialDiv);
+              }
+              speakerCard.appendChild(speakerDetail);
+              return speakerCard;
+            }
             
             // Helper function to get minutes from start of day (PST) for a timestamp (alias for consistency)
             function getMinutesFromStartOfDayPST(timestamp) {
@@ -993,7 +1104,7 @@ export function Component({ fieldValues }) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers sessions-card-speakers-column-layout';
                   speakersDiv.style.paddingTop = '10px';
-                  speakersDiv.style.maxHeight = '160px';
+                  speakersDiv.style.maxHeight = '180px';
                   speakersDiv.style.overflowY = 'auto';
                   speakersDiv.style.scrollbarColor = '#020e26 transparent';
                   speakersDiv.style.scrollbarWidth = 'thin';
@@ -2100,7 +2211,7 @@ export function Component({ fieldValues }) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers sessions-card-speakers-column-layout';
                   speakersDiv.style.paddingTop = '10px';
-                  speakersDiv.style.maxHeight = '160px';
+                  speakersDiv.style.maxHeight = '180px';
                   speakersDiv.style.overflowY = 'auto';
                   speakersDiv.style.scrollbarColor = '#020e26 transparent';
                   speakersDiv.style.scrollbarWidth = 'thin';
@@ -3104,22 +3215,39 @@ export function Component({ fieldValues }) {
                 }
               }
               
-              // Moderator section (heading + name on one line, from HubDB "moderator" column)
-              if (session.moderators && session.moderators.length > 0) {
-                const moderatorDiv = document.createElement('div');
-                moderatorDiv.className = 'session-detail-moderator';
-                const moderatorLabel = document.createElement('span');
-                moderatorLabel.className = 'session-detail-moderator-label';
-                moderatorLabel.textContent = 'Moderator:';
-                moderatorDiv.appendChild(moderatorLabel);
-                const moderatorNameDiv = document.createElement('span');
-                moderatorNameDiv.className = 'session-detail-moderator-name';
-                moderatorNameDiv.textContent = session.moderators.join(', ');
-                moderatorDiv.appendChild(moderatorNameDiv);
-                body.appendChild(moderatorDiv);
+              // Moderator section in popup modal (rendered as full width speaker card)
+              const modalModeratorList = ((session.moderators && session.moderators.length > 0) || (session.moderatorSpeakerIds && session.moderatorSpeakerIds.length > 0))
+                ? getModeratorSpeakerObjects(session)
+                : [];
+
+              if (modalModeratorList.length > 0) {
+                const modSectionDiv = document.createElement('div');
+                modSectionDiv.className = 'session-detail-speakers session-detail-moderators-section';
+                modSectionDiv.style.marginBottom = '20px';
+                
+                const modLabel = document.createElement('div');
+                modLabel.className = 'session-detail-label';
+                modLabel.textContent = modalModeratorList.length > 1 ? 'Moderators:' : 'Moderator:';
+                modSectionDiv.appendChild(modLabel);
+                
+                const modCardsList = document.createElement('div');
+                modCardsList.className = 'session-detail-speakers-list';
+                modCardsList.style.display = 'flex';
+                modCardsList.style.flexDirection = 'column';
+                modCardsList.style.gap = '20px';
+                modCardsList.style.width = '100%';
+                
+                modalModeratorList.forEach(function(modSpk) {
+                  // Full width moderator card
+                  const modCard = createModalSpeakerCard(modSpk, true, true);
+                  modCardsList.appendChild(modCard);
+                });
+                
+                modSectionDiv.appendChild(modCardsList);
+                body.appendChild(modSectionDiv);
               }
 
-              // Speakers section
+              // Speakers section in popup modal
               if (session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers && !session.hideSpeakers) {
                 const speakersDiv = document.createElement('div');
                 speakersDiv.className = 'session-detail-speakers';
@@ -3134,9 +3262,6 @@ export function Component({ fieldValues }) {
                 session.speakerIds.forEach(function(speakerId) {
                   const speaker = allSpeakersData[speakerId];
                   if (speaker) {
-                    const speakerCard = document.createElement('div');
-                    speakerCard.className = 'session-detail-speaker-card';
-                    
                     const moderatorIds = Array.isArray(session.moderatorSpeakerIds) ? session.moderatorSpeakerIds : [];
                     const moderatorNames = Array.isArray(session.moderators)
                       ? session.moderators.map(function(n) { return String(n || '').toLowerCase().trim(); }).filter(Boolean)
@@ -3145,103 +3270,7 @@ export function Component({ fieldValues }) {
                       (moderatorIds.length > 0 && moderatorIds.indexOf(speakerId) !== -1) ||
                       (speaker.name && moderatorNames.indexOf(String(speaker.name).toLowerCase().trim()) !== -1);
                     
-                    // Row 1: image + (name + topic)
-                    const speakerRow = document.createElement('div');
-                    speakerRow.className = 'session-detail-speaker-row';
-                    if (speaker.image && speaker.image.src) {
-                      const img = document.createElement('img');
-                      img.src = speaker.image.src;
-                      img.alt = speaker.image.alt || speaker.name;
-                      img.className = 'session-detail-speaker-image';
-                      speakerRow.appendChild(img);
-                    }
-                    const nameTopicCol = document.createElement('div');
-                    nameTopicCol.className = 'session-detail-speaker-name-topics';
-                    if (speaker.name) {
-                      const nameDiv = document.createElement('div');
-                      nameDiv.className = 'session-detail-speaker-name';
-                      nameDiv.textContent = speaker.name;
-                      nameTopicCol.appendChild(nameDiv);
-                    }
-                    if (speaker.title) {
-                      const titleDiv = document.createElement('div');
-                      titleDiv.className = 'gai-speaker-title';
-                      titleDiv.textContent = speaker.title;
-                      nameTopicCol.appendChild(titleDiv);
-                    }
-                    // Show company LOGO (white version) instead of the company name
-                    var speakerCompanyLogo = (speaker.companyLogoWhite && speaker.companyLogoWhite.src)
-                      ? speaker.companyLogoWhite
-                      : ((speaker.companyLogo && speaker.companyLogo.src) ? speaker.companyLogo : null);
-                    if (speakerCompanyLogo) {
-                      const companyLogoImg = document.createElement('img');
-                      companyLogoImg.className = 'session-detail-speaker-company-logo';
-                      companyLogoImg.src = speakerCompanyLogo.src;
-                      companyLogoImg.alt = speakerCompanyLogo.alt || 'Company logo';
-                      nameTopicCol.appendChild(companyLogoImg);
-                    }
-                    if (isModerator) {
-                      const roleTag = document.createElement('span');
-                      roleTag.className = 'session-detail-speaker-role-tag';
-                      roleTag.textContent = 'Moderator';
-                      nameTopicCol.appendChild(roleTag);
-                    }
-                    if (speaker.topics && speaker.topics.length > 0) {
-                      const speakerTopicsDiv = document.createElement('div');
-                      speakerTopicsDiv.className = 'session-detail-speaker-topics';
-                      speaker.topics.forEach(function(topic) {
-                        const topicTag = document.createElement('span');
-                        topicTag.className = 'session-detail-speaker-topic-tag';
-                        topicTag.textContent = topic;
-                        speakerTopicsDiv.appendChild(topicTag);
-                      });
-                      nameTopicCol.appendChild(speakerTopicsDiv);
-                    }
-                    speakerRow.appendChild(nameTopicCol);
-                    speakerCard.appendChild(speakerRow);
-                    
-                    // Row 2: description + links (full width)
-                    const speakerDetail = document.createElement('div');
-                    speakerDetail.className = 'session-detail-speaker-detail';
-                    if (speaker.description && speaker.description.trim()) {
-                      const descDiv = document.createElement('div');
-                      descDiv.className = 'session-detail-speaker-description';
-                      descDiv.innerHTML = removeSpanTags(speaker.description);
-                      speakerDetail.appendChild(descDiv);
-                    }
-                    if (speaker.bio) {
-                      const bioDiv = document.createElement('div');
-                      bioDiv.className = 'session-detail-speaker-bio';
-                      bioDiv.textContent = speaker.bio;
-                      speakerDetail.appendChild(bioDiv);
-                    }
-                    if ((speaker.linkedin_profile && speaker.linkedin_profile.trim()) ||
-                        (speaker.portfolio_site && speaker.portfolio_site.trim())) {
-                      const socialDiv = document.createElement('div');
-                      socialDiv.className = 'session-detail-speaker-social';
-                      if (speaker.linkedin_profile && speaker.linkedin_profile.trim()) {
-                        const linkedinLink = document.createElement('a');
-                        linkedinLink.href = speaker.linkedin_profile;
-                        linkedinLink.target = '_blank';
-                        linkedinLink.rel = 'noopener noreferrer';
-                        linkedinLink.className = 'session-detail-speaker-social-link';
-                        linkedinLink.setAttribute('aria-label', 'LinkedIn Profile');
-                        linkedinLink.innerHTML = '<i class="fa-brands fa-linkedin"></i>';
-                        socialDiv.appendChild(linkedinLink);
-                      }
-                      if (speaker.portfolio_site && speaker.portfolio_site.trim()) {
-                        const portfolioLink = document.createElement('a');
-                        portfolioLink.href = speaker.portfolio_site;
-                        portfolioLink.target = '_blank';
-                        portfolioLink.rel = 'noopener noreferrer';
-                        portfolioLink.className = 'session-detail-speaker-social-link';
-                        portfolioLink.setAttribute('aria-label', 'Portfolio Site');
-                        portfolioLink.innerHTML = '<i class="fa-solid fa-globe"></i>';
-                        socialDiv.appendChild(portfolioLink);
-                      }
-                      speakerDetail.appendChild(socialDiv);
-                    }
-                    speakerCard.appendChild(speakerDetail);
+                    const speakerCard = createModalSpeakerCard(speaker, isModerator, false);
                     speakersList.appendChild(speakerCard);
                   }
                 });
