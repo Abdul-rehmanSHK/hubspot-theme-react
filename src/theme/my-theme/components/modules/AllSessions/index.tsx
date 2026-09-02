@@ -415,6 +415,29 @@ export function Component({ fieldValues }) {
                 return String(a.id || '').localeCompare(String(b.id || ''));
               });
             }
+
+            // Helper function to sort sessions by FEATURED order (1, 2, 3, 4...), then DATE, then TIME
+            function sortSessionsByFeaturedOrder(sessions) {
+              if (!sessions || sessions.length === 0) return sessions;
+              return sessions.slice().sort(function(a, b) {
+                const orderA = (a.featuredOrder !== undefined && a.featuredOrder !== null) ? a.featuredOrder : Infinity;
+                const orderB = (b.featuredOrder !== undefined && b.featuredOrder !== null) ? b.featuredOrder : Infinity;
+                if (orderA !== orderB) {
+                  return orderA - orderB; // Sort ascending: small to high (1, 2, 3, 4, 5...)
+                }
+                const dateA = getDateTimestamp(a);
+                const dateB = getDateTimestamp(b);
+                if (dateA !== dateB) return dateA - dateB;
+                const timeA = getTimeOfDayInMinutes(a.start_time);
+                const timeB = getTimeOfDayInMinutes(b.start_time);
+                if (timeA !== timeB) return timeA - timeB;
+                const titleA = (a.title || '').toLowerCase();
+                const titleB = (b.title || '').toLowerCase();
+                if (titleA < titleB) return -1;
+                if (titleA > titleB) return 1;
+                return String(a.id || '').localeCompare(String(b.id || ''));
+              });
+            }
             
             // Helper function to get minutes from start of day (PST) for a timestamp (alias for consistency)
             function getMinutesFromStartOfDayPST(timestamp) {
@@ -748,9 +771,11 @@ export function Component({ fieldValues }) {
               // Clear grid wrapper
               gridWrapper.innerHTML = '';
               
-              const sortedSessions = selectedDateValue === 'all'
-                ? sortSessionsByDateThenTime(sessions)
-                : sortSessionsByTimeOfDay(sessions);
+              const sortedSessions = showFeaturedOnly
+                ? sortSessionsByFeaturedOrder(sessions)
+                : (selectedDateValue === 'all'
+                    ? sortSessionsByDateThenTime(sessions)
+                    : sortSessionsByTimeOfDay(sessions));
               
               // Create grid container
               const gridContainer = document.createElement('div');
@@ -1016,6 +1041,21 @@ export function Component({ fieldValues }) {
                     return name && name.trim() !== '';
                   });
                   
+                  // Extract featured_session (number field: 1, 2, 3, 4, 5...)
+                  const fsRaw = row.values?.featured_session;
+                  let isFeatured = false;
+                  let featuredOrder = Infinity;
+                  if (fsRaw !== null && fsRaw !== undefined && fsRaw !== '') {
+                    const fsNum = Number(fsRaw);
+                    if (!isNaN(fsNum) && fsNum > 0) {
+                      isFeatured = true;
+                      featuredOrder = fsNum;
+                    } else if (fsRaw === true || fsRaw === 'true' || fsRaw === 'TRUE') {
+                      isFeatured = true;
+                      featuredOrder = 1;
+                    }
+                  }
+                  
                   return {
                     id: row.id,
                     title: row.values?.session_title || 'Untitled Session',
@@ -1033,7 +1073,8 @@ export function Component({ fieldValues }) {
                     sessionTypes: sessionTypes,
                     hideSpeakers: (row.values?.hide_speakers === true || row.values?.hide_speakers === 1 || row.values?.hide_speakers === '1' || row.values?.hide_speakers === 'true' || row.values?.hide_speakers === 'TRUE'),
                     hideSession: (row.values?.hide_session === true || row.values?.hide_session === 1 || row.values?.hide_session === '1' || row.values?.hide_session === 'true'),
-                    featuredSession: (row.values?.featured_session === true || row.values?.featured_session === 1 || row.values?.featured_session === '1' || row.values?.featured_session === 'true' || row.values?.featured_session === 'TRUE')
+                    featuredSession: isFeatured,
+                    featuredOrder: featuredOrder
                   };
                 }).filter(function(session) {
                   // Exclude sessions flagged "Hide Session" in HubDB (hidden from both grid and calendar views)
@@ -1195,6 +1236,7 @@ export function Component({ fieldValues }) {
                   filteredSessions = filteredSessions.filter(function(session) {
                     return session.featuredSession;
                   });
+                  filteredSessions = sortSessionsByFeaturedOrder(filteredSessions);
                 }
                 
                 // Filter by search query if search is active
@@ -1896,9 +1938,11 @@ export function Component({ fieldValues }) {
               // Clear grid wrapper
               gridWrapper.innerHTML = '';
               
-              const sortedSessions = selectedDateValue === 'all'
-                ? sortSessionsByDateThenTime(sessions)
-                : sortSessionsByTimeOfDay(sessions);
+              const sortedSessions = showFeaturedOnly
+                ? sortSessionsByFeaturedOrder(sessions)
+                : (selectedDateValue === 'all'
+                    ? sortSessionsByDateThenTime(sessions)
+                    : sortSessionsByTimeOfDay(sessions));
               
               // Create grid container
               const gridContainer = document.createElement('div');
