@@ -438,6 +438,132 @@ export function Component({ fieldValues }) {
                 return String(a.id || '').localeCompare(String(b.id || ''));
               });
             }
+
+            // Helper function to resolve moderator speaker objects from allSpeakersData
+            function getModeratorSpeakerObjects(session) {
+              const list = [];
+              const addedIds = new Set();
+              
+              if (session.moderatorSpeakerIds && session.moderatorSpeakerIds.length > 0) {
+                session.moderatorSpeakerIds.forEach(function(mId) {
+                  const spk = allSpeakersData[mId];
+                  if (spk) {
+                    list.push(spk);
+                    if (spk.id) addedIds.add(String(spk.id));
+                    if (spk.name) addedIds.add(String(spk.name).toLowerCase().trim());
+                  }
+                });
+              }
+              
+              if (session.moderators && session.moderators.length > 0) {
+                session.moderators.forEach(function(mName) {
+                  const cleanName = String(mName || '').toLowerCase().trim();
+                  if (cleanName && !addedIds.has(cleanName)) {
+                    let found = false;
+                    for (const id in allSpeakersData) {
+                      const spk = allSpeakersData[id];
+                      if (spk && spk.name && String(spk.name).toLowerCase().trim() === cleanName) {
+                        list.push(spk);
+                        addedIds.add(cleanName);
+                        found = true;
+                        break;
+                      }
+                    }
+                    if (!found) {
+                      list.push({ name: mName, title: '', image: null, companyLogo: null });
+                      addedIds.add(cleanName);
+                    }
+                  }
+                });
+              }
+              
+              return list;
+            }
+
+            // Helper function to render a speaker or moderator card row with headshot, name, title, and company logo
+            function createPersonRow(person) {
+              const rowDiv = document.createElement('div');
+              rowDiv.className = 'sessions-card-speaker-row';
+              rowDiv.style.display = 'flex';
+              rowDiv.style.alignItems = 'center';
+              rowDiv.style.gap = '10px';
+              rowDiv.style.marginBottom = '12px';
+              rowDiv.style.paddingBottom = '10px';
+              rowDiv.style.borderBottom = '1px solid #e3ebdd';
+              
+              // 1. Headshot
+              const imgDiv = document.createElement('div');
+              imgDiv.className = 'sessions-card-speaker-image-wrap';
+              imgDiv.style.flexShrink = '0';
+              imgDiv.style.width = '48px';
+              imgDiv.style.height = '48px';
+              if (person.image && person.image.src) {
+                const img = document.createElement('img');
+                img.src = person.image.src;
+                img.alt = person.image.alt || person.name || 'Person';
+                img.className = 'sessions-card-speaker-image';
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.borderRadius = '50%';
+                img.style.objectFit = 'cover';
+                imgDiv.appendChild(img);
+              }
+              rowDiv.appendChild(imgDiv);
+              
+              // 2. Name and Job Title
+              const infoDiv = document.createElement('div');
+              infoDiv.className = 'sessions-card-speaker-info';
+              infoDiv.style.flexGrow = '1';
+              infoDiv.style.display = 'flex';
+              infoDiv.style.flexDirection = 'column';
+              infoDiv.style.justifyContent = 'center';
+              
+              if (person.name) {
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'sessions-card-speaker-name';
+                nameDiv.style.fontWeight = 'bold';
+                nameDiv.style.fontSize = '14px';
+                nameDiv.style.lineHeight = '1.2';
+                nameDiv.style.color = 'var(--text-color, inherit)';
+                nameDiv.textContent = person.name;
+                infoDiv.appendChild(nameDiv);
+              }
+              
+              if (person.title) {
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'sessions-card-speaker-job-title';
+                titleDiv.style.fontSize = '12px';
+                titleDiv.style.lineHeight = '1.2';
+                titleDiv.style.marginTop = '2px';
+                titleDiv.style.color = 'var(--text-color, inherit)';
+                titleDiv.textContent = person.title;
+                infoDiv.appendChild(titleDiv);
+              }
+              
+              rowDiv.appendChild(infoDiv);
+              
+              // 3. Company Logo
+              const logoDiv = document.createElement('div');
+              logoDiv.className = 'sessions-card-speaker-logo-wrap';
+              logoDiv.style.flexShrink = '0';
+              logoDiv.style.marginLeft = 'auto';
+              logoDiv.style.paddingRight = '15px';
+              
+              const logoData = person.companyLogo || person.companyLogoWhite;
+              if (logoData && logoData.src) {
+                const logoImg = document.createElement('img');
+                logoImg.src = logoData.src;
+                logoImg.alt = logoData.alt || (person.company ? person.company + ' logo' : 'Company logo');
+                logoImg.className = 'sessions-card-speaker-company-logo';
+                logoImg.style.maxHeight = '50px';
+                logoImg.style.maxWidth = '110px';
+                logoImg.style.objectFit = 'contain';
+                logoDiv.appendChild(logoImg);
+              }
+              
+              rowDiv.appendChild(logoDiv);
+              return rowDiv;
+            }
             
             // Helper function to get minutes from start of day (PST) for a timestamp (alias for consistency)
             function getMinutesFromStartOfDayPST(timestamp) {
@@ -822,7 +948,7 @@ export function Component({ fieldValues }) {
                 titleDiv.textContent = session.title;
                 card.appendChild(titleDiv);
                 
-                // Session types (if any)
+                // Session types / room tag (e.g., Main Stage) - MUST come right after description/title
                 if (session.sessionTypes && session.sessionTypes.length > 0) {
                   const typesWrapper = document.createElement('div');
                   typesWrapper.className = 'sessions-card-types-wrapper';
@@ -834,122 +960,59 @@ export function Component({ fieldValues }) {
                   });
                   card.appendChild(typesWrapper);
                 }
-                // Speaker images and names (only for non-break sessions)
+
+                // Moderator section (only for non-break sessions)
+                if (!isBreak && ((session.moderators && session.moderators.length > 0) || (session.moderatorSpeakerIds && session.moderatorSpeakerIds.length > 0))) {
+                  const moderatorList = getModeratorSpeakerObjects(session);
+                  if (moderatorList.length > 0) {
+                    const modWrapper = document.createElement('div');
+                    modWrapper.className = 'sessions-card-moderators-container';
+                    modWrapper.style.paddingTop = '10px';
+                    
+                    const modHeading = document.createElement('div');
+                    modHeading.className = 'sessions-card-section-heading';
+                    modHeading.style.fontWeight = 'bold';
+                    modHeading.style.fontSize = '12px';
+                    modHeading.style.textTransform = 'uppercase';
+                    modHeading.style.letterSpacing = '0.5px';
+                    modHeading.style.color = '#555';
+                    modHeading.style.marginBottom = '8px';
+                    modHeading.textContent = moderatorList.length > 1 ? 'Moderators:' : 'Moderator:';
+                    modWrapper.appendChild(modHeading);
+                    
+                    moderatorList.forEach(function(modPerson) {
+                      modWrapper.appendChild(createPersonRow(modPerson));
+                    });
+                    
+                    card.appendChild(modWrapper);
+                  }
+                }
+
+                // Speaker section (only for non-break sessions)
                 if (!isBreak && session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers && !session.hideSpeakers) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers sessions-card-speakers-column-layout';
-                  // Basic styles for scrollable list of speakers
-                  speakersDiv.style.maxHeight = '160px';
-                  speakersDiv.style.overflowY = 'auto';
-                  speakersDiv.style.scrollbarColor = '#020e26 transparent';
-                  speakersDiv.style.scrollbarWidth = 'thin';
-                  speakersDiv.style.display = 'flex';
-                  speakersDiv.style.flexDirection = 'column';
-                  speakersDiv.style.gap = '15px';
-                  speakersDiv.style.paddingTop = '15px';
+                  speakersDiv.style.paddingTop = '10px';
+                  
+                  const spkHeading = document.createElement('div');
+                  spkHeading.className = 'sessions-card-section-heading';
+                  spkHeading.style.fontWeight = 'bold';
+                  spkHeading.style.fontSize = '12px';
+                  spkHeading.style.textTransform = 'uppercase';
+                  spkHeading.style.letterSpacing = '0.5px';
+                  spkHeading.style.color = '#555';
+                  spkHeading.style.marginBottom = '8px';
+                  spkHeading.textContent = session.speakerIds.length > 1 ? 'Speakers:' : 'Speaker:';
+                  speakersDiv.appendChild(spkHeading);
                   
                   session.speakerIds.forEach(function(speakerId) {
                     const speaker = allSpeakersData[speakerId];
                     if (speaker) {
-                      const speakerRow = document.createElement('div');
-                      speakerRow.className = 'sessions-card-speaker-row';
-                      speakerRow.style.display = 'flex';
-                      speakerRow.style.alignItems = 'center';
-                      speakerRow.style.gap = '10px';
-                      speakerRow.style.marginBottom = '18px';
-                      
-                      // 1. Headshot
-                      const imgDiv = document.createElement('div');
-                      imgDiv.className = 'sessions-card-speaker-image-wrap';
-                      imgDiv.style.flexShrink = '0';
-                      imgDiv.style.width = '48px';
-                      imgDiv.style.height = '48px';
-                      if (speaker.image && speaker.image.src) {
-                        const img = document.createElement('img');
-                        img.src = speaker.image.src;
-                        img.alt = speaker.image.alt || speaker.name;
-                        img.className = 'sessions-card-speaker-image';
-                        img.style.width = '100%';
-                        img.style.height = '100%';
-                        img.style.borderRadius = '50%';
-                        img.style.objectFit = 'cover';
-                        imgDiv.appendChild(img);
-                      }
-                      speakerRow.appendChild(imgDiv);
-                      
-                      // 2. Name and Job Title
-                      const infoDiv = document.createElement('div');
-                      infoDiv.className = 'sessions-card-speaker-info';
-                      infoDiv.style.flexGrow = '1';
-                      infoDiv.style.display = 'flex';
-                      infoDiv.style.flexDirection = 'column';
-                      infoDiv.style.justifyContent = 'center';
-                      
-                      if (speaker.name) {
-                        const nameDiv = document.createElement('div');
-                        nameDiv.className = 'sessions-card-speaker-name';
-                        nameDiv.style.fontWeight = 'bold';
-                        nameDiv.style.fontSize = '14px';
-                        nameDiv.style.lineHeight = '1.2';
-                        nameDiv.style.color = 'var(--text-color, inherit)';
-                        nameDiv.textContent = speaker.name;
-                        infoDiv.appendChild(nameDiv);
-                      }
-                      
-                      if (speaker.title) {
-                        const titleDiv = document.createElement('div');
-                        titleDiv.className = 'sessions-card-speaker-job-title';
-                        titleDiv.style.fontSize = '12px';
-                        titleDiv.style.lineHeight = '1.2';
-                        titleDiv.style.marginTop = '2px';
-                        titleDiv.style.color = 'var(--text-color, inherit)';
-                        titleDiv.textContent = speaker.title;
-                        infoDiv.appendChild(titleDiv);
-                      }
-                      
-                      speakerRow.appendChild(infoDiv);
-                      
-                      // 3. Company Logo
-                      const logoDiv = document.createElement('div');
-                      logoDiv.className = 'sessions-card-speaker-logo-wrap';
-                      logoDiv.style.flexShrink = '0';
-                      logoDiv.style.marginLeft = 'auto';
-                      logoDiv.style.paddingRight = '15px';
-                      
-                      const logoData = speaker.companyLogo || speaker.companyLogoWhite;
-                      if (logoData && logoData.src) {
-                        const logoImg = document.createElement('img');
-                        logoImg.src = logoData.src;
-                        logoImg.alt = logoData.alt || (speaker.company ? speaker.company + ' logo' : 'Company logo');
-                        logoImg.className = 'sessions-card-speaker-company-logo';
-                        logoImg.style.maxHeight = '50px';
-                        logoImg.style.maxWidth = '110px';
-                        logoImg.style.objectFit = 'contain';
-                        logoDiv.appendChild(logoImg);
-                      }
-                      
-                      speakerRow.appendChild(logoDiv);
-                      
-                      speakersDiv.appendChild(speakerRow);
+                      speakersDiv.appendChild(createPersonRow(speaker));
                     }
                   });
                   
                   card.appendChild(speakersDiv);
-                }
-
-                // Moderator heading + name (only for non-break sessions), from HubDB "moderator" column
-                if (!isBreak && session.moderators && session.moderators.length > 0) {
-                  const moderatorDiv = document.createElement('div');
-                  moderatorDiv.className = 'sessions-card-moderator';
-                  const moderatorLabel = document.createElement('span');
-                  moderatorLabel.className = 'sessions-card-moderator-label';
-                  moderatorLabel.textContent = 'Moderator: ';
-                  moderatorDiv.appendChild(moderatorLabel);
-                  const moderatorName = document.createElement('span');
-                  moderatorName.className = 'sessions-card-moderator-name';
-                  moderatorName.textContent = session.moderators.join(', ');
-                  moderatorDiv.appendChild(moderatorName);
-                  card.appendChild(moderatorDiv);
                 }
 
                 // Add click event to open session detail modal (only for non-break sessions)
@@ -1987,22 +2050,7 @@ export function Component({ fieldValues }) {
                   card.appendChild(cardDescDiv);
                 }
 
-                // Moderator heading + name (only for non-break sessions), from HubDB "moderator" column
-                if (!isBreak && session.moderators && session.moderators.length > 0) {
-                  const moderatorDiv = document.createElement('div');
-                  moderatorDiv.className = 'sessions-card-moderator';
-                  const moderatorLabel = document.createElement('span');
-                  moderatorLabel.className = 'sessions-card-moderator-label';
-                  moderatorLabel.textContent = 'Moderator: ';
-                  moderatorDiv.appendChild(moderatorLabel);
-                  const moderatorName = document.createElement('span');
-                  moderatorName.className = 'sessions-card-moderator-name';
-                  moderatorName.textContent = session.moderators.join(', ');
-                  moderatorDiv.appendChild(moderatorName);
-                  card.appendChild(moderatorDiv);
-                }
-
-                // Session types (if any)
+                // Session types / room tag (e.g., Main Stage) - MUST come right after description
                 if (session.sessionTypes && session.sessionTypes.length > 0) {
                   const typesWrapper = document.createElement('div');
                   typesWrapper.className = 'sessions-card-types-wrapper';
@@ -2014,105 +2062,55 @@ export function Component({ fieldValues }) {
                   });
                   card.appendChild(typesWrapper);
                 }
-                // Speaker images and names (only for non-break sessions)
+
+                // Moderator section (only for non-break sessions), styled same as speakers
+                if (!isBreak && ((session.moderators && session.moderators.length > 0) || (session.moderatorSpeakerIds && session.moderatorSpeakerIds.length > 0))) {
+                  const moderatorList = getModeratorSpeakerObjects(session);
+                  if (moderatorList.length > 0) {
+                    const modWrapper = document.createElement('div');
+                    modWrapper.className = 'sessions-card-moderators-container';
+                    modWrapper.style.paddingTop = '10px';
+                    
+                    const modHeading = document.createElement('div');
+                    modHeading.className = 'sessions-card-section-heading';
+                    modHeading.style.fontWeight = 'bold';
+                    modHeading.style.fontSize = '12px';
+                    modHeading.style.textTransform = 'uppercase';
+                    modHeading.style.letterSpacing = '0.5px';
+                    modHeading.style.color = '#555';
+                    modHeading.style.marginBottom = '8px';
+                    modHeading.textContent = moderatorList.length > 1 ? 'Moderators:' : 'Moderator:';
+                    modWrapper.appendChild(modHeading);
+                    
+                    moderatorList.forEach(function(modPerson) {
+                      modWrapper.appendChild(createPersonRow(modPerson));
+                    });
+                    
+                    card.appendChild(modWrapper);
+                  }
+                }
+
+                // Speaker section (only for non-break sessions)
                 if (!isBreak && session.speakerIds && session.speakerIds.length > 0 && !hideSpeakers && !session.hideSpeakers) {
                   const speakersDiv = document.createElement('div');
                   speakersDiv.className = 'sessions-card-speakers sessions-card-speakers-column-layout';
-                  // Basic styles for scrollable list of speakers
-                  speakersDiv.style.maxHeight = '160px';
-                  speakersDiv.style.overflowY = 'auto';
-                  speakersDiv.style.scrollbarColor = '#020e26 transparent';
-                  speakersDiv.style.scrollbarWidth = 'thin';
-                  speakersDiv.style.display = 'flex';
-                  speakersDiv.style.flexDirection = 'column';
-                  speakersDiv.style.gap = '15px';
-                  speakersDiv.style.paddingTop = '15px';
+                  speakersDiv.style.paddingTop = '10px';
+                  
+                  const spkHeading = document.createElement('div');
+                  spkHeading.className = 'sessions-card-section-heading';
+                  spkHeading.style.fontWeight = 'bold';
+                  spkHeading.style.fontSize = '12px';
+                  spkHeading.style.textTransform = 'uppercase';
+                  spkHeading.style.letterSpacing = '0.5px';
+                  spkHeading.style.color = '#555';
+                  spkHeading.style.marginBottom = '8px';
+                  spkHeading.textContent = session.speakerIds.length > 1 ? 'Speakers:' : 'Speaker:';
+                  speakersDiv.appendChild(spkHeading);
                   
                   session.speakerIds.forEach(function(speakerId) {
                     const speaker = allSpeakersData[speakerId];
                     if (speaker) {
-                      const speakerRow = document.createElement('div');
-                      speakerRow.className = 'sessions-card-speaker-row';
-                      speakerRow.style.display = 'flex';
-                      speakerRow.style.alignItems = 'center';
-                      speakerRow.style.gap = '10px';
-                      speakerRow.style.marginBottom = '12px';
-                      speakerRow.style.paddingBottom = '10px';
-                      speakerRow.style.borderBottom = '1px solid #e3ebdd';
-                      
-                      // 1. Headshot
-                      const imgDiv = document.createElement('div');
-                      imgDiv.className = 'sessions-card-speaker-image-wrap';
-                      imgDiv.style.flexShrink = '0';
-                      imgDiv.style.width = '48px';
-                      imgDiv.style.height = '48px';
-                      if (speaker.image && speaker.image.src) {
-                        const img = document.createElement('img');
-                        img.src = speaker.image.src;
-                        img.alt = speaker.image.alt || speaker.name;
-                        img.className = 'sessions-card-speaker-image';
-                        img.style.width = '100%';
-                        img.style.height = '100%';
-                        img.style.borderRadius = '50%';
-                        img.style.objectFit = 'cover';
-                        imgDiv.appendChild(img);
-                      }
-                      speakerRow.appendChild(imgDiv);
-                      
-                      // 2. Name and Job Title
-                      const infoDiv = document.createElement('div');
-                      infoDiv.className = 'sessions-card-speaker-info';
-                      infoDiv.style.flexGrow = '1';
-                      infoDiv.style.display = 'flex';
-                      infoDiv.style.flexDirection = 'column';
-                      infoDiv.style.justifyContent = 'center';
-                      
-                      if (speaker.name) {
-                        const nameDiv = document.createElement('div');
-                        nameDiv.className = 'sessions-card-speaker-name';
-                        nameDiv.style.fontWeight = 'bold';
-                        nameDiv.style.fontSize = '14px';
-                        nameDiv.style.lineHeight = '1.2';
-                        nameDiv.style.color = 'var(--text-color, inherit)';
-                        nameDiv.textContent = speaker.name;
-                        infoDiv.appendChild(nameDiv);
-                      }
-                      
-                      if (speaker.title) {
-                        const titleDiv = document.createElement('div');
-                        titleDiv.className = 'sessions-card-speaker-job-title';
-                        titleDiv.style.fontSize = '12px';
-                        titleDiv.style.lineHeight = '1.2';
-                        titleDiv.style.marginTop = '2px';
-                        titleDiv.style.color = 'var(--text-color, inherit)';
-                        titleDiv.textContent = speaker.title;
-                        infoDiv.appendChild(titleDiv);
-                      }
-                      
-                      speakerRow.appendChild(infoDiv);
-                      
-                      // 3. Company Logo
-                      const logoDiv = document.createElement('div');
-                      logoDiv.className = 'sessions-card-speaker-logo-wrap';
-                      logoDiv.style.flexShrink = '0';
-                      logoDiv.style.marginLeft = 'auto';
-                      logoDiv.style.paddingRight = '15px';
-                      
-                      const logoData = speaker.companyLogo || speaker.companyLogoWhite;
-                      if (logoData && logoData.src) {
-                        const logoImg = document.createElement('img');
-                        logoImg.src = logoData.src;
-                        logoImg.alt = logoData.alt || (speaker.company ? speaker.company + ' logo' : 'Company logo');
-                        logoImg.className = 'sessions-card-speaker-company-logo';
-                        logoImg.style.maxHeight = '50px';
-                        logoImg.style.maxWidth = '110px';
-                        logoImg.style.objectFit = 'contain';
-                        logoDiv.appendChild(logoImg);
-                      }
-                      
-                      speakerRow.appendChild(logoDiv);
-                      
-                      speakersDiv.appendChild(speakerRow);
+                      speakersDiv.appendChild(createPersonRow(speaker));
                     }
                   });
                   
