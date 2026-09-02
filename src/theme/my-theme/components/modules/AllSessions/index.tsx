@@ -575,9 +575,13 @@ export function Component({ fieldValues }) {
                 speakerCard.style.boxSizing = 'border-box';
               }
               
-              // Row 1: image + (name + title + logo + roleTag + topics)
+              // Row 1: image + (name + title + topics) + company logo (far right edge)
               const speakerRow = document.createElement('div');
               speakerRow.className = 'session-detail-speaker-row';
+              speakerRow.style.display = 'flex';
+              speakerRow.style.alignItems = 'flex-start';
+              speakerRow.style.width = '100%';
+              
               if (speaker.image && speaker.image.src) {
                 const img = document.createElement('img');
                 img.src = speaker.image.src;
@@ -585,8 +589,11 @@ export function Component({ fieldValues }) {
                 img.className = 'session-detail-speaker-image';
                 speakerRow.appendChild(img);
               }
+              
               const nameTopicCol = document.createElement('div');
               nameTopicCol.className = 'session-detail-speaker-name-topics';
+              nameTopicCol.style.flexGrow = '1';
+              
               if (speaker.name) {
                 const nameDiv = document.createElement('div');
                 nameDiv.className = 'session-detail-speaker-name';
@@ -600,23 +607,6 @@ export function Component({ fieldValues }) {
                 nameTopicCol.appendChild(titleDiv);
               }
               
-              // Show company LOGO (white version) instead of company name
-              var speakerCompanyLogo = (speaker.companyLogoWhite && speaker.companyLogoWhite.src)
-                ? speaker.companyLogoWhite
-                : ((speaker.companyLogo && speaker.companyLogo.src) ? speaker.companyLogo : null);
-              if (speakerCompanyLogo) {
-                const companyLogoImg = document.createElement('img');
-                companyLogoImg.className = 'session-detail-speaker-company-logo';
-                companyLogoImg.src = speakerCompanyLogo.src;
-                companyLogoImg.alt = speakerCompanyLogo.alt || 'Company logo';
-                nameTopicCol.appendChild(companyLogoImg);
-              }
-              if (isModerator) {
-                const roleTag = document.createElement('span');
-                roleTag.className = 'session-detail-speaker-role-tag';
-                roleTag.textContent = 'Moderator';
-                nameTopicCol.appendChild(roleTag);
-              }
               if (speaker.topics && speaker.topics.length > 0) {
                 const speakerTopicsDiv = document.createElement('div');
                 speakerTopicsDiv.className = 'session-detail-speaker-topics';
@@ -629,50 +619,53 @@ export function Component({ fieldValues }) {
                 nameTopicCol.appendChild(speakerTopicsDiv);
               }
               speakerRow.appendChild(nameTopicCol);
+
+              // Company LOGO on far right edge (opposite avatar & name/title)
+              var speakerCompanyLogo = (speaker.companyLogoWhite && speaker.companyLogoWhite.src)
+                ? speaker.companyLogoWhite
+                : ((speaker.companyLogo && speaker.companyLogo.src) ? speaker.companyLogo : null);
+              if (speakerCompanyLogo) {
+                const logoWrap = document.createElement('div');
+                logoWrap.className = 'session-detail-speaker-logo-wrap';
+                logoWrap.style.marginLeft = 'auto';
+                logoWrap.style.paddingLeft = '15px';
+                logoWrap.style.flexShrink = '0';
+                logoWrap.style.display = 'flex';
+                logoWrap.style.alignItems = 'center';
+                
+                const companyLogoImg = document.createElement('img');
+                companyLogoImg.className = 'session-detail-speaker-company-logo';
+                companyLogoImg.src = speakerCompanyLogo.src;
+                companyLogoImg.alt = speakerCompanyLogo.alt || 'Company logo';
+                companyLogoImg.style.maxHeight = '50px';
+                companyLogoImg.style.maxWidth = '120px';
+                companyLogoImg.style.objectFit = 'contain';
+                logoWrap.appendChild(companyLogoImg);
+                
+                speakerRow.appendChild(logoWrap);
+              }
+
               speakerCard.appendChild(speakerRow);
               
-              // Row 2: description + bio + links
-              const speakerDetail = document.createElement('div');
-              speakerDetail.className = 'session-detail-speaker-detail';
-              if (speaker.description && speaker.description.trim()) {
-                const descDiv = document.createElement('div');
-                descDiv.className = 'session-detail-speaker-description';
-                descDiv.innerHTML = removeSpanTags(speaker.description);
-                speakerDetail.appendChild(descDiv);
-              }
-              if (speaker.bio) {
-                const bioDiv = document.createElement('div');
-                bioDiv.className = 'session-detail-speaker-bio';
-                bioDiv.textContent = speaker.bio;
-                speakerDetail.appendChild(bioDiv);
-              }
-              if ((speaker.linkedin_profile && speaker.linkedin_profile.trim()) ||
-                  (speaker.portfolio_site && speaker.portfolio_site.trim())) {
-                const socialDiv = document.createElement('div');
-                socialDiv.className = 'session-detail-speaker-social';
-                if (speaker.linkedin_profile && speaker.linkedin_profile.trim()) {
-                  const linkedinLink = document.createElement('a');
-                  linkedinLink.href = speaker.linkedin_profile;
-                  linkedinLink.target = '_blank';
-                  linkedinLink.rel = 'noopener noreferrer';
-                  linkedinLink.className = 'session-detail-speaker-social-link';
-                  linkedinLink.setAttribute('aria-label', 'LinkedIn Profile');
-                  linkedinLink.innerHTML = '<i class="fa-brands fa-linkedin"></i>';
-                  socialDiv.appendChild(linkedinLink);
+              // Row 2: description + bio (if available)
+              if ((speaker.description && speaker.description.trim()) || speaker.bio) {
+                const speakerDetail = document.createElement('div');
+                speakerDetail.className = 'session-detail-speaker-detail';
+                if (speaker.description && speaker.description.trim()) {
+                  const descDiv = document.createElement('div');
+                  descDiv.className = 'session-detail-speaker-description';
+                  descDiv.innerHTML = removeSpanTags(speaker.description);
+                  speakerDetail.appendChild(descDiv);
                 }
-                if (speaker.portfolio_site && speaker.portfolio_site.trim()) {
-                  const portfolioLink = document.createElement('a');
-                  portfolioLink.href = speaker.portfolio_site;
-                  portfolioLink.target = '_blank';
-                  portfolioLink.rel = 'noopener noreferrer';
-                  portfolioLink.className = 'session-detail-speaker-social-link';
-                  portfolioLink.setAttribute('aria-label', 'Portfolio Site');
-                  portfolioLink.innerHTML = '<i class="fa-solid fa-globe"></i>';
-                  socialDiv.appendChild(portfolioLink);
+                if (speaker.bio) {
+                  const bioDiv = document.createElement('div');
+                  bioDiv.className = 'session-detail-speaker-bio';
+                  bioDiv.textContent = speaker.bio;
+                  speakerDetail.appendChild(bioDiv);
                 }
-                speakerDetail.appendChild(socialDiv);
+                speakerCard.appendChild(speakerDetail);
               }
-              speakerCard.appendChild(speakerDetail);
+              
               return speakerCard;
             }
             
